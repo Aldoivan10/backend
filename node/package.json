@@ -1,0 +1,33 @@
+{
+    "name": "express-sql-api",
+    "version": "1.0.0",
+    "description": "API for SQLite with express",
+    "main": "index.js",
+    "type": "module",
+    "exports": "./dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/api/index.ts",
+        "build": "pkgroll",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "express",
+        "node",
+        "sqlite"
+    ],
+    "author": "Aldoivan",
+    "license": "ISC",
+    "dependencies": {
+        "express": "4.21.1",
+        "sqlite3": "5.1.7",
+        "valibot": "1.0.0-beta.3"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.9.0",
+        "@types/sqlite3": "^3.1.11",
+        "pkgroll": "^2.5.1",
+        "tsx": "^4.19.2",
+        "typescript": "^5.6.3"
+    }
+}
