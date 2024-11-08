@@ -1,3 +1,4 @@
+import { ValidationError } from "express-validator"
 import DB from "../model/db"
 
 declare global {
@@ -5,6 +6,21 @@ declare global {
         interface Locals {
             db: DB
         }
+    }
+
+    type APIErr = {
+        msg: string
+        value?: any
+        type?: string
+        path: string
+        location: string
+    }
+
+    type APIErrConstructor = {
+        error?: APIErr
+        status?: number
+        message: string
+        errors?: ValidationError[]
     }
 
     type TableID = { id: number }
