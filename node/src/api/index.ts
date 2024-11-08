@@ -1,11 +1,15 @@
-import express, { json } from "express"
+import express, { json, NextFunction, Request, Response } from "express"
 import DB from "../model/db"
+import codeRoute from "./routes/code"
 import productRoute from "./routes/product"
+import { APIError } from "./util/error"
+import * as Logger from "./util/logger"
 
 const app = express()
 const PORT = process.env.PORT || 3000
 const HOST = process.env.HOST || "localhost"
 
+app.disable("x-powered-by")
 app.use(json()) // Middleware para parsear el body de la petición
 
 app.get("/", (_, res) => {
@@ -13,9 +17,15 @@ app.get("/", (_, res) => {
 })
 
 app.use("/product", productRoute)
+app.use("/code", codeRoute)
 
-app.on("error", (err) => {
-    console.error(err)
+// Middleware para capturar errores
+app.use((err: APIError, _: Request, res: Response, __: NextFunction) => {
+    Logger.error(err)
+    res.status(err.status).json({
+        message: err.message,
+        errors: err.errors,
+    })
 })
 
 async function init() {
@@ -25,7 +35,7 @@ async function init() {
             console.log(`Server running at http://${HOST}:${PORT}/`)
         })
     } catch (error) {
-        console.error(error)
+        Logger.error(error as Error)
     }
 }
 
