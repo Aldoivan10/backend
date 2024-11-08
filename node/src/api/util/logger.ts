@@ -1,4 +1,5 @@
 import winston, { format, transports } from "winston"
+import { APIError } from "./error"
 
 const logger = winston.createLogger({
     transports: [
@@ -8,10 +9,15 @@ const logger = winston.createLogger({
     format: format.combine(format.timestamp(), format.json()),
 })
 
-export const error = ({ message, name, stack }: Error) => {
-    logger.error({
-        message,
-        name,
-        stack,
-    })
+export const error = (error: APIError | Error, errors: Object[] = []) => {
+    if (error instanceof APIError) logger.error(error)
+    else {
+        const { message, name, stack } = error as Error
+        logger.error({
+            message,
+            name,
+            stack,
+            errors,
+        })
+    }
 }
