@@ -17,6 +17,7 @@ declare global {
     }
 
     type APIErrConstructor = {
+        name?: string
         error?: APIErr
         status?: number
         message: string
