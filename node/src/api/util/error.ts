@@ -5,10 +5,17 @@ export class APIError extends Error {
     name: string = "APIError"
     status: number
 
-    constructor({ message, status = 500, error, errors }: APIErrConstructor) {
+    constructor({
+        message,
+        status = 500,
+        error,
+        errors,
+        name,
+    }: APIErrConstructor) {
         super(message)
         if (error) this.errors.push({ ...error, type: this.name })
         if (errors) this.errors = errors
+        if (name) this.name = name
         this.status = status
     }
 }
