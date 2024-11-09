@@ -1,8 +1,8 @@
-import express, { json, NextFunction, Request, Response } from "express"
+import express, { json } from "express"
 import DB from "../model/db"
+import { errorHandler } from "./middleware/errmid"
 import codeRoute from "./routes/code"
 import productRoute from "./routes/product"
-import { APIError } from "./util/error"
 import * as Logger from "./util/logger"
 
 const app = express()
@@ -20,13 +20,7 @@ app.use("/product", productRoute)
 app.use("/code", codeRoute)
 
 // Middleware para capturar errores
-app.use((err: APIError, _: Request, res: Response, __: NextFunction) => {
-    Logger.error(err)
-    res.status(err.status).json({
-        message: err.message,
-        errors: err.errors,
-    })
-})
+app.use(errorHandler)
 
 async function init() {
     try {
