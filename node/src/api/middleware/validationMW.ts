@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express"
 import { checkSchema, validationResult } from "express-validator"
-import { ValError } from "../util/errors"
+import { ValError } from "../util/error"
 import { getValError } from "../util/logger"
 
-export const validationHandler = ({ schema, item }: ValMidArgs): any[] => {
+export const validationMW = ({ schema, item }: ValMWArgs): any[] => {
     return [
         checkSchema(schema),
         (req: Request, _: Response, next: NextFunction) => {
