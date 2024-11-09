@@ -1,4 +1,4 @@
-import { ValidationError } from "express-validator"
+import { Schema, ValidationError } from "express-validator"
 import DB from "../model/db"
 
 declare global {
@@ -23,6 +23,8 @@ declare global {
         message: string
         errors?: ValidationError[]
     }
+
+    type ValMidArgs = { schema: Schema; item?: string }
 
     type TableID = { id: number }
 }
