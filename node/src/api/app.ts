@@ -1,6 +1,7 @@
 import express, { json } from "express"
 import DB from "../model/db"
-import { errorHandler } from "./middleware/errorMW"
+import { errorMW } from "./middleware/errorMW"
+import { logMW } from "./middleware/logMW"
 import codeRoute from "./routes/code"
 import productRoute from "./routes/product"
 import * as Logger from "./util/logger"
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 3000
 const HOST = process.env.HOST || "localhost"
 
 app.disable("x-powered-by")
+
 app.use(json()) // Middleware para parsear el body de la petición
 
 app.get("/", (_, res) => {
@@ -19,7 +21,8 @@ app.get("/", (_, res) => {
 app.use("/product", productRoute)
 app.use("/code", codeRoute)
 
-app.use(errorHandler) // Manejador de errores
+app.use(errorMW) // Manejador de errores
+app.use(logMW) // Middleware para logs de peticiones
 
 async function init() {
     try {
