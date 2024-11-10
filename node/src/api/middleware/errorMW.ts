@@ -1,17 +1,14 @@
 import { NextFunction, Request, Response } from "express"
 import { APIError } from "../util/error"
-import { error } from "../util/logger"
+import * as Logger from "../util/logger"
 
-export const errorHandler = (
+export const errorMW = (
     err: APIError | Error,
     _: Request,
     res: Response,
-    __: NextFunction
+    next: NextFunction
 ) => {
-    error(err)
-    const status = err instanceof APIError ? err.status : 500
-    res.status(status).json({
-        message: err.message,
-        errors: err instanceof APIError ? err.errors : undefined,
-    })
+    Logger.error(err)
+    res.locals.error = err
+    next()
 }
