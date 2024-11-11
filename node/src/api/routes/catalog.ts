@@ -1,22 +1,47 @@
 import { NextFunction, Request, Response, Router } from "express"
 import { validationMW } from "../middleware/validationMW"
-import * as CodeVal from "../validations/codeVal"
+import { plural } from "../util/util"
+import * as CodeVal from "../validations/catalogVal"
 import * as GeneralVal from "../validations/generalVal"
 
 const router = Router()
-const item = "código"
-const table = "Codigo"
+const root = "/:table(code|department|entity|unit)"
 
-// Obtener todos los códigos
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+const catalogs: CatalogMap = {
+    code: { item: "Código", table: "Codigo" },
+    unit: { item: "Unidad", table: "Unidad" },
+    entity: { item: "Entidad", table: "Entidad" },
+    department: { item: "Departamento", table: "Departamento" },
+}
+
+function getData(req: Request) {
+    const { limit = 10, offset = 0, filter = "" }: APIFilter = req.query
+    const { name = "", ids = [] }: CatalogBody = req.body
+    const { id, table }: CatalogParams = req.params
+    const catalog = catalogs[table]
+    const db = req.app.locals.db
+    return {
+        db,
+        ids,
+        name,
+        limit,
+        offset,
+        id: +id,
+        item: catalog.item,
+        table: catalog.table,
+        filter: `%${filter}%`,
+    }
+}
+
+// Obtener todos
+router.get(root, async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { limit = 10, offset = 0, filter = "" }: APIFilter = req.query
-        const db = req.app.locals.db
+        const { db, limit, offset, filter, table } = getData(req)
         const query = `SELECT id, nombre AS name 
         FROM ${table} 
         WHERE nombre LIKE ? ORDER BY nombre
         LIMIT ? OFFSET ?`
-        const codes = await db.fetch(query, [`%${filter}%`, limit, offset])
+        const codes = await db.fetch(query, [filter, limit, offset])
         res.json({ data: codes })
     } catch (err) {
         next(err)
@@ -25,11 +50,10 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 
 // Obtener por ID
 router.get(
-    "/:id(\\d+)",
+    `${root}/:id(\\d+)`,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const db = req.app.locals.db
-            const { id } = req.params
+            const { db, id, table } = getData(req)
             const query = `SELECT id, nombre AS name FROM ${table} WHERE id = ?`
             const code = await db.get(query, [id])
             res.json({ data: code ?? null })
@@ -39,21 +63,20 @@ router.get(
     }
 )
 
-// Crear nuevo código
+// Crear nuevo
 router.post(
-    "/",
-    validationMW({ schema: CodeVal.name, item }),
+    root,
+    validationMW(CodeVal.name),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const db = req.app.locals.db
-            const name = req.body.name
+            const { db, table, name, item } = getData(req)
             const lastID = await db.lastID(table)
             await db.insert(`INSERT INTO ${table} VALUES (?, ?)`, [
                 lastID,
                 name,
             ])
             res.status(201).send({
-                message: "Código agregado con éxito",
+                message: `${item} agregado con éxito`,
                 data: { id: lastID, name },
             })
         } catch (err) {
@@ -62,21 +85,20 @@ router.post(
     }
 )
 
-// Eliminar códigos
+// Eliminar
 router.delete(
-    "/",
-    validationMW({ schema: GeneralVal.ids, item }),
+    root,
+    validationMW(GeneralVal.ids),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const db = req.app.locals.db
-            const ids: number[] = req.body.ids
+            const { db, table, ids, item } = getData(req)
             const placeholders = ids.map((_) => "?").join(", ")
             await db.remove(
                 `DELETE FROM ${table} WHERE id IN (${placeholders})`,
                 ids
             )
             res.send({
-                message: "Códigos eliminados con éxito",
+                message: `${plural(item)} eliminados con éxito`,
             })
         } catch (err) {
             next(err)
@@ -84,21 +106,19 @@ router.delete(
     }
 )
 
-// Actualizar nombre del código
+// Actualizar nombre
 router.patch(
-    "/:id(\\d+)",
-    validationMW({ schema: CodeVal.name, item }),
+    `${root}/:id(\\d+)`,
+    validationMW(CodeVal.name),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const db = req.app.locals.db
-            const name = req.body.name
-            const id = +req.params.id
+            const { db, table, id, name, item } = getData(req)
             await db.query(`UPDATE ${table} SET nombre = ? WHERE id = ?`, [
                 name,
                 id,
             ])
             res.status(201).send({
-                message: "Código actualizado con éxito",
+                message: `${item} actualizado con éxito`,
                 data: { id, name },
             })
         } catch (err) {
