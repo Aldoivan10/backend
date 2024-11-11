@@ -80,16 +80,17 @@ export default class DB {
         return new Promise<T[]>((resolve, reject) => {
             db.all<T>(query, params, async (err, rows) => {
                 if (err) reject(err)
-                /*  const casted = rows.map((row) => {
-                    for (const key in row as Object) {
-                        try {
-                            row[key] = JSON.parse(row[key])
-                        } catch {
-                            row[key] = row[key]
-                        }
-                    }
-                    return row
-                }) */ else resolve(rows)
+                else resolve(rows)
+            })
+        })
+    }
+
+    async get<T>(query: string, params: any[] = []) {
+        const db = this.checkDB()
+        return new Promise<T>((resolve, reject) => {
+            db.get<T>(query, params, (err, row) => {
+                if (err) reject(err)
+                else resolve(row)
             })
         })
     }
@@ -108,6 +109,34 @@ export default class DB {
                         resolve()
                     }
                 })
+            })
+        })
+    }
+
+    async remove(query: string, params: any[] = []) {
+        const db = this.checkDB()
+        return new Promise<void>((resolve, reject) => {
+            db.serialize(() => {
+                db.run("BEGIN TRANSACTION")
+                db.run(query, params, (err: Error | null) => {
+                    if (err) {
+                        db.run("ROLLBACK")
+                        reject(err)
+                    } else {
+                        db.run("COMMIT")
+                        resolve()
+                    }
+                })
+            })
+        })
+    }
+
+    async query(query: string, params: any[] = []) {
+        const db = this.checkDB()
+        return new Promise<void>((resolve, reject) => {
+            db.run(query, params, async (err) => {
+                if (err) reject(err)
+                else resolve()
             })
         })
     }
