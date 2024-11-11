@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express"
 import { validationMW } from "../middleware/validationMW"
-import * as Validation from "../validations/codeVal"
+import * as CodeVal from "../validations/codeVal"
+import * as GeneralVal from "../validations/generalVal"
 
 const router = Router()
 const item = "código"
@@ -41,7 +42,7 @@ router.get(
 // Crear nuevo código
 router.post(
     "/",
-    validationMW({ schema: Validation.name, item }),
+    validationMW({ schema: CodeVal.name, item }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const db = req.app.locals.db
@@ -64,7 +65,7 @@ router.post(
 // Eliminar códigos
 router.delete(
     "/",
-    validationMW({ schema: Validation.ids, item }),
+    validationMW({ schema: GeneralVal.ids, item }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const db = req.app.locals.db
@@ -86,7 +87,7 @@ router.delete(
 // Actualizar nombre del código
 router.patch(
     "/:id(\\d+)",
-    validationMW({ schema: Validation.name, item }),
+    validationMW({ schema: CodeVal.name, item }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const db = req.app.locals.db
