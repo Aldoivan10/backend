@@ -3,16 +3,20 @@ import { APIError } from "../util/error"
 import * as Logger from "../util/logger"
 
 export const errorMW = (
-    err: APIError,
-    _: Request,
+    err: APIError | Error,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    Logger.error(err)
-    res.locals.error = err
-    res.status(err.status).json({
-        message: err.message,
-        errors: err.errors || [],
+    const error =
+        err instanceof APIError
+            ? err
+            : Logger.getError(err, `${req.method} ${req.url}`)
+    Logger.error(error)
+    res.locals.error = error
+    res.status(error.status).json({
+        message: error.message,
+        errors: error.errors || [],
     })
     next()
 }
