@@ -29,7 +29,7 @@ morgan.token("errors", (_: Request, res: Response) => {
             error.errors
                 .map((err) => {
                     return (
-                        chalk.red.bold(`[${err.type}]`) +
+                        chalk.red.bold(`[${err.location ?? err.type}]`) +
                         chalk.yellow.bold(` ${err.path}: `) +
                         chalk.gray.bold(err.msg)
                     )
