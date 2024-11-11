@@ -1,23 +1,32 @@
 import { ValidationError } from "express-validator"
 import winston, { format, transports } from "winston"
-import { APIError, ValError } from "./errors"
+import { APIError, ValError } from "./error"
 
 const logger = winston.createLogger({
-    transports: [
-        new transports.File({ filename: "express.log" }),
-        new transports.Console(),
-    ],
-    format: format.combine(format.timestamp(), format.json()),
+    transports: [new transports.File({ filename: "express.log" })],
+    format: format.combine(
+        format.timestamp({ format: "YYYY-MM-DD hh:mm:ss A" }),
+        format.json()
+    ),
 })
 
 export const getError = (err: Error, loc: string, status = 500) => {
+    const { message, stack } = err
+    let path = stack || "unknown"
+    let msg = message
+
+    if (message.startsWith("SQL")) {
+        const data = message.split(":")
+        path = data[0].trim()
+        msg = data[1].trim()
+    }
+
     return new APIError({
-        name: err.name,
         message: "A ocurrido un error inesperado",
         error: {
-            msg: err.message,
             location: loc,
-            path: err.stack || "unknown",
+            path,
+            msg,
         },
         status,
     })
