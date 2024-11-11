@@ -1,0 +1,31 @@
+### Obtener todos los códigos
+GET http://localhost:3000/code
+
+### Obtener código por id
+GET http://localhost:3000/code/0
+
+### Agregar un código
+POST http://localhost:3000/code
+Content-Type: application/json
+
+{
+    "name": "Código de barras"
+}
+
+
+### Eliminar códigos
+DELETE http://localhost:3000/code/
+Content-Type: application/json
+
+{
+    "ids": [3, 4, 5]
+}
+
+
+### Actualizar nombre del código
+PATCH  http://localhost:3000/code/3
+Content-Type: application/json
+
+{
+    "name": "Código actualizado"
+}
