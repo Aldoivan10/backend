@@ -3,42 +3,47 @@ import winston, { format, transports } from "winston"
 import { APIError, ValError } from "./error"
 
 const logger = winston.createLogger({
-    transports: [new transports.File({ filename: "express.log" })],
+    transports: [new transports.File({ filename: "express.json" })],
     format: format.combine(
         format.timestamp({ format: "YYYY-MM-DD hh:mm:ss A" }),
-        format.json()
+        format.json({ space: 4 })
     ),
 })
 
-export const getError = (err: Error, loc: string, status = 500) => {
+export const getError = (err: Error, request: string, status = 500) => {
     const { message, stack } = err
     let path = stack || "unknown"
+    let location = "unknown"
     let msg = message
 
     if (message.startsWith("SQL")) {
-        const data = message.split(":")
-        path = data[0].trim()
-        msg = data[1].trim()
+        const [name, ...data] = message.split(": ")
+        path = name
+        msg = data.join(": ")
+        location = "database"
     }
 
     return new APIError({
         message: "A ocurrido un error inesperado",
         error: {
-            location: loc,
+            location,
             path,
             msg,
         },
         status,
+        request,
     })
 }
 
 export const getValError = (
     msg: string,
+    request: string,
     errors: ValidationError[],
     status = 500
 ) => {
     return new ValError({
         message: msg,
+        request,
         errors,
         status,
     })
