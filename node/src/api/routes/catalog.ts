@@ -1,17 +1,45 @@
 import { NextFunction, Request, Response, Router } from "express"
+import { checkSchema } from "express-validator"
 import { validationMW } from "../middleware/validationMW"
-import { plural } from "../util/util"
-import * as CodeVal from "../validations/catalogVal"
+import catalogVal from "../validations/catalogVal"
 import * as GeneralVal from "../validations/generalVal"
 
 const router = Router()
-const root = "/:table(code|department|entity|unit)"
+const root = "/:table(code|department|entity_type|unit)"
 
 const catalogs: CatalogMap = {
-    code: { item: "Código", table: "Codigo" },
-    unit: { item: "Unidad", table: "Unidad" },
-    entity: { item: "Entidad", table: "Entidad" },
-    department: { item: "Departamento", table: "Departamento" },
+    code: {
+        msgs: {
+            del: "Códigos eliminados",
+            add: "Código agregado",
+            upd: "Código actaualizado",
+        },
+        table: "Codigo",
+    },
+    unit: {
+        msgs: {
+            del: "Unidades eliminadas",
+            add: "Unidad agregada",
+            upd: "Unidad actualizada",
+        },
+        table: "Unidad",
+    },
+    entity_type: {
+        msgs: {
+            add: "Tipo agregado",
+            del: "Tipos eliminados",
+            upd: "Tipo actualizado",
+        },
+        table: "Tipo_Entidad",
+    },
+    department: {
+        msgs: {
+            add: "Departamento agregado",
+            del: "Departamentos eliminados",
+            upd: "Departamento actualizado",
+        },
+        table: "Departamento",
+    },
 }
 
 function getData(req: Request) {
@@ -27,10 +55,17 @@ function getData(req: Request) {
         limit,
         offset,
         id: +id,
-        item: catalog.item,
+        msgs: catalog.msgs,
         table: catalog.table,
         filter: `%${filter}%`,
     }
+}
+
+async function check(req: Request, _: Response, next: NextFunction) {
+    const { table } = req.params
+    const schema = catalogVal[table]
+    await checkSchema(schema).run(req)
+    next()
 }
 
 // Obtener todos
@@ -66,17 +101,17 @@ router.get(
 // Crear nuevo
 router.post(
     root,
-    validationMW(CodeVal.name),
+    validationMW(check),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { db, table, name, item } = getData(req)
+            const { db, table, name, msgs } = getData(req)
             const lastID = await db.lastID(table)
             await db.insert(`INSERT INTO ${table} VALUES (?, ?)`, [
                 lastID,
                 name,
             ])
             res.status(201).send({
-                message: `${item} agregado con éxito`,
+                message: msgs.add,
                 data: { id: lastID, name },
             })
         } catch (err) {
@@ -91,14 +126,14 @@ router.delete(
     validationMW(GeneralVal.ids),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { db, table, ids, item } = getData(req)
+            const { db, table, ids, msgs } = getData(req)
             const placeholders = ids.map((_) => "?").join(", ")
             await db.remove(
                 `DELETE FROM ${table} WHERE id IN (${placeholders})`,
                 ids
             )
             res.send({
-                message: `${plural(item)} eliminados con éxito`,
+                message: msgs.del,
             })
         } catch (err) {
             next(err)
@@ -109,16 +144,16 @@ router.delete(
 // Actualizar nombre
 router.patch(
     `${root}/:id(\\d+)`,
-    validationMW(CodeVal.name),
+    validationMW(check),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { db, table, id, name, item } = getData(req)
+            const { db, table, id, name, msgs } = getData(req)
             await db.query(`UPDATE ${table} SET nombre = ? WHERE id = ?`, [
                 name,
                 id,
             ])
             res.status(201).send({
-                message: `${item} actualizado con éxito`,
+                message: msgs.upd,
                 data: { id, name },
             })
         } catch (err) {
