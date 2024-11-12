@@ -1,0 +1,31 @@
+### Obtener todos
+GET http://localhost:3000/unit
+
+### Obtener por id
+GET http://localhost:3000/unit/2
+
+### Agregar
+POST http://localhost:3000/unit
+Content-Type: application/json
+
+{
+    "name": "Pza"
+}
+
+
+### Eliminar
+DELETE http://localhost:3000/unit/
+Content-Type: application/json
+
+{
+    "ids": [1]
+}
+
+
+### Actualizar nombre
+PATCH  http://localhost:3000/unit/1
+Content-Type: application/json
+
+{
+    "name": "Unidad nuevo nombre"
+}
