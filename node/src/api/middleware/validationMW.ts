@@ -10,7 +10,14 @@ export const validationMW = (arg: Schema | Function): any[] => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 const msg = ValError.ERRVAL
-                next(getValError(msg, errors.array(), 422))
+                next(
+                    getValError(
+                        msg,
+                        `${req.method} ${req.url}`,
+                        errors.array(),
+                        422
+                    )
+                )
             } else next()
         },
     ]
