@@ -98,16 +98,16 @@ export default class DB {
 
     async insert(query: string, params: any[] = []) {
         const db = this.checkDB()
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<sqlite.RunResult>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.run(query, params, (err: Error | null) => {
+                db.run(query, params, function (err: Error | null) {
                     if (err) {
                         db.run("ROLLBACK")
                         reject(err)
                     } else {
                         db.run("COMMIT")
-                        resolve()
+                        resolve(this)
                     }
                 })
             })
@@ -116,16 +116,16 @@ export default class DB {
 
     async remove(query: string, params: any[] = []) {
         const db = this.checkDB()
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<sqlite.RunResult>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.run(query, params, (err: Error | null) => {
+                db.run(query, params, function (err: Error | null) {
                     if (err) {
                         db.run("ROLLBACK")
                         reject(err)
                     } else {
                         db.run("COMMIT")
-                        resolve()
+                        resolve(this)
                     }
                 })
             })
@@ -134,10 +134,10 @@ export default class DB {
 
     async query(query: string, params: any[] = []) {
         const db = this.checkDB()
-        return new Promise<void>((resolve, reject) => {
-            db.run(query, params, async (err) => {
+        return new Promise<sqlite.RunResult>((resolve, reject) => {
+            db.run(query, params, function (err) {
                 if (err) reject(err)
-                else resolve()
+                else resolve(this)
             })
         })
     }
