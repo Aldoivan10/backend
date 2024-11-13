@@ -9,7 +9,7 @@ POST http://localhost:3000/code
 Content-Type: application/json
 
 {
-    "name": 123
+    "name": "Código de prueba"
 }
 
 
@@ -18,7 +18,7 @@ DELETE http://localhost:3000/code/
 Content-Type: application/json
 
 {
-    "ids": [3, 4, 5]
+    "ids": [1]
 }
 
 

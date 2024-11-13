@@ -9,7 +9,7 @@ POST http://localhost:3000/unit
 Content-Type: application/json
 
 {
-    "name": "Pza"
+    "name": "pza"
 }
 
 

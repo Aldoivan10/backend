@@ -9,7 +9,7 @@ POST http://localhost:3000/department
 Content-Type: application/json
 
 {
-    "name": "Pza"
+    "name": "Departamento 1"
 }
 
 
