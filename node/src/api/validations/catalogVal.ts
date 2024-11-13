@@ -1,18 +1,17 @@
 import { Schema } from "express-validator"
+import { nameAttr } from "./util"
 
-export const name: Schema = {
-    name: {
-        isString: {
-            errorMessage: "El nombre deben ser carácteres",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "El nombre es obligatorio",
-        },
-        escape: true,
-        isLength: {
-            options: { max: 128 },
-            errorMessage: "El nombre no debe exeder de 128 carácteres",
-        },
+export default {
+    code: {
+        name: nameAttr(128),
     },
-}
+    entity_type: {
+        name: nameAttr(128),
+    },
+    unit: {
+        name: nameAttr(32),
+    },
+    department: {
+        name: nameAttr(128),
+    },
+} as Record<string, Schema>
