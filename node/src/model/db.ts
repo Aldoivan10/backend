@@ -39,6 +39,7 @@ export default class DB {
             })
         try {
             this.db = await this.getDataBase(path)
+            await this.query("PRAGMA foreign_keys = ON")
             return this
         } catch (e) {
             const err = e as Error
