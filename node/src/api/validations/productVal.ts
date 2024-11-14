@@ -84,9 +84,7 @@ export const productVal: Schema = {
         },
         custom: {
             options: (arr: { id_unit: number; sale: number }[]) => {
-                console.log(arr)
                 const ids = new Set(arr.map((item) => item.id_unit))
-                console.log(ids.size, arr.length)
                 if (ids.size !== arr.length)
                     throw new Error("Las unidades deben ser únicas por venta")
                 return true
