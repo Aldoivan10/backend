@@ -122,6 +122,35 @@ export default class DB {
         })
     }
 
+    async multiple(...queries: Array<[string, any[]]>) {
+        const db = this.checkDB()
+        return new Promise<sqlite.RunResult>((resolve, reject) => {
+            db.serialize(() => {
+                db.run("BEGIN TRANSACTION")
+
+                const promises = queries.map(([query, params]) => {
+                    return new Promise<void>((resolve, reject) => {
+                        db.run(query, params, (err) => {
+                            if (err) return reject(err)
+                            resolve()
+                        })
+                    })
+                })
+
+                Promise.all(promises)
+                    .then(() => {
+                        db.run("COMMIT", function (err) {
+                            if (err) db.run("ROLLBACK", () => reject(err))
+                            else resolve(this)
+                        })
+                    })
+                    .catch((err) => {
+                        db.run("ROLLBACK", () => reject(err))
+                    })
+            })
+        })
+    }
+
     async insert<T>(table: string, params: any[]) {
         const id = await this.lastID(table)
         const query = `
@@ -160,7 +189,7 @@ export default class DB {
                 db.get(
                     `${query} RETURNING *`,
                     params,
-                    function (err: Error | null, rows: T[]) {
+                    function (err, rows: T[]) {
                         if (err) {
                             db.run("ROLLBACK")
                             reject(err)
@@ -179,19 +208,15 @@ export default class DB {
         return new Promise<T>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.get(
-                    `${query} RETURNING *`,
-                    params,
-                    function (err: Error | null, row: T) {
-                        if (err) {
-                            db.run("ROLLBACK")
-                            reject(err)
-                        } else {
-                            db.run("COMMIT")
-                            resolve(row)
-                        }
+                db.get(`${query} RETURNING *`, params, function (err, row: T) {
+                    if (err) {
+                        db.run("ROLLBACK")
+                        reject(err)
+                    } else {
+                        db.run("COMMIT")
+                        resolve(row)
                     }
-                )
+                })
             })
         })
     }
