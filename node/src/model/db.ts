@@ -117,7 +117,7 @@ export default class DB {
         return new Promise<T>((resolve, reject) => {
             db.get<T>(query, params, (err, row) => {
                 if (err) reject(err)
-                else resolve(row)
+                else resolve(this.parse<T>(row))
             })
         })
     }
@@ -186,19 +186,18 @@ export default class DB {
         return new Promise<T[]>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.get(
-                    `${query} RETURNING *`,
-                    params,
-                    function (err, rows: T[]) {
-                        if (err) {
-                            db.run("ROLLBACK")
-                            reject(err)
-                        } else {
-                            db.run("COMMIT")
+                db.get(`${query} RETURNING *`, params, (err, rows: T[]) => {
+                    if (err) {
+                        db.run("ROLLBACK")
+                        reject(err)
+                    } else {
+                        db.run("COMMIT", (err) => {
+                            if (err) return reject(err)
+                            rows.map((row) => this.parse<T>(row))
                             resolve(rows)
-                        }
+                        })
                     }
-                )
+                })
             })
         })
     }
@@ -208,13 +207,13 @@ export default class DB {
         return new Promise<T>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.get(`${query} RETURNING *`, params, function (err, row: T) {
+                db.get(`${query} RETURNING *`, params, (err, row: T) => {
                     if (err) {
                         db.run("ROLLBACK")
                         reject(err)
                     } else {
                         db.run("COMMIT")
-                        resolve(row)
+                        resolve(this.parse<T>(row))
                     }
                 })
             })
@@ -243,6 +242,15 @@ export default class DB {
                 else resolve(row.id)
             })
         })
+    }
+
+    parse<T>(row: any) {
+        for (const key in row) {
+            try {
+                row[key] = JSON.parse(row[key])
+            } catch {}
+        }
+        return row as T
     }
 
     close() {
