@@ -87,18 +87,34 @@ export default class DB {
         const query = `
         SELECT ${cols} 
         FROM ${table} 
-        WHERE nombre LIKE ? 
+        WHERE ${order} LIKE ? 
         ORDER BY ${order}
         LIMIT ? OFFSET ?`
         return await this.fetch<T>(query, filters)
+    }
+
+    async allByID<T>(
+        table: string,
+        columns: string[],
+        ids: number[],
+        order = "nombre"
+    ) {
+        const cols = columns.join(", ")
+        const query = `
+        SELECT ${cols} 
+        FROM ${table} 
+        WHERE id IN (${ids.map((_) => "?").join()})  
+        ORDER BY ${order}`
+        return await this.fetch<T>(query, ids)
     }
 
     async fetch<T>(query: string, params: any[] = []) {
         const db = this.checkDB()
         return new Promise<T[]>((resolve, reject) => {
             db.all<T>(query, params, async (err, rows) => {
-                if (err) reject(err)
-                else resolve(rows)
+                if (err) return reject(err)
+                rows.map((row) => this.parse<T>(row))
+                resolve(rows)
             })
         })
     }
@@ -130,7 +146,7 @@ export default class DB {
 
                 const promises = queries.map(([query, params]) => {
                     return new Promise<void>((resolve, reject) => {
-                        db.run(query, params, (err) => {
+                        db.run(query, params ?? [], (err) => {
                             if (err) return reject(err)
                             resolve()
                         })
@@ -186,12 +202,15 @@ export default class DB {
         return new Promise<T[]>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.get(`${query} RETURNING *`, params, (err, rows: T[]) => {
+                db.get(`${query} RETURNING *`, params, (err, result: T[]) => {
                     if (err) {
                         db.run("ROLLBACK")
                         reject(err)
                     } else {
                         db.run("COMMIT", (err) => {
+                            const rows = Array.isArray(result)
+                                ? result
+                                : [result]
                             if (err) return reject(err)
                             rows.map((row) => this.parse<T>(row))
                             resolve(rows)
