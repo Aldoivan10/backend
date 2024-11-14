@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express"
 import { checkSchema } from "express-validator"
 import { validationMW } from "../middleware/validationMW"
-import { getBase, getPlaceholders } from "../util/util"
+import { getBase } from "../util/util"
 import catalogVal from "../validations/catalogVal"
 import * as GeneralVal from "../validations/generalVal"
 
@@ -72,11 +72,12 @@ async function check(req: Request, _: Response, next: NextFunction) {
 router.get(root, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { db, limit, offset, filter, table } = getData(req)
-        const query = `SELECT id, nombre AS name 
-        FROM ${table} 
-        WHERE nombre LIKE ? ORDER BY nombre
-        LIMIT ? OFFSET ?`
-        const items = await db.fetch(query, [filter, limit, offset])
+        const items = await db.all<Entity>(
+            table,
+            ["id", "nombre AS name"],
+            [`%${filter}%`, limit, offset]
+        )
+        res
         res.json({ data: items })
     } catch (err) {
         next(err)
@@ -89,8 +90,11 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, id, table } = getData(req)
-            const query = `SELECT id, nombre AS name FROM ${table} WHERE id = ?`
-            const item = await db.get(query, [id])
+            const item = await db.getByID<CatalogItem>(
+                table,
+                ["id", "nombre AS name"],
+                id
+            )
             res.json({ data: item ?? null })
         } catch (err) {
             next(err)
@@ -105,11 +109,7 @@ router.post(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, table, name, msgs } = getData(req)
-            const lastID = await db.lastID(table)
-            const item = await db.queryAndGet<CatalogItem>(
-                `INSERT INTO ${table} VALUES (?, ?)`,
-                [lastID, name]
-            )
+            const item = await db.insert<CatalogItem>(table, [name])
             res.status(201).send({
                 message: msgs.add,
                 data: item,
@@ -127,11 +127,7 @@ router.delete(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, table, ids, msgs } = getData(req)
-            const placeholders = getPlaceholders(ids)
-            const items = await db.queryAndAll<CatalogItem[]>(
-                `DELETE FROM ${table} WHERE id IN (${placeholders})`,
-                ids
-            )
+            const items = await db.delete<CatalogItem>(table, ids)
             res.send({
                 message: msgs.del,
                 data: items,
@@ -149,10 +145,9 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, table, id, name, msgs } = getData(req)
-            const item = await db.queryAndGet<CatalogItem>(
-                `UPDATE ${table} SET nombre = ? WHERE id = ?`,
-                [name, id]
-            )
+            const item = await db.update<CatalogItem>(table, ["name"], id, [
+                name,
+            ])
             if (item)
                 res.json({
                     message: msgs.upd,
