@@ -77,7 +77,6 @@ router.get(root, async (req: Request, res: Response, next: NextFunction) => {
             ["id", "nombre AS name"],
             [`%${filter}%`, limit, offset]
         )
-        res
         res.json({ data: items })
     } catch (err) {
         next(err)
@@ -145,7 +144,7 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, table, id, name, msgs } = getData(req)
-            const item = await db.update<CatalogItem>(table, ["name"], id, [
+            const item = await db.update<CatalogItem>(table, ["nombre"], id, [
                 name,
             ])
             if (item)
