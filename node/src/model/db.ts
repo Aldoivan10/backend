@@ -77,6 +77,22 @@ export default class DB {
         return this.db
     }
 
+    async all<T>(
+        table: string,
+        columns: string[],
+        filters: [string, number, number] = ["%%", 10, 0],
+        order = "nombre"
+    ) {
+        const cols = columns.join(", ")
+        const query = `
+        SELECT ${cols} 
+        FROM ${table} 
+        WHERE nombre LIKE ? 
+        ORDER BY ${order}
+        LIMIT ? OFFSET ?`
+        return await this.fetch<T>(query, filters)
+    }
+
     async fetch<T>(query: string, params: any[] = []) {
         const db = this.checkDB()
         return new Promise<T[]>((resolve, reject) => {
@@ -85,6 +101,15 @@ export default class DB {
                 else resolve(rows)
             })
         })
+    }
+
+    async getByID<T>(table: string, columns: string[], id: number) {
+        const cols = columns.join(", ")
+        const query = `
+        SELECT ${cols} 
+        FROM ${table} 
+        WHERE id = ?`
+        return await this.get<T>(query, [id])
     }
 
     async get<T>(query: string, params: any[] = []) {
