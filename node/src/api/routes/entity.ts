@@ -98,7 +98,7 @@ router.delete(
     }
 )
 
-// Actualizar nombre
+// Actualizar
 router.patch(
     "/:id(\\d+)",
     validationMW(entityVal),
