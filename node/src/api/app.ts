@@ -14,6 +14,7 @@ const HOST = process.env.HOST || "localhost"
 app.disable("x-powered-by")
 app.use(json()) // Middleware para parsear el body de la petición
 
+app.use(logMW) // Middleware para logs de peticiones
 app.get("/", (_, res) => {
     res.json({ message: "API con express", dev: "Aldoivan" })
 })
@@ -23,7 +24,6 @@ app.use("/entity", entityRoute)
 app.use(catalogRoute)
 
 app.use(errorMW) // Manejador de errores
-app.use(logMW) // Middleware para logs de peticiones
 
 async function init() {
     try {
