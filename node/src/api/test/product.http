@@ -18,23 +18,19 @@ Content-Type: application/json
     "codes": [
         {
             "id": 1,
-            "code": "Código 1"
-        },
-        {
-            "id": 2,
             "code": "Código 2"
         }
     ],
-    "sales": [{
-        "id_unit": 1,
+    "units": [{
+        "id": 1,
         "sale": 100,
         "profit": 10
     },
     {
-        "id_unit": 1,
+        "id": 2,
         "sale": 200
     }],
-    "name": "Pza"
+    "name": "Producto de prueba"
 }
 
 
@@ -43,7 +39,7 @@ DELETE http://localhost:3000/product/
 Content-Type: application/json
 
 {
-    "ids": [1]
+    "ids": [1,2]
 }
 
 
@@ -52,5 +48,26 @@ PATCH  http://localhost:3000/product/1
 Content-Type: application/json
 
 {
-    "name": "Unidad nuevo nombre"
+    "id_department": 1,
+    "id_supplier": 1,
+    "amount": 100,
+    "buy": 100,
+    "min": 5,
+    "refundable": true,
+    "codes": [
+        {
+            "id": 1,
+            "code": "Código 2"
+        }
+    ],
+    "units": [{
+        "id": 1,
+        "sale": 100,
+        "profit": 10
+    },
+    {
+        "id": 2,
+        "sale": 200
+    }],
+    "name": "Producto de prueba modificado"
 }
