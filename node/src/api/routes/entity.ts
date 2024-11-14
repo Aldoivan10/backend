@@ -37,7 +37,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
         const { db, limit, offset, filter } = getBase(req)
         const entitys = await db.all<Entity>(
             table,
-            ["id", "nombre as Name"],
+            ["id", "nombre as name"],
             [`%${filter}%`, limit, offset]
         )
         res.json({ data: entitys })
@@ -122,10 +122,16 @@ router.patch(
                 params
             )
 
-            res.send({
-                message: "Entidad actualizada",
-                data: entity,
-            })
+            if (entity)
+                res.send({
+                    message: "Entidad actualizada",
+                    data: entity,
+                })
+            else
+                res.send({
+                    message: "No hubo modificaciones",
+                    data: entity ?? null,
+                })
         } catch (err) {
             next(err)
         }
