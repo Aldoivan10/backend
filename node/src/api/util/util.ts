@@ -1,7 +1,7 @@
 import { Request } from "express"
 
 export const getPlaceholders = (arr: any[]) => {
-    return arr.map((_) => "?").join(", ")
+    return arr.map((_) => "?").join()
 }
 
 export const getBase = (req: Request) => {
