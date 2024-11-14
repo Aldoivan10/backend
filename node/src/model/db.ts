@@ -80,7 +80,7 @@ export default class DB {
     async all<T>(
         table: string,
         columns: string[],
-        filters: [string, number, number] = ["%%", 10, 0],
+        filters: [string, number, number],
         order = "nombre"
     ) {
         const cols = columns.join(", ")
