@@ -74,7 +74,7 @@ export const productVal: Schema = {
             errorMessage: "El código es obligatorio",
         },
     },
-    sales: {
+    units: {
         isArray: {
             options: {
                 min: 1,
@@ -83,28 +83,28 @@ export const productVal: Schema = {
                 "Las ventas deben ser un arreglo de al menos 1 elemento",
         },
         custom: {
-            options: (arr: { id_unit: number; sale: number }[]) => {
-                const ids = new Set(arr.map((item) => item.id_unit))
+            options: (arr: ProductUnit[]) => {
+                const ids = new Set(arr.map((item) => item.id))
                 if (ids.size !== arr.length)
-                    throw new Error("Las unidades deben ser únicas por venta")
+                    throw new Error("Las unidades deben ser únicas")
                 return true
             },
         },
     },
-    "sales.0.profit": {
+    "units.0.profit": {
         isFloat: {
             options: { gt: 0 },
             errorMessage:
                 "La ganancia debe ser un número mayor a 0 (Solo para el primer elemento).",
         },
     },
-    "sales.*.id_unit": {
+    "units.*.id": {
         isInt: {
             options: { gt: 0 },
             errorMessage: "El ID de la unidad debe ser un número positivo",
         },
     },
-    "sales.*.sale": {
+    "units.*.sale": {
         isFloat: {
             options: { gt: 0 },
             errorMessage: "El precio de venta debe ser un número mayor a 0",
