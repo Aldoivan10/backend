@@ -1,6 +1,7 @@
 import { existsSync } from "fs"
 import sqlite from "sqlite3"
 import { DBError } from "../api/util/error"
+import { getPlaceholders } from "../api/util/util"
 
 export default class DB {
     db: sqlite.Database | null = null
@@ -94,6 +95,36 @@ export default class DB {
                 else resolve(row)
             })
         })
+    }
+
+    async insert<T>(table: string, params: any[]) {
+        const id = await this.lastID(table)
+        const query = `
+            INSERT INTO ${table}
+            VALUES (${getPlaceholders(params)})`
+        return await this.queryAndGet<T>(query, [id, ...params])
+    }
+
+    async update<T>(
+        table: string,
+        columns: string[],
+        id: number,
+        params: any[]
+    ) {
+        const cols = columns.map((col) => `${col} = ?`).join(", ")
+        const query = `
+            UPDATE ${table} 
+            SET ${cols}
+            WHERE id = ?`
+        return await this.queryAndGet<T>(query, [...params, id])
+    }
+
+    async delete<T>(table: string, ids: number[]) {
+        const placeholders = getPlaceholders(ids)
+        const query = `
+            DELETE FROM ${table}
+            WHERE id IN (${placeholders})`
+        return await this.queryAndAll<T>(query, ids)
     }
 
     async queryAndAll<T>(query: string, params: any[] = []) {
