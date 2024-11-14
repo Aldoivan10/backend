@@ -27,5 +27,5 @@ PATCH  http://localhost:3000/unit/1
 Content-Type: application/json
 
 {
-    "name": "Unidad nuevo nombre"
+    "name": "pza"
 }
