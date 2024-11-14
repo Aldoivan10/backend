@@ -96,38 +96,46 @@ export default class DB {
         })
     }
 
-    async insert(query: string, params: any[] = []) {
+    async queryAndAll<T>(query: string, params: any[] = []) {
         const db = this.checkDB()
-        return new Promise<sqlite.RunResult>((resolve, reject) => {
+        return new Promise<T[]>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.run(query, params, function (err: Error | null) {
-                    if (err) {
-                        db.run("ROLLBACK")
-                        reject(err)
-                    } else {
-                        db.run("COMMIT")
-                        resolve(this)
+                db.get(
+                    `${query} RETURNING *`,
+                    params,
+                    function (err: Error | null, rows: T[]) {
+                        if (err) {
+                            db.run("ROLLBACK")
+                            reject(err)
+                        } else {
+                            db.run("COMMIT")
+                            resolve(rows)
+                        }
                     }
-                })
+                )
             })
         })
     }
 
-    async remove(query: string, params: any[] = []) {
+    async queryAndGet<T>(query: string, params: any[] = []) {
         const db = this.checkDB()
-        return new Promise<sqlite.RunResult>((resolve, reject) => {
+        return new Promise<T>((resolve, reject) => {
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.run(query, params, function (err: Error | null) {
-                    if (err) {
-                        db.run("ROLLBACK")
-                        reject(err)
-                    } else {
-                        db.run("COMMIT")
-                        resolve(this)
+                db.get(
+                    `${query} RETURNING *`,
+                    params,
+                    function (err: Error | null, row: T) {
+                        if (err) {
+                            db.run("ROLLBACK")
+                            reject(err)
+                        } else {
+                            db.run("COMMIT")
+                            resolve(row)
+                        }
                     }
-                })
+                )
             })
         })
     }
