@@ -1,7 +1,7 @@
 export class APIError extends Error {
     errors: APIErrorsArr = []
     name: string = "APIError"
-    request: string
+    request?: string
     status: number
 
     constructor({
@@ -16,7 +16,7 @@ export class APIError extends Error {
         if (error) this.errors.push({ ...error, type: this.name })
         if (errors) this.errors = errors
         if (name) this.name = name
-        this.request = request
+        if (request) this.request = request
         this.status = status
     }
 }
