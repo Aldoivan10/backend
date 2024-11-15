@@ -48,10 +48,10 @@ log4js.configure({
                 type: "pattern",
                 pattern: '{ "%d{yyyy-MM-dd} %r": %m }',
             },
-            keepFileExt: true,
-            pattern: "yyyy-MM",
-            alwaysIncludePattern: true,
-            numBackups: 2,
+            keepFileExt: true, // Mantener la extensión del archivo
+            pattern: "yyyy-MM", // Archivo por mes
+            alwaysIncludePattern: true, // Incluir el patrón en todos los archivos
+            numBackups: 2, // Número de copias de seguridad
         },
         console: {
             type: "console",
@@ -68,11 +68,12 @@ log4js.configure({
 })
 
 const fileLogger = log4js.getLogger("error")
-log4js.recording
 
 const httpLogger = log4js.connectLogger(log4js.getLogger("default"), {
     level: "auto", // Ajusta automáticamente el nivel de log según el código de estado HTTP
-    format: (_: Request, res: Response, format) => {
+    format: (req: Request, res: Response, format) => {
+        if (req.path === "/favicon.ico") return "" // Ignorar peticiones a favicon
+
         const errors = coloredErrors(res)
         const status = coloredStatus(res)
 
