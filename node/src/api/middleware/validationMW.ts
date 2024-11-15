@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { checkSchema, Schema, validationResult } from "express-validator"
-import { ValError } from "../util/error"
-import { getValError } from "../util/logger"
+import { getValError, ValError } from "../util/error"
 
 export const validationMW = (arg: Schema | Function): any[] => {
     return [
@@ -10,14 +9,7 @@ export const validationMW = (arg: Schema | Function): any[] => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 const msg = ValError.ERRVAL
-                next(
-                    getValError(
-                        msg,
-                        `${req.method} ${req.url}`,
-                        errors.array(),
-                        422
-                    )
-                )
+                next(getValError(msg, errors.array(), 422))
             } else next()
         },
     ]
