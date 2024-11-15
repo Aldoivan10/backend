@@ -1,10 +1,12 @@
 import { Schema, ValidationError } from "express-validator"
 import DB from "../model/db"
+import { APIError } from "./util/error"
 
 declare global {
     namespace Express {
         interface Locals {
             db: DB
+            error?: APIError
         }
     }
 
@@ -18,7 +20,6 @@ declare global {
 
     type APIErrorArgs = {
         name?: string
-        request?: string
         status?: number
         message: string
         error?: ErrorItem

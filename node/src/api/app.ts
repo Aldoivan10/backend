@@ -5,7 +5,6 @@ import { logMW } from "./middleware/logMW"
 import catalogRoute from "./routes/catalog"
 import entityRoute from "./routes/entity"
 import productRoute from "./routes/product"
-import * as Logger from "./util/logger"
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -32,7 +31,7 @@ async function init() {
             console.log(`Server running at http://${HOST}:${PORT}/`)
         })
     } catch (error) {
-        Logger.error(error as Error)
+        console.log(error)
     }
 }
 
