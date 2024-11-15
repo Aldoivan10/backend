@@ -10,6 +10,8 @@ declare global {
         }
     }
 
+    type Env = { PORT?: number; HOST?: string; PASS_SALT?: number }
+
     type ErrorItem = {
         msg: string
         value?: any
@@ -48,6 +50,8 @@ declare global {
     type ProductBody = Omit<Product, "id" | "sales"> & { units: ProductUnits }
 
     type EntityBody = Omit<Entity, "id">
+
+    type UserBody = Omit<CatalogBody, "id"> & { password: string }
 
     type TableID = { id: number }
 
