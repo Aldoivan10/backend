@@ -1,14 +1,5 @@
 import { ValidationError } from "express-validator"
-import winston, { format, transports } from "winston"
 import { APIError, ValError } from "./error"
-
-const logger = winston.createLogger({
-    transports: [new transports.File({ filename: "express.json" })],
-    format: format.combine(
-        format.timestamp({ format: "YYYY-MM-DD hh:mm:ss A" }),
-        format.json({ space: 4 })
-    ),
-})
 
 export const getError = (err: Error, request: string, status = 500) => {
     const { message, stack } = err
@@ -47,17 +38,4 @@ export const getValError = (
         errors,
         status,
     })
-}
-
-export const error = (error: APIError | Error, errors: Object[] = []) => {
-    if (error instanceof APIError) logger.error(error)
-    else {
-        const { message, name, stack } = error as Error
-        logger.error({
-            message,
-            name,
-            stack,
-            errors,
-        })
-    }
 }
