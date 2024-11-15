@@ -1,12 +1,8 @@
 import { Request, Response } from "express"
-import { APIError } from "../util/error"
-import * as Logger from "../util/logger"
+import { APIError, getError } from "../util/error"
 
-export const errorMW = (err: APIError | Error, req: Request, res: Response) => {
-    const error =
-        err instanceof APIError
-            ? err
-            : Logger.getError(err, `${req.method} ${req.url}`)
+export const errorMW = (err: APIError | Error, _: Request, res: Response) => {
+    const error = err instanceof APIError ? err : getError(err)
     res.locals.error = error
     res.status(error.status).json({
         message: error.message,
