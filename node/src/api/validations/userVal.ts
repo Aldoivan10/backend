@@ -1,7 +1,7 @@
 import { Schema } from "express-validator"
 import { nameAttr } from "./util"
 
-export const entityVal: Schema = {
+export const userVal: Schema = {
     name: nameAttr(64),
     password: {
         optional: true,
