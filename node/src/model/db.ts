@@ -169,10 +169,11 @@ export default class DB {
 
     async insert<T>(table: string, params: any[]) {
         const id = await this.lastID(table)
+        const queryParams = [id, ...params]
         const query = `
             INSERT INTO ${table}
-            VALUES (${getPlaceholders(params)})`
-        return await this.queryAndGet<T>(query, [id, ...params])
+            VALUES (${getPlaceholders(queryParams)})`
+        return await this.queryAndGet<T>(query, queryParams)
     }
 
     async update<T>(
