@@ -16,6 +16,6 @@ export const getBase = (req: Request) => {
 }
 
 // Validamos que la contraseña sea correcta
-const isPass = (pass: string, hashed: string) => {
+export const isPass = (pass: string, hashed: string) => {
     return bcrypt.compareSync(pass, hashed)
 }
