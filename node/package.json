@@ -26,6 +26,7 @@
         "sqlite3": "5.1.7"
     },
     "devDependencies": {
+        "@types/bcrypt": "^5.0.2",
         "@types/express": "^5.0.0",
         "@types/node": "^22.9.0",
         "@types/sqlite3": "^3.1.11",
