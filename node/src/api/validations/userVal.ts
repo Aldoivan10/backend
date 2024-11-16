@@ -17,4 +17,9 @@ export const userVal: Schema = {
             errorMessage: "La contraseña debe ser de 3 a 8 carácteres",
         },
     },
+    id_user_type: {
+        isInt: {
+            errorMessage: "El ID del usuario debe ser un número entero",
+        },
+    },
 }
