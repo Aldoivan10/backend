@@ -6,6 +6,16 @@ import * as GeneralVal from "../validations/generalVal"
 
 const router = Router()
 const table = "Entidad"
+const columns = [
+    "id_entity_type",
+    "rfc",
+    "name",
+    "address",
+    "domicile",
+    "postal_code",
+    "phone",
+    "email",
+]
 
 const getParams = (req: Request) => {
     const {
@@ -72,7 +82,7 @@ router.post(
         try {
             const { db } = getBase(req)
             const params = getParams(req)
-            const entity = await db.insert<Entity>(table, params)
+            const entity = await db.insert<Entity>(table, params, columns)
             res.status(201).json({
                 message: "Entidad creada",
                 data: entity,
@@ -90,7 +100,7 @@ router.delete(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, ids } = getBase(req)
-            const entitys = await db.delete<Entity>(table, ids)
+            const entitys = await db.delete<Entity>(table, ids, columns)
             res.send({ message: "Entidades eliminadas", data: entitys })
         } catch (err) {
             next(err)
@@ -119,7 +129,8 @@ router.patch(
                     "correo",
                 ],
                 id,
-                params
+                params,
+                columns
             )
 
             if (entity)
