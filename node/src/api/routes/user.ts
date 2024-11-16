@@ -2,7 +2,7 @@ import bcrypt from "bcrypt"
 import { NextFunction, Request, Response, Router } from "express"
 import { PASS_SALT } from "../config"
 import { validationMW } from "../middleware/validationMW"
-import { getBase } from "../util/util"
+import { getBase, isPass } from "../util/util"
 import * as GeneralVal from "../validations/generalVal"
 import { userVal } from "../validations/userVal"
 
@@ -10,10 +10,7 @@ const router = Router()
 const table = "Usuario"
 const columns = ["id", "id_tipo_usuario AS id_user_type", "nombre AS name"]
 
-const isPass = (pass: string, hashed: string) => {
-    return bcrypt.compareSync(pass, hashed)
-}
-
+// Hasehamos la contraseña
 const getPass = (pass: string) => {
     return pass ? bcrypt.hashSync(pass, PASS_SALT) : pass
 }
