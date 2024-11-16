@@ -53,7 +53,7 @@ declare global {
 
     type EntityBody = Omit<Entity, "id">
 
-    type UserBody = Omit<CatalogBody, "id"> & { password: string }
+    type UserBody = Omit<UserType, "id"> & { password: string }
 
     type TableID = { id: number }
 
@@ -85,7 +85,10 @@ declare global {
         buy: number
         min: number
     }
+
+    type UserType = CatalogItem & {
+        id_user_type: number
+    }
 }
 
-export { }
-
+export {}
