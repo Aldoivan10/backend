@@ -167,7 +167,7 @@ export default class DB {
         })
     }
 
-    async insert<T>(table: string, params: any[]) {
+    async insert<T>(table: string, params: any[], returning: string[] = ["*"]) {
         const id = await this.lastID(table)
         const queryParams = [id, ...params]
         const query = `
@@ -180,7 +180,8 @@ export default class DB {
         table: string,
         columns: string[],
         id: number,
-        params: any[]
+        params: any[],
+        returning: string[] = ["*"]
     ) {
         const cols = columns.map((col) => `${col} = ?`).join(", ")
         const query = `
@@ -190,7 +191,7 @@ export default class DB {
         return await this.queryAndGet<T>(query, [...params, id])
     }
 
-    async delete<T>(table: string, ids: number[]) {
+    async delete<T>(table: string, ids: number[], returning: string[] = ["*"]) {
         const placeholders = getPlaceholders(ids)
         const query = `
             DELETE FROM ${table}
@@ -198,36 +199,50 @@ export default class DB {
         return await this.queryAndAll<T>(query, ids)
     }
 
-    async queryAndAll<T>(query: string, params: any[] = []) {
+    async queryAndAll<T>(
+        query: string,
+        params: any[] = [],
+        returning: string[] = ["*"]
+    ) {
         const db = this.checkDB()
         return new Promise<T[]>((resolve, reject) => {
+            const attrs = returning.join(",")
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.get(`${query} RETURNING *`, params, (err, result: T[]) => {
-                    if (err) {
-                        db.run("ROLLBACK")
-                        reject(err)
-                    } else {
-                        db.run("COMMIT", (err) => {
-                            const rows = Array.isArray(result)
-                                ? result
-                                : [result]
-                            if (err) return reject(err)
-                            rows.map((row) => this.parse<T>(row))
-                            resolve(rows)
-                        })
+                db.get(
+                    `${query} RETURNING ${attrs}`,
+                    params,
+                    (err, result: T[]) => {
+                        if (err) {
+                            db.run("ROLLBACK")
+                            reject(err)
+                        } else {
+                            db.run("COMMIT", (err) => {
+                                const rows = Array.isArray(result)
+                                    ? result
+                                    : [result]
+                                if (err) return reject(err)
+                                rows.map((row) => this.parse<T>(row))
+                                resolve(rows)
+                            })
+                        }
                     }
-                })
+                )
             })
         })
     }
 
-    async queryAndGet<T>(query: string, params: any[] = []) {
+    async queryAndGet<T>(
+        query: string,
+        params: any[] = [],
+        returning: string[] = ["*"]
+    ) {
         const db = this.checkDB()
         return new Promise<T>((resolve, reject) => {
+            const attrs = returning.join(",")
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION")
-                db.get(`${query} RETURNING *`, params, (err, row: T) => {
+                db.get(`${query} RETURNING ${attrs}`, params, (err, row: T) => {
                     if (err) {
                         db.run("ROLLBACK")
                         reject(err)

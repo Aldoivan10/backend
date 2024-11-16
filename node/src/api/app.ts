@@ -13,12 +13,12 @@ const app = express()
 app.disable("x-powered-by")
 // Middleware para parsear el body de la petición
 app.use(json())
-// Middleware para logs de peticiones
-app.use(logMW)
 // Ignorar peticiones a favicon
 app.get("/favicon.ico", (_, res) => {
-    res.status(204).end()
+    res.status(204)
 })
+// Middleware para logs de peticiones
+app.use(logMW)
 // Pagina de bienvenida
 app.get("/", (_, res) => {
     res.status(200).json({ message: "API con express", dev: "Aldoivan" })
