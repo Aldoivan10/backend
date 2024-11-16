@@ -173,7 +173,7 @@ export default class DB {
         const query = `
             INSERT INTO ${table}
             VALUES (${getPlaceholders(queryParams)})`
-        return await this.queryAndGet<T>(query, queryParams)
+        return await this.queryAndGet<T>(query, queryParams, returning)
     }
 
     async update<T>(
@@ -188,7 +188,7 @@ export default class DB {
             UPDATE ${table} 
             SET ${cols}
             WHERE id = ?`
-        return await this.queryAndGet<T>(query, [...params, id])
+        return await this.queryAndGet<T>(query, [...params, id], returning)
     }
 
     async delete<T>(table: string, ids: number[], returning: string[] = ["*"]) {
@@ -196,7 +196,7 @@ export default class DB {
         const query = `
             DELETE FROM ${table}
             WHERE id IN (${placeholders})`
-        return await this.queryAndAll<T>(query, ids)
+        return await this.queryAndAll<T>(query, ids, returning)
     }
 
     async queryAndAll<T>(
