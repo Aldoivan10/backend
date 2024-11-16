@@ -12,6 +12,8 @@ declare global {
 
     type Env = { PORT?: number; HOST?: string; PASS_SALT?: number }
 
+    type Filters = [string, number, number]
+
     type ErrorItem = {
         msg: string
         value?: any
@@ -85,4 +87,5 @@ declare global {
     }
 }
 
-export {}
+export { }
+
