@@ -81,11 +81,8 @@ async function check(req: Request, _: Response, next: NextFunction) {
 router.get(root, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { db, limit, offset, filter, table } = getData(req)
-        const items = await db.all<Entity>(table, columns, [
-            `%${filter}%`,
-            limit,
-            offset,
-        ])
+        const arrFilter: Filters = [`%${filter}%`, limit, offset]
+        const items = await db.all<Entity>(table, columns, arrFilter)
         res.json({ data: items })
     } catch (err) {
         next(err)
