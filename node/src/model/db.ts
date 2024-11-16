@@ -193,10 +193,12 @@ export default class DB {
 
     async delete<T>(table: string, ids: number[], returning: string[] = ["*"]) {
         const placeholders = getPlaceholders(ids)
+        const items = await this.allByID<T>(table, returning, ids)
         const query = `
             DELETE FROM ${table}
             WHERE id IN (${placeholders})`
-        return await this.queryAndAll<T>(query, ids, returning)
+        await this.query(query, ids)
+        return items
     }
 
     async queryAndAll<T>(
@@ -258,9 +260,17 @@ export default class DB {
     async query(query: string, params: any[] = []) {
         const db = this.checkDB()
         return new Promise<sqlite.RunResult>((resolve, reject) => {
-            db.run(query, params, function (err) {
-                if (err) reject(err)
-                else resolve(this)
+            db.serialize(() => {
+                db.run("BEGIN TRANSACTION")
+                db.run(query, params, function (err) {
+                    if (err) {
+                        db.run("ROLLBACK")
+                        reject(err)
+                    } else {
+                        db.run("COMMIT")
+                        resolve(this)
+                    }
+                })
             })
         })
     }
@@ -269,9 +279,19 @@ export default class DB {
         const db = this.checkDB()
         return new Promise<number>((resolve, reject) => {
             const query = `
-            SELECT COALESCE(MIN(id) + 1, 1) AS id
-            FROM ${table} t1
-            WHERE NOT EXISTS (SELECT 1 FROM ${table} t2 WHERE t2.id = t1.id + 1);`
+                WITH miss_id AS
+                (
+                    SELECT id FROM ${table}
+                    UNION ALL 
+                    SELECT 0
+                )
+                SELECT MIN(id) + 1 AS id
+                FROM miss_id
+                WHERE NOT EXISTS
+                (
+                    SELECT * FROM ${table} 
+                    WHERE ${table}.id = miss_id.id + 1
+                )`
             db.get<TableID>(query, (err, row) => {
                 if (err) reject(err)
                 else resolve(row.id)
