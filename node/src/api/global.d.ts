@@ -1,6 +1,6 @@
 import { Schema, ValidationError } from "express-validator"
-import DB from "../model/db"
-import { APIError } from "./util/error"
+import DB from "./model/db"
+import { APIError } from "./model/error"
 
 declare global {
     namespace Express {
@@ -62,6 +62,8 @@ declare global {
     type ProductUnit = { id: number; sale: number; profit: number }
 
     type ProductUnits = [ProductUnit, ...Omit<ProductUnit, "profit">[]]
+
+    type LoginBody = { name: string; password: string }
 
     type Code = { id: number; code: string }
 
