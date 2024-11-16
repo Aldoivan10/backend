@@ -1,7 +1,7 @@
 import { existsSync } from "fs"
 import sqlite from "sqlite3"
-import { DBError } from "../api/util/error"
-import { getPlaceholders } from "../api/util/util"
+import { getPlaceholders } from "../util/util"
+import { DBError } from "./error"
 
 export default class DB {
     db: sqlite.Database | null = null
