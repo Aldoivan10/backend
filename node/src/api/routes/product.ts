@@ -247,7 +247,6 @@ router.delete(
             await db.delete<Product>(table, ids)
             res.send({ message: "Productos eliminados", data })
         } catch (err) {
-            console.log(err)
             next(err)
         }
     }
