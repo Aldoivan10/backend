@@ -13,7 +13,7 @@ export const userVal: Schema = {
             errorMessage: "La contraseña no puede ser un campo vacío",
         },
         isLength: {
-            options: { min: 3, max: 8 },
+            options: { min: 3, max: 10 },
             errorMessage: "La contraseña debe ser de 3 a 8 carácteres",
         },
     },
