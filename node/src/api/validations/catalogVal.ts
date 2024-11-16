@@ -14,4 +14,7 @@ export default {
     department: {
         name: nameAttr(128),
     },
+    user_type: {
+        name: nameAttr(32),
+    },
 } as Record<string, Schema>
