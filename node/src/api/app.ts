@@ -6,6 +6,7 @@ import { logMW } from "./middleware/logMW"
 import catalogRoute from "./routes/catalog"
 import entityRoute from "./routes/entity"
 import productRoute from "./routes/product"
+import userRoute from "./routes/user"
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.get("/", (_, res) => {
 // Rutas
 app.use("/product", productRoute)
 app.use("/entity", entityRoute)
+app.use("/user", userRoute)
 app.use(catalogRoute)
 // Manejador de errores
 app.use(errorMW)
