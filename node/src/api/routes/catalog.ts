@@ -5,9 +5,6 @@ import { getBase } from "../util/util"
 import catalogVal from "../validations/catalogVal"
 import * as GeneralVal from "../validations/generalVal"
 
-const router = Router()
-const root = "/:table(code|department|entity_type|unit)"
-
 const catalogs: CatalogMap = {
     code: {
         msgs: {
@@ -41,7 +38,19 @@ const catalogs: CatalogMap = {
         },
         table: "Departamento",
     },
+    user_type: {
+        msgs: {
+            add: "Tipo de usuario agregado",
+            del: "Tipos de usuario eliminados",
+            upd: "Tipo de usuario actualizado",
+        },
+        table: "Tipo_Usuario",
+    },
 }
+
+const router = Router()
+const root = `/:table(${Object.keys(catalogs).join("|")})`
+const columns = ["id", "nombre AS name"]
 
 function getData(req: Request) {
     const { db, limit, offset, filter, ids } = getBase(req)
@@ -72,11 +81,11 @@ async function check(req: Request, _: Response, next: NextFunction) {
 router.get(root, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { db, limit, offset, filter, table } = getData(req)
-        const items = await db.all<Entity>(
-            table,
-            ["id", "nombre AS name"],
-            [`%${filter}%`, limit, offset]
-        )
+        const items = await db.all<Entity>(table, columns, [
+            `%${filter}%`,
+            limit,
+            offset,
+        ])
         res.json({ data: items })
     } catch (err) {
         next(err)
@@ -89,11 +98,7 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, id, table } = getData(req)
-            const item = await db.getByID<CatalogItem>(
-                table,
-                ["id", "nombre AS name"],
-                id
-            )
+            const item = await db.getByID<CatalogItem>(table, columns, id)
             res.json({ data: item ?? null })
         } catch (err) {
             next(err)
@@ -108,7 +113,7 @@ router.post(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, table, name, msgs } = getData(req)
-            const item = await db.insert<CatalogItem>(table, [name])
+            const item = await db.insert<CatalogItem>(table, [name], columns)
             res.status(201).send({
                 message: msgs.add,
                 data: item,
@@ -126,7 +131,7 @@ router.delete(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, table, ids, msgs } = getData(req)
-            const items = await db.delete<CatalogItem>(table, ids)
+            const items = await db.delete<CatalogItem>(table, ids, columns)
             res.send({
                 message: msgs.del,
                 data: items,
@@ -144,9 +149,13 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, table, id, name, msgs } = getData(req)
-            const item = await db.update<CatalogItem>(table, ["nombre"], id, [
-                name,
-            ])
+            const item = await db.update<CatalogItem>(
+                table,
+                ["nombre"],
+                id,
+                [name],
+                columns
+            )
             if (item)
                 res.json({
                     message: msgs.upd,
