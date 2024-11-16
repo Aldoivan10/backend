@@ -7,14 +7,14 @@ import * as GeneralVal from "../validations/generalVal"
 const router = Router()
 const table = "Entidad"
 const columns = [
-    "id_entity_type",
-    "rfc",
-    "name",
-    "address",
-    "domicile",
-    "postal_code",
-    "phone",
-    "email",
+    "id_tipo_entidad AS id_entity_type",
+    "rfc AS rfc",
+    "nombre AS name",
+    "direccion AS address",
+    "domicilio AS domicile",
+    "codigo_postal AS postal_code",
+    "telefono AS phone",
+    "correo AS email",
 ]
 
 const getParams = (req: Request) => {
@@ -45,11 +45,8 @@ const getParams = (req: Request) => {
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { db, limit, offset, filter } = getBase(req)
-        const entitys = await db.all<Entity>(
-            table,
-            ["id", "nombre as name"],
-            [`%${filter}%`, limit, offset]
-        )
+        const arrFilter: Filters = [`%${filter}%`, limit, offset]
+        const entitys = await db.all<Entity>(table, columns, arrFilter)
         res.json({ data: entitys })
     } catch (err) {
         next(err)
@@ -62,11 +59,7 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { db, id } = getBase(req)
-            const entity = await db.getByID<Entity>(
-                table,
-                ["id", "nombre AS name"],
-                id
-            )
+            const entity = await db.getByID<Entity>(table, columns, id)
             res.json({ data: entity ?? null })
         } catch (err) {
             next(err)
