@@ -1,0 +1,35 @@
+### Obtener todos
+GET http://localhost:3000/user
+
+### Obtener por id
+GET http://localhost:3000/user/1
+
+### Agregar
+POST http://localhost:3000/user
+Content-Type: application/json
+
+{
+    "id_user_type": 1,
+    "name": "admin",
+    "password": "Cas7illo1*"
+}
+
+
+### Eliminar
+DELETE http://localhost:3000/user/
+Content-Type: application/json
+
+{
+    "ids": [1]
+}
+
+
+### Actualizar 
+PATCH  http://localhost:3000/user/1
+Content-Type: application/json
+
+{
+    "id_user_type": 1,
+    "name": "root",
+    "password": "Cas7illo1*"
+}
