@@ -1,47 +1,114 @@
-export class APIError extends Error {
-    errors: APIErrorsArr = []
-    name: string = "APIError"
-    status: number
+import { Result } from "express-validator"
 
-    constructor({ message, error, errors, name, status = 500 }: APIErrorArgs) {
+export class APIError extends Error {
+    id = `ERR${new Date().getTime()}`
+    details: ErrorDetail[] = []
+    status: number
+    code: string
+
+    constructor({
+        message,
+        details,
+        status = 500,
+        code = "ERR_GENERIC",
+    }: APIErrorArgs) {
         super(message)
-        if (name) this.name = name
-        if (error) this.errors.push({ ...error, type: this.name })
-        if (errors) this.errors = errors
+        this.name = this.constructor.name
+        this.details = details
         this.status = status
+        this.code = code
     }
 }
 
-export class ValError extends APIError {
-    constructor(
-        args: Omit<APIErrorArgs, "status" | "message" | "name">,
-        status: 400 | 422 = 422
-    ) {
+export class ValidError extends APIError {
+    constructor({
+        details,
+        code = "ERR_VALIDATION",
+        status = 422,
+    }: ValidationErrorArgs) {
         super({
-            ...args,
+            details,
             status,
-            name: "ValidationError",
+            code,
             message: "Error en los datos enviados",
         })
+    }
+
+    static unprocessed(): never {
+        throw new ValidError({
+            details: [
+                {
+                    msg: "Formato JSON no válido",
+                    location: "body",
+                    field: null,
+                },
+            ],
+            code: "ERR_UNPROCESSED",
+            status: 400,
+        })
+    }
+
+    static fromExpress(errors: Result<ExpressValidationError>): never {
+        const details = errors.array().map((err) => ({
+            field: err.param!,
+            msg: err.msg,
+            location: err.location!,
+        }))
+        throw new ValidError({ details })
     }
 }
 
 export class AuthError extends APIError {
-    constructor(args: Omit<APIErrorArgs, "status" | "message" | "name">) {
+    constructor(args: Omit<APIErrorArgs, "status" | "message">) {
         super({
             ...args,
             status: 401,
-            name: "AuthError",
             message: "Usuario no autorizado",
         })
     }
+
+    /* static rol() {
+        return new AuthError({
+            error: {
+                msg: "No cuentas con los permisos necesarios",
+                location: "body",
+                path: "fields",
+            },
+        })
+    }
+
+    static auth() {
+        return new AuthError({
+            error: {
+                msg: "Credenciales incorrectas",
+                location: "body",
+                path: "fields",
+            },
+        })
+    }
+
+    static token() {
+        return new AuthError({
+            error: {
+                msg: "Aun no se ha autenticado el usuario",
+                location: "body",
+                path: "fields",
+            },
+        })
+    } */
 }
 
 export class DBError extends APIError {
-    name = "DBError"
-
-    constructor(args: Omit<APIErrorArgs, "status">) {
-        super({ ...args, status: 401 })
+    static open({
+        details,
+        status = 500,
+    }: Omit<APIErrorArgs, "message" | "code">): never {
+        throw new DBError({
+            message: "Error al abrir la base de datos",
+            code: "ERR_OPEN",
+            status,
+            details,
+        })
     }
 
     static ERROPEN = "Error al abrir la base de datos"
