@@ -34,8 +34,8 @@ export class ValidError extends APIError {
         })
     }
 
-    static unprocessed(): never {
-        throw new ValidError({
+    static unprocessed(): APIError {
+        return new ValidError({
             details: [
                 {
                     msg: "Formato JSON no válido",
@@ -48,13 +48,13 @@ export class ValidError extends APIError {
         })
     }
 
-    static fromExpress(errors: Result<ExpressValidationError>): never {
+    static fromExpress(errors: Result<ExpressValidationError>): APIError {
         const details = errors.array().map((err) => ({
             field: err.param!,
             msg: err.msg,
             location: err.location!,
         }))
-        throw new ValidError({ details })
+        return new ValidError({ details })
     }
 }
 
@@ -102,8 +102,8 @@ export class DBError extends APIError {
     static open({
         details,
         status = 500,
-    }: Omit<APIErrorArgs, "message" | "code">): never {
-        throw new DBError({
+    }: Omit<APIErrorArgs, "message" | "code">): APIError {
+        return new DBError({
             message: "Error al abrir la base de datos",
             code: "ERR_OPEN",
             status,
@@ -111,10 +111,68 @@ export class DBError extends APIError {
         })
     }
 
-    static ERROPEN = "Error al abrir la base de datos"
-    static ERRQUERY = "Error al ejecutar query"
-    static ERRCREATE = "Error al crear la tabla"
-    static ERRINSERT = "Error al insertar datos"
-    static ERRUPDATE = "Error al actualizar datos"
-    static ERRDELETE = "Error al eliminar datos"
+    static query(err: SQLError, status = 500): APIError {
+        return new DBError({
+            message: "Error al ejecutar obtener los datos",
+            code: err.code,
+            details: [
+                {
+                    location: "query",
+                    msg: err.message,
+                    field: this.getField(err),
+                },
+            ],
+            status,
+        })
+    }
+
+    static insert(err: SQLError, status = 500) {
+        return new DBError({
+            message: "Error al crear item",
+            code: err.code,
+            details: [
+                {
+                    location: "insert",
+                    msg: err.message,
+                    field: this.getField(err),
+                },
+            ],
+            status,
+        })
+    }
+
+    static update(err: SQLError, status = 500) {
+        return new DBError({
+            message: "Error al actualizar datos",
+            code: err.code,
+            details: [
+                {
+                    location: "update",
+                    msg: err.message,
+                    field: this.getField(err),
+                },
+            ],
+            status,
+        })
+    }
+
+    static delete(err: SQLError, status = 500) {
+        return new DBError({
+            message: "Error al eliminar items",
+            code: err.code,
+            details: [
+                {
+                    location: "update",
+                    msg: err.message,
+                    field: this.getField(err),
+                },
+            ],
+            status,
+        })
+    }
+
+    static getField(err: SQLError) {
+        const arr = err.code.split("_")
+        return arr[arr.length - 1]
+    }
 }
