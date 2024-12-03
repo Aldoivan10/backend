@@ -1,11 +1,13 @@
 import { Database, Statement } from "better-sqlite3"
 import db from "../model/betterdb"
+import { mapTo } from "../util/util"
 
 export default abstract class Repository<T> {
     protected db: Database = db
     protected table: string
-    protected allStm!: Statement<Filters, T>
-    protected getByIDStm!: Statement<ID, T>
+    protected allStm!: Statement<Filters, Record<string, any>>
+    protected getByIDStm!: Statement<ID, Record<string, any>>
+    protected mapper?: Record<string, string>
 
     constructor(table: string) {
         this.table = table
@@ -20,9 +22,10 @@ export default abstract class Repository<T> {
         this.getByIDStm = this.db.prepare(this.getByIDQuery(columns))
     }
 
-    all = (filter: Filters) => this.allStm.all(filter)
+    all = (filter: Filters) =>
+        this.allStm.all(filter).map((item) => mapTo<T>(item, this.mapper))
 
-    getByID = (id: number) => this.getByIDStm.get({ id })
+    getByID = (id: number) => mapTo<T>(this.getByIDStm.get({ id }), this.mapper)
 
     abstract insert(item: T): T
 
