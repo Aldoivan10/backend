@@ -11,7 +11,9 @@ export const errorMW = (
     const error = err instanceof APIError ? err : getError(err)
     res.locals.error = error
     res.status(error.status).json({
+        id: error.id,
+        code: error.code,
         message: error.message,
-        errors: error.details || [],
+        details: error.details || [],
     })
 }
