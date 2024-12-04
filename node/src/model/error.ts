@@ -1,4 +1,4 @@
-import { Result } from "express-validator"
+import { FieldValidationError } from "express-validator"
 
 export class APIError extends Error {
     id = `ERR${new Date().getTime()}`
@@ -39,6 +39,7 @@ export class ValidError extends APIError {
             details: [
                 {
                     msg: "Formato JSON no válido",
+                    type: "entity.parse.failed",
                     location: "body",
                     field: null,
                 },
@@ -48,11 +49,12 @@ export class ValidError extends APIError {
         })
     }
 
-    static fromExpress(errors: Result<ExpressValidationError>): APIError {
-        const details = errors.array().map((err) => ({
-            field: err.param!,
+    static fromExpress(errors: FieldValidationError[]): APIError {
+        const details = errors.map((err) => ({
             msg: err.msg,
-            location: err.location!,
+            field: err.path,
+            location: err.location,
+            type: err.type,
         }))
         return new ValidError({ details })
     }
@@ -120,6 +122,7 @@ export class DBError extends APIError {
                     location: "query",
                     msg: err.message,
                     field: this.getField(err),
+                    type: "sql_error",
                 },
             ],
             status,
@@ -135,6 +138,7 @@ export class DBError extends APIError {
                     location: "insert",
                     msg: err.message,
                     field: this.getField(err),
+                    type: "sql_error",
                 },
             ],
             status,
@@ -150,6 +154,7 @@ export class DBError extends APIError {
                     location: "update",
                     msg: err.message,
                     field: this.getField(err),
+                    type: "sql_error",
                 },
             ],
             status,
@@ -162,9 +167,10 @@ export class DBError extends APIError {
             code: err.code,
             details: [
                 {
-                    location: "update",
+                    location: "delete",
                     msg: err.message,
                     field: this.getField(err),
+                    type: "sql_error",
                 },
             ],
             status,
@@ -172,6 +178,7 @@ export class DBError extends APIError {
     }
 
     static getField(err: SQLError) {
+        console.log(err)
         const arr = err.code.split("_")
         return arr[arr.length - 1]
     }
