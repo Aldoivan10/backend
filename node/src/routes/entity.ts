@@ -1,55 +1,24 @@
+import { SqliteError } from "better-sqlite3"
 import { NextFunction, Request, Response, Router } from "express"
-import { validationMW } from "../middleware/validationMW"
+import { validationMW } from "../middleware/validation.mw"
+import { DBError } from "../model/error"
+import EntityRepository from "../repositories/entity.repo"
 import { getBase } from "../util/util"
 import { entityVal } from "../validations/entityVal"
 import * as GeneralVal from "../validations/generalVal"
 
 const router = Router()
-const table = "Entidad"
-const columns = [
-    "id_tipo_entidad AS id_entity_type",
-    "rfc AS rfc",
-    "nombre AS name",
-    "direccion AS address",
-    "domicilio AS domicile",
-    "codigo_postal AS postal_code",
-    "telefono AS phone",
-    "correo AS email",
-]
-
-const getParams = (req: Request) => {
-    const {
-        rfc,
-        name,
-        phone,
-        email,
-        address,
-        domicile,
-        postal_code,
-        id_entity_type,
-    }: EntityBody = req.body
-
-    return [
-        id_entity_type,
-        rfc,
-        name,
-        address,
-        domicile,
-        postal_code,
-        phone,
-        email,
-    ]
-}
+const repo = new EntityRepository()
 
 // Obtener todos
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { db, limit, offset, filter } = getBase(req)
-        const arrFilter: Filters = [`%${filter}%`, limit, offset]
-        const entitys = await db.all<Entity>(table, columns, arrFilter)
+        const { filter } = getBase(req)
+        const entitys = repo.all(filter)
         res.json({ data: entitys })
-    } catch (err) {
-        next(err)
+    } catch (err: any) {
+        if (err instanceof SqliteError) next(DBError.query(err))
+        else next(err)
     }
 })
 
@@ -58,11 +27,12 @@ router.get(
     "/:id(\\d+)",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { db, id } = getBase(req)
-            const entity = await db.getByID<Entity>(table, columns, id)
-            res.json({ data: entity ?? null })
-        } catch (err) {
-            next(err)
+            const { id } = getBase(req)
+            const entity = repo.getByID(id)
+            res.json({ data: entity })
+        } catch (err: any) {
+            if (err instanceof SqliteError) next(DBError.query(err))
+            else next(err)
         }
     }
 )
@@ -73,15 +43,15 @@ router.post(
     validationMW(entityVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { db } = getBase(req)
-            const params = getParams(req)
-            const entity = await db.insert<Entity>(table, params, columns)
+            const params: Entity = req.body
+            const entity = repo.insert(params)
             res.status(201).json({
                 message: "Entidad creada",
                 data: entity,
             })
-        } catch (err) {
-            next(err)
+        } catch (err: any) {
+            if (err instanceof SqliteError) next(DBError.insert(err))
+            else next(err)
         }
     }
 )
@@ -92,11 +62,12 @@ router.delete(
     validationMW(GeneralVal.ids),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { db, ids } = getBase(req)
-            const entitys = await db.delete<Entity>(table, ids, columns)
+            const { ids } = getBase(req)
+            const entitys = repo.delete(ids)
             res.send({ message: "Entidades eliminadas", data: entitys })
-        } catch (err) {
-            next(err)
+        } catch (err: any) {
+            if (err instanceof SqliteError) next(DBError.delete(err))
+            else next(err)
         }
     }
 )
@@ -107,24 +78,9 @@ router.patch(
     validationMW(entityVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { db, id } = getBase(req)
-            const params = getParams(req)
-            const entity = await db.update<Entity>(
-                table,
-                [
-                    "id_tipo_entidad",
-                    "rfc",
-                    "nombre",
-                    "direccion",
-                    "domicilio",
-                    "codigo_postal",
-                    "telefono",
-                    "correo",
-                ],
-                id,
-                params,
-                columns
-            )
+            const { id } = getBase(req)
+            const params: Entity = req.body
+            const entity = repo.update(id, params)
 
             if (entity)
                 res.send({
@@ -134,10 +90,11 @@ router.patch(
             else
                 res.send({
                     message: "No hubo modificaciones",
-                    data: entity ?? null,
+                    data: null,
                 })
-        } catch (err) {
-            next(err)
+        } catch (err: any) {
+            if (err instanceof SqliteError) next(DBError.update(err))
+            else next(err)
         }
     }
 )
