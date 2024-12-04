@@ -28,8 +28,12 @@ const coloredErrors = (res: Response) => {
         const details = error.details
             .map((detail) => {
                 return (
-                    chalk.red.bold(`[${detail.location}]`) +
-                    chalk.yellow.bold(` ${detail.field}: `) +
+                    chalk.red.bold(
+                        `\t[${detail.location}${
+                            detail.field ? ": " + detail.field : ""
+                        }]`
+                    ) +
+                    chalk.yellow.bold(` ${detail.type}: `) +
                     chalk.gray.bold(detail.msg)
                 )
             })
