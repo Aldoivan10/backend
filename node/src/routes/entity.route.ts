@@ -5,7 +5,7 @@ import { DBError } from "../model/error"
 import EntityRepository from "../repositories/entity.repo"
 import { getBase } from "../util/util"
 import { entityVal } from "../validations/entity.val"
-import * as GeneralVal from "../validations/generalVal"
+import * as GeneralVal from "../validations/general.val"
 
 const router = Router()
 const repo = new EntityRepository()
