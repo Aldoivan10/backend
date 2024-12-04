@@ -1,9 +1,8 @@
 import cookieParser from "cookie-parser"
 import express, { json } from "express"
 import { HOST, PORT } from "./config"
-import { errorMW } from "./middleware/errorMW"
-import { logMW } from "./middleware/logMW"
-import DB from "./model/db"
+import { errorMW } from "./middleware/error.mw"
+import { logMW } from "./middleware/log.mw"
 import auth from "./routes/auth"
 import catalogRoute from "./routes/catalog"
 import entityRoute from "./routes/entity"
@@ -38,15 +37,6 @@ app.use(catalogRoute)
 // Manejador de errores
 app.use(errorMW)
 
-async function init() {
-    try {
-        app.locals.db = await new DB().open("../database.db")
-        app.listen(PORT, HOST, async () => {
-            console.log(`Server running at http://${HOST}:${PORT}/`)
-        })
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-init()
+app.listen(PORT, HOST, () =>
+    console.log(`Server running at http://${HOST}:${PORT}/`)
+)
