@@ -1,13 +1,15 @@
 import { Database, Statement } from "better-sqlite3"
 import db from "../model/betterdb"
-import { mapTo } from "../util/util"
+import { getPlaceholders, mapTo } from "../util/util"
 
 export default abstract class Repository<T> {
     protected db: Database = db
     protected table: string
     protected allStm!: Statement<Filters, Record<string, any>>
     protected getByIDStm!: Statement<ID, Record<string, any>>
-    protected mapper?: Record<string, string>
+    protected abstract mapper: Record<string, string>
+    protected mapFunc = (item?: Record<string, any>) =>
+        mapTo<Maybe<T>>(item, this.mapper)
 
     constructor(table: string) {
         this.table = table
@@ -22,16 +24,21 @@ export default abstract class Repository<T> {
         this.getByIDStm = this.db.prepare(this.getByIDQuery(columns))
     }
 
-    all = (filter: Filters) =>
-        this.allStm.all(filter).map((item) => mapTo<T>(item, this.mapper))
+    all = (filter: Filters) => this.allStm.all(filter).map(this.mapFunc)
 
     getByID = (id: number) => mapTo<T>(this.getByIDStm.get({ id }), this.mapper)
 
+    delete = (ids: number[]) => {
+        const placeholders = getPlaceholders(ids)
+        const stm = this.db.prepare<number[], Record<string, any>>(
+            `DELETE FROM ${this.table} WHERE id IN (${placeholders}) RETURNING *`
+        )
+        return stm.all(...ids).map(this.mapFunc)
+    }
+
     abstract insert(item: T): T
 
-    abstract update(id: number, item: T): T
-
-    abstract delete(ids: number[]): T
+    abstract update(id: number, item: T): Maybe<T>
 
     private allQuery(columns: string[], orderBy?: string, filterBy?: string) {
         const cols = columns.join()
@@ -45,7 +52,7 @@ export default abstract class Repository<T> {
         return `SELECT ${cols} FROM ${this.table} WHERE id = @id`
     }
 
-    nextID() {
+    protected nextID() {
         const query = `
         WITH miss_id AS
         (
