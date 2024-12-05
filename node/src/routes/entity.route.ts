@@ -82,16 +82,12 @@ router.patch(
             const params: Entity = req.body
             const entity = repo.update(id, params)
 
-            if (entity)
-                res.send({
-                    message: "Entidad actualizada",
-                    data: entity,
-                })
-            else
-                res.send({
-                    message: "No hubo modificaciones",
-                    data: null,
-                })
+            res.send({
+                message: entity
+                    ? "Entidad actualizada"
+                    : "No hubo modificaciones",
+                data: entity,
+            })
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.update(err))
             else next(err)
