@@ -10,6 +10,10 @@ export const loginVal: Schema = {
             errorMessage: "El nombre es obligatorio",
         },
     },
+}
+
+export const adminVal: Schema = {
+    ...loginVal,
     password: {
         isString: {
             errorMessage: "La contraseña es obligatoria",
