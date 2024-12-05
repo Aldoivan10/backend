@@ -26,7 +26,7 @@ export default class CatalogRepository extends Repository<CatalogItem> {
         return this
     }
 
-    insert(item: CatalogItem): CatalogItem {
+    insert(item: CatalogBody): CatalogItem {
         if (this.insertStm) {
             const id = this.nextID()!
             const catalog = toBD<CatalogItem>(
@@ -38,7 +38,7 @@ export default class CatalogRepository extends Repository<CatalogItem> {
         throw new Error("Method not implemented.")
     }
 
-    update(id: number, item: CatalogItem): Maybe<CatalogItem> {
+    update(id: number, item: CatalogBody): Maybe<CatalogItem> {
         if (this.updateStm) {
             const catalog = toBD<CatalogItem>(
                 { ...item, id },
