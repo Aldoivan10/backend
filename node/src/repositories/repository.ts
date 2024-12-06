@@ -2,13 +2,13 @@ import { Database, Statement } from "better-sqlite3"
 import db from "../model/db"
 import { getPlaceholders, mapTo } from "../util/util"
 
-export default abstract class Repository<T> {
+export default abstract class Repository<I, O> {
     protected db: Database = db
     protected table: string
     protected allStm!: Statement<Filters, Obj>
     protected getByIDStm!: Statement<ID, Obj>
     protected abstract mapper: Record<string, string>
-    protected mapFunc = (item?: Obj) => mapTo<Maybe<T>>(item, this.mapper)
+    protected mapFunc = (item?: Obj) => mapTo<Maybe<O>>(item, this.mapper)
 
     constructor(table: string) {
         this.table = table
@@ -25,7 +25,7 @@ export default abstract class Repository<T> {
 
     all = (filter: Filters) => this.allStm.all(filter).map(this.mapFunc)
 
-    getByID = (id: number) => mapTo<T>(this.getByIDStm.get({ id }), this.mapper)
+    getByID = (id: number) => mapTo<O>(this.getByIDStm.get({ id }), this.mapper)
 
     delete = (ids: number[]) => {
         const placeholders = getPlaceholders(ids)
@@ -35,9 +35,9 @@ export default abstract class Repository<T> {
         return stm.all(...ids).map(this.mapFunc)
     }
 
-    abstract insert(item: T): T
+    abstract insert(item: I): O
 
-    abstract update(id: number, item: T): Maybe<T>
+    abstract update(id: number, item: I): Maybe<O>
 
     protected allQuery(columns: string[], orderBy?: string, filterBy?: string) {
         const cols = columns.join()
