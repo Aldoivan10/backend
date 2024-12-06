@@ -5,11 +5,10 @@ import { getPlaceholders, mapTo } from "../util/util"
 export default abstract class Repository<T> {
     protected db: Database = db
     protected table: string
-    protected allStm!: Statement<Filters, Record<string, any>>
-    protected getByIDStm!: Statement<ID, Record<string, any>>
+    protected allStm!: Statement<Filters, Obj>
+    protected getByIDStm!: Statement<ID, Obj>
     protected abstract mapper: Record<string, string>
-    protected mapFunc = (item?: Record<string, any>) =>
-        mapTo<Maybe<T>>(item, this.mapper)
+    protected mapFunc = (item?: Obj) => mapTo<Maybe<T>>(item, this.mapper)
 
     constructor(table: string) {
         this.table = table
@@ -30,7 +29,7 @@ export default abstract class Repository<T> {
 
     delete = (ids: number[]) => {
         const placeholders = getPlaceholders(ids)
-        const stm = this.db.prepare<number[], Record<string, any>>(
+        const stm = this.db.prepare<number[], Obj>(
             `DELETE FROM ${this.table} WHERE id IN (${placeholders}) RETURNING *`
         )
         return stm.all(...ids).map(this.mapFunc)
@@ -40,14 +39,14 @@ export default abstract class Repository<T> {
 
     abstract update(id: number, item: T): Maybe<T>
 
-    private allQuery(columns: string[], orderBy?: string, filterBy?: string) {
+    protected allQuery(columns: string[], orderBy?: string, filterBy?: string) {
         const cols = columns.join()
         const filter = filterBy ? ` WHERE ${filterBy} LIKE @filter ` : ""
         const order = orderBy ? ` ORDER BY ${orderBy} ` : ""
         return `SELECT ${cols} FROM ${this.table}${filter}${order} LIMIT @limit OFFSET @offset`
     }
 
-    private getByIDQuery(columns: string[]) {
+    protected getByIDQuery(columns: string[]) {
         const cols = columns.join()
         return `SELECT ${cols} FROM ${this.table} WHERE id = @id`
     }
