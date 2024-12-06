@@ -14,8 +14,8 @@ export default class EntityRepository extends Repository<Entity> {
         phone: "telefono",
         email: "correo",
     }
-    private insertStm: Statement<Entity, Entity>
-    private updateStm: Statement<Entity, Entity>
+    private insertStm: Statement<Entity, Obj>
+    private updateStm: Statement<Entity, Obj>
 
     constructor() {
         super("Entidad")
