@@ -1,5 +1,5 @@
 import { Database, Statement } from "better-sqlite3"
-import db from "../model/betterdb"
+import db from "../model/db"
 import { getPlaceholders, mapTo } from "../util/util"
 
 export default abstract class Repository<T> {
