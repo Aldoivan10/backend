@@ -23,10 +23,11 @@ export const toBD = <T>(obj: Obj, attrs: string[]) => {
 
 // Obtenemos los datos base de cada petición
 export const getBase = (req: Request) => {
-    const { filter = "%%", limit = 10, offset = 0 }: Filters = req.query
+    const { filter = "%", limit = 10, offset = 0 }: Filters = req.query
     const id: number = +req.params.id
+    const pathFilter = req.params.filter
     const ids: number[] = req.body.ids ?? []
-    return { id, ids, filter: { filter, limit, offset } }
+    return { id, ids, filter: { filter: pathFilter ?? filter, limit, offset } }
 }
 
 // Validamos que la contraseña sea correcta
