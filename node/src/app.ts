@@ -3,11 +3,11 @@ import express, { json } from "express"
 import { HOST, PORT } from "./config"
 import { errorMW } from "./middleware/error.mw"
 import { logMW } from "./middleware/log.mw"
-import auth from "./routes/auth"
-import catalogRoute from "./routes/catalog"
-import entityRoute from "./routes/entity"
-import productRoute from "./routes/product"
-import userRoute from "./routes/user"
+import auth from "./routes/auth.route"
+import catalogRoute from "./routes/catalog.route"
+import entityRoute from "./routes/entity.route"
+import productRoute from "./routes/product.route"
+import userRoute from "./routes/user.route"
 
 const app = express()
 
