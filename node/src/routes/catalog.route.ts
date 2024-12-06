@@ -57,7 +57,7 @@ const root = `/:table(${Object.keys(catalogs).join("|")})`
 
 function getData(req: Request) {
     const { filter, ids } = getBase(req)
-    const item: CatalogItem = req.body
+    const item: CatalogBody = req.body
     const { id, table }: CatalogParams = req.params
     const catalog = catalogs[table]
     return {

@@ -2,7 +2,10 @@ import { Statement } from "better-sqlite3"
 import { toBD } from "../util/util"
 import Repository from "./repository"
 
-export default class CatalogRepository extends Repository<CatalogItem> {
+export default class CatalogRepository extends Repository<
+    CatalogBody,
+    CatalogItem
+> {
     protected mapper: Record<string, string> = {
         id: "id",
         name: "nombre",
@@ -26,7 +29,7 @@ export default class CatalogRepository extends Repository<CatalogItem> {
         return this
     }
 
-    insert(item: CatalogBody): CatalogItem {
+    insert(item: CatalogBody) {
         if (this.insertStm) {
             const id = this.nextID()!
             const catalog = toBD<CatalogItem>(
@@ -38,7 +41,7 @@ export default class CatalogRepository extends Repository<CatalogItem> {
         throw new Error("Method not implemented.")
     }
 
-    update(id: number, item: CatalogBody): Maybe<CatalogItem> {
+    update(id: number, item: CatalogBody) {
         if (this.updateStm) {
             const catalog = toBD<CatalogItem>(
                 { ...item, id },
