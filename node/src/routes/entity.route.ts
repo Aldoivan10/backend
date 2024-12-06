@@ -16,7 +16,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
         const { filter } = getBase(req)
         const entitys = repo.all(filter)
         res.json({ data: entitys })
-    } catch (err: any) {
+    } catch (err) {
         if (err instanceof SqliteError) next(DBError.query(err))
         else next(err)
     }
@@ -30,7 +30,7 @@ router.get(
             const { id } = getBase(req)
             const entity = repo.getByID(id)
             res.json({ data: entity })
-        } catch (err: any) {
+        } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
         }
@@ -49,7 +49,7 @@ router.post(
                 message: "Entidad creada",
                 data: entity,
             })
-        } catch (err: any) {
+        } catch (err) {
             if (err instanceof SqliteError) next(DBError.insert(err))
             else next(err)
         }
@@ -65,7 +65,7 @@ router.delete(
             const { ids } = getBase(req)
             const entitys = repo.delete(ids)
             res.send({ message: "Entidades eliminadas", data: entitys })
-        } catch (err: any) {
+        } catch (err) {
             if (err instanceof SqliteError) next(DBError.delete(err))
             else next(err)
         }
@@ -88,7 +88,7 @@ router.patch(
                     : "No hubo modificaciones",
                 data: entity,
             })
-        } catch (err: any) {
+        } catch (err) {
             if (err instanceof SqliteError) next(DBError.update(err))
             else next(err)
         }

@@ -2,7 +2,7 @@ import { Statement } from "better-sqlite3"
 import { toBD } from "../util/util"
 import Repository from "./repository"
 
-export default class EntityRepository extends Repository<Entity> {
+export default class EntityRepository extends Repository<EntityBody, Entity> {
     protected mapper: Record<string, string> = {
         id: "id",
         name: "nombre",
@@ -20,21 +20,21 @@ export default class EntityRepository extends Repository<Entity> {
     constructor() {
         super("Entidad")
         this.init({ columns: Object.values(this.mapper) })
-        this.insertStm = this.db.prepare<Entity, Entity>(
+        this.insertStm = this.db.prepare<EntityBody, Obj>(
             `INSERT INTO ${this.table} VALUES (@id, @id_entity_type, @rfc, @name, @address, @domicile, @postal_code, @phone, @email) RETURNING *`
         )
-        this.updateStm = this.db.prepare<Entity, Entity>(
+        this.updateStm = this.db.prepare<EntityBody, Obj>(
             `UPDATE ${this.table} SET id_tipo_entidad=@id_entity_type, rfc=@rfc, nombre=@name, direccion=@address, domicilio=@domicile, codigo_postal=@postal_code, telefono=@phone, correo=@email WHERE id=@id RETURNING *`
         )
     }
 
-    insert(item: EntityBody): Entity {
+    insert(item: EntityBody) {
         const id = this.nextID()!
         const entity = toBD<Entity>({ ...item, id }, Object.keys(this.mapper))
         return this.mapFunc(this.insertStm.get(entity))!
     }
 
-    update(id: number, item: EntityBody): Maybe<Entity> {
+    update(id: number, item: EntityBody) {
         const entity = toBD<Entity>({ ...item, id }, Object.keys(this.mapper))
         return this.mapFunc(this.updateStm.get(entity))
     }
