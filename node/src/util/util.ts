@@ -7,19 +7,16 @@ export const getPlaceholders = (arr: any[]) => {
 }
 
 // Convertir los campos de un objeto a otro objeto (DTO)
-export const mapTo = <T>(
-    obj?: Record<string, any>,
-    mapper?: Record<string, string>
-) => {
+export const mapTo = <T>(obj?: Obj, mapper?: Record<string, string>) => {
     if (!obj) return null
     if (!mapper) return obj as T
-    const mapped: Record<string, any> = {}
+    const mapped: Obj = {}
     for (const key in mapper) mapped[key] = obj[mapper[key]]
     return mapped as T
 }
 
 // Mappear objeto a BD (poner en null los campos que no sean requeridos y falten)
-export const toBD = <T>(obj: Record<string, any>, attrs: string[]) => {
+export const toBD = <T>(obj: Obj, attrs: string[]) => {
     for (const attr of attrs) obj[attr] = obj[attr] ?? null
     return obj as T
 }
