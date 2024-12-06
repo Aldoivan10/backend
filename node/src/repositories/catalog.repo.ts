@@ -10,8 +10,8 @@ export default class CatalogRepository extends Repository<
         id: "id",
         name: "nombre",
     }
-    private insertStm?: Statement<CatalogItem, CatalogItem>
-    private updateStm?: Statement<CatalogItem, CatalogItem>
+    private insertStm?: Statement<CatalogItem, Obj>
+    private updateStm?: Statement<CatalogItem, Obj>
 
     constructor() {
         super("Catalogo")
@@ -20,10 +20,10 @@ export default class CatalogRepository extends Repository<
     setTable(table: string) {
         this.table = table
         this.init({ columns: Object.values(this.mapper) })
-        this.insertStm = this.db.prepare<CatalogItem, CatalogItem>(
+        this.insertStm = this.db.prepare<CatalogItem, Obj>(
             `INSERT INTO ${table} VALUES (@id, @name) RETURNING *`
         )
-        this.updateStm = this.db.prepare<CatalogItem, CatalogItem>(
+        this.updateStm = this.db.prepare<CatalogItem, Obj>(
             `UPDATE ${table} SET nombre=@name WHERE id=@id RETURNING *`
         )
         return this

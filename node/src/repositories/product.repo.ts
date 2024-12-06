@@ -2,7 +2,10 @@ import { Transaction } from "better-sqlite3"
 import { getPlaceholders } from "../util/util"
 import Repository from "./repository"
 
-export default class ProductRepository extends Repository<Product> {
+export default class ProductRepository extends Repository<
+    ProductBody,
+    Product
+> {
     protected mapper = {
         id: "id",
         id_department: "id_departamento",
@@ -18,7 +21,7 @@ export default class ProductRepository extends Repository<Product> {
 
     constructor() {
         super("Producto_Vista")
-        const insertProductStm = this.db.prepare<Product, unknown>(
+        const insertProductStm = this.db.prepare<ProductBody, unknown>(
             "INSERT INTO Producto VALUES (@id, @id_department, @id_supplier, @name, @amount, @buy, @min, @refundable)"
         )
         const insertCodesStm = this.db.prepare<ProductCode, Obj>(
@@ -33,7 +36,7 @@ export default class ProductRepository extends Repository<Product> {
         const delUnitsStm = this.db.prepare<ID, unknown>(
             "DELETE FROM Producto_Venta WHERE id_producto=@id"
         )
-        const updateStm = this.db.prepare<Product, ID>(
+        const updateStm = this.db.prepare<ProductBody, ID>(
             "UPDATE Producto SET id_departamento=@id_department,id_proveedor=@id_supplier,nombre=@name,cantidad=@amount,compra=@buy,min=@min,reembolsable=@refundable WHERE id=@id RETURNING *"
         )
 
@@ -93,7 +96,7 @@ export default class ProductRepository extends Repository<Product> {
 
     getByID = (id: number) => this.toJSON(this.getByIDStm.get({ id }))
 
-    insert = (item: any) => this.insertStm(item)
+    insert = (item: ProductBody) => this.insertStm(item)
 
     delete = (ids: number[]) => {
         const products = ids.map((id) => this.getByID(id))
@@ -105,7 +108,7 @@ export default class ProductRepository extends Repository<Product> {
         return products
     }
 
-    update = (id: number, item: any) =>
+    update = (id: number, item: ProductBody) =>
         this.updateStm({ ...item, refundable: item.refundable ? 1 : 0, id })
 
     hasChanges(oldArr: ProductArr, newArr: ProductArr) {
@@ -142,14 +145,14 @@ export default class ProductRepository extends Repository<Product> {
         return false
     }
 
-    getCodes(id: number, product: Product) {
+    getCodes(id: number, product: Pick<Product, "codes">) {
         return product.codes.map((_) => ({
             ..._,
             id_product: id,
         }))
     }
 
-    getUnits(id: number, product: Product) {
+    getUnits(id: number, product: Pick<Product, "units">) {
         return product.units.map((unit) => ({
             ...unit,
             id_product: id,
