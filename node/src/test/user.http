@@ -9,18 +9,18 @@ POST http://localhost:3000/user
 Content-Type: application/json
 
 {
-    "id_user_type": 1,
-    "name": "admin",
+    "id_user_type": 2,
+    "name": "aldo 2",
     "password": "Cas7illo1*"
 }
 
 
 ### Eliminar
-DELETE http://localhost:3000/user/
+DELETE http://localhost:3000/user
 Content-Type: application/json
 
 {
-    "ids": [1]
+    "ids": [2,3]
 }
 
 
@@ -30,6 +30,6 @@ Content-Type: application/json
 
 {
     "id_user_type": 1,
-    "name": "root",
+    "name": "aldo2",
     "password": "Cas7illo1*"
 }
