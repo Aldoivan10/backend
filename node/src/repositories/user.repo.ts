@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt"
 import { Statement } from "better-sqlite3"
 import { PASS_SALT } from "../config"
-import { toJSON } from "../util/util"
+import { getPlaceholders, toJSON } from "../util/util"
 import Repository from "./repository"
 
 export default class UserRepo extends Repository<UserBody, User> {
@@ -66,6 +66,20 @@ export default class UserRepo extends Repository<UserBody, User> {
 
         const user = this.getByIDStm.get({ id })
         return this.removePass(toJSON<User>(user))
+    }
+
+    delete = (ids: number[]) => {
+        const placeholders = getPlaceholders(ids)
+        const users = ids
+            .map((id) => this.getByIDStm.get({ id }))
+            .filter(Boolean)
+            .map(toJSON<User>)
+            .map(this.removePass)
+        const stm = this.db.prepare<number[], ID>(
+            `DELETE FROM ${this.table} WHERE id IN (${placeholders}) RETURNING id`
+        )
+        const deleted = stm.all(...ids).map((item) => item.id)
+        return users.filter((user) => deleted.includes(user.id))
     }
 
     samePass(pass: Maybe<string>, hashed: Maybe<string>) {

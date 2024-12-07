@@ -89,13 +89,13 @@ export default class ProductRepository extends Repository<
     insert = (item: ProductBody) => this.insertStm(item)
 
     delete = (ids: number[]) => {
-        const products = ids.map((id) => this.getByID(id))
+        const products = ids.map((id) => this.getByID(id)).filter(Boolean)
         const placeholders = getPlaceholders(ids)
-        const stm = this.db.prepare<number[], unknown>(
-            `DELETE FROM Producto WHERE id IN (${placeholders})`
+        const stm = this.db.prepare<number[], ID>(
+            `DELETE FROM Producto WHERE id IN (${placeholders}) RETURNING id`
         )
-        stm.run(...ids)
-        return products
+        const deleted = stm.all(...ids).map((item) => item.id)
+        return products.filter((product) => deleted.includes(product.id))
     }
 
     update = (id: number, item: ProductBody) =>
