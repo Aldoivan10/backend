@@ -35,8 +35,21 @@ export const isPass = (pass: string, hashed: string) => {
     return bcrypt.compareSync(pass, hashed)
 }
 
+// Obtenemos los tokens de acceso
 export const getTokens = (req: Request) => {
     const { name }: LoginBody = req.body
     const cookies = req.cookies
     return [cookies[`${name}_at`], cookies[`${name}_rt`]]
+}
+
+// Mapea un objeto a JSON (si contienen objetos como string)
+export const toJSON = <T>(item?: Obj) => {
+    if (item) {
+        for (const key in item) {
+            try {
+                item[key] = JSON.parse(item[key])
+            } catch (e) {}
+        }
+    }
+    return item as T
 }
