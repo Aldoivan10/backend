@@ -20,10 +20,10 @@ export default class CatalogRepository extends Repository<
     setTable(table: string) {
         this.table = table
         this.init({ columns: Object.values(this.mapper) })
-        this.insertStm = this.db.prepare<CatalogItem, Obj>(
+        this.insertStm = this.db.prepare(
             `INSERT INTO ${table} VALUES (@id, @name) RETURNING *`
         )
-        this.updateStm = this.db.prepare<CatalogItem, Obj>(
+        this.updateStm = this.db.prepare(
             `UPDATE ${table} SET nombre=@name WHERE id=@id RETURNING *`
         )
         return this

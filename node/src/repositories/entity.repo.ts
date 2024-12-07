@@ -20,10 +20,10 @@ export default class EntityRepository extends Repository<EntityBody, Entity> {
     constructor() {
         super("Entidad")
         this.init({ columns: Object.values(this.mapper) })
-        this.insertStm = this.db.prepare<EntityBody, Obj>(
+        this.insertStm = this.db.prepare(
             `INSERT INTO ${this.table} VALUES (@id, @id_entity_type, @rfc, @name, @address, @domicile, @postal_code, @phone, @email) RETURNING *`
         )
-        this.updateStm = this.db.prepare<EntityBody, Obj>(
+        this.updateStm = this.db.prepare(
             `UPDATE ${this.table} SET id_tipo_entidad=@id_entity_type, rfc=@rfc, nombre=@name, direccion=@address, domicilio=@domicile, codigo_postal=@postal_code, telefono=@phone, correo=@email WHERE id=@id RETURNING *`
         )
     }

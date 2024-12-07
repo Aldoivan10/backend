@@ -1,21 +1,11 @@
 import { Transaction } from "better-sqlite3"
-import { getPlaceholders } from "../util/util"
+import { getPlaceholders, toJSON } from "../util/util"
 import Repository from "./repository"
 
 export default class ProductRepository extends Repository<
     ProductBody,
     Product
 > {
-    protected mapper = {
-        id: "id",
-        id_department: "id_departamento",
-        id_supplier: "id_proveedor",
-        refundable: "reembolsable",
-        amount: "cantidad",
-        name: "nombre",
-        buy: "compra",
-        min: "min",
-    }
     private insertStm: Transaction<ProductAction<Product>>
     private updateStm: Transaction<ProductAction<Maybe<Product>>>
 
@@ -92,9 +82,9 @@ export default class ProductRepository extends Repository<
         )
     }
 
-    all = (filter: Filters) => this.allStm.all(filter).map(this.toJSON)
+    all = (filter: Filters) => this.allStm.all(filter).map(toJSON<Product>)
 
-    getByID = (id: number) => this.toJSON(this.getByIDStm.get({ id }))
+    getByID = (id: number) => toJSON<Product>(this.getByIDStm.get({ id }))
 
     insert = (item: ProductBody) => this.insertStm(item)
 
@@ -159,16 +149,5 @@ export default class ProductRepository extends Repository<
             sale: unit.sale,
             profit: unit.profit ?? null,
         }))
-    }
-
-    toJSON(item?: Obj) {
-        if (item) {
-            for (const key in item) {
-                try {
-                    item[key] = JSON.parse(item[key])
-                } catch (e) {}
-            }
-        }
-        return item as Product
     }
 }

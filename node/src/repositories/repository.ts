@@ -7,7 +7,7 @@ export default abstract class Repository<I, O> {
     protected table: string
     protected allStm!: Statement<Filters, Obj>
     protected getByIDStm!: Statement<ID, Obj>
-    protected abstract mapper: Record<string, string>
+    protected mapper?: Record<string, string>
     protected mapFunc = (item?: Obj) => mapTo<Maybe<O>>(item, this.mapper)
 
     constructor(table: string) {
