@@ -4,7 +4,7 @@ import { tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { AuthError } from "../model/error"
 import UserRepo from "../repositories/user.repo"
-import { getTokens, getUser, singToken } from "../util/token.util"
+import { singToken } from "../util/token.util"
 import { adminVal, loginVal } from "../validations/login.val"
 
 const router = Router()
@@ -41,8 +41,7 @@ router.post(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { password }: LoginBody = req.body
-            const [auxToken] = getTokens(req)
-            const user = await getUser(auxToken)
+            const user = res.locals.user
 
             if (!user) throw AuthError.token()
             if (user.role !== "Administrador") throw AuthError.rol()
