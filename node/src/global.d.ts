@@ -1,71 +1,72 @@
-import { Schema, ValidationError } from "express-validator"
-import DB from "./model/db"
+import { ValidationError } from "express-validator"
 import { APIError } from "./model/error"
 
 declare global {
     namespace Express {
         interface Locals {
-            db: DB
             error?: APIError
+            user?: UserToken
         }
     }
 
-    type Env = { PORT?: number; HOST?: string; PASS_SALT?: number }
+    type Env = {
+        PORT?: number
+        HOST?: string
+        PASS_SALT?: number
+        TK_KEY?: string
+        AT_TIME?: string
+        RT_TIME?: string
+        DB_PATH?: string
+        TK_ALG?: string
+        TK_OPT?: Obj
+    }
 
-    type Filters = [string, number, number]
+    type Maybe<T> = T | undefined | null
 
-    type ErrorItem = {
+    /* DATABASE */
+
+    type Filters = { limit?: number; offset?: number; filter?: string }
+
+    type RepoArgs = {
+        columns: string[]
+        order?: string
+        filter?: string
+    }
+
+    type ID = { id: number }
+
+    /* ERRORS */
+
+    type ErrorDetail = {
         msg: string
-        value?: any
-        type?: string
-        path: string
+        type: string
         location: string
+        field: string | null
     }
 
     type APIErrorArgs = {
-        name?: string
+        code?: string
         status?: number
         message: string
-        error?: ErrorItem
-        errors?: Array<ValidationError>
+        details: ErrorDetail[]
     }
 
-    type APIErrorsArr = Array<
-        ErrorItem | (ValidationError & { path?: string; location?: string })
-    >
+    type ValidationErrorArgs = Omit<APIErrorArgs, "message"> & {
+        status?: 400 | 422
+    }
 
-    type ValMWArgs = { schema: Schema; item?: string }
+    type ExpressValidationError = ValidationError & {
+        param?: string
+        location?: string
+    }
 
-    type APIFilter = { limit?: number; offset?: number; filter?: string }
+    type SQLError = Error & Required<Pick<APIErrorArgs, "message" | "code">>
 
-    type CatalogParams = { id?: string; table?: string }
+    /* MODEL */
 
-    type CatalogMap = Record<
-        string,
-        { msgs: { del: string; add: string; upd: string }; table: string }
-    >
+    type Obj = Record<string, any>
 
-    type DelBody = { ids: number[] }
-
-    type CatalogBody = { name: string } & DelBody
-
-    type ProductBody = Omit<Product, "id" | "sales"> & { units: ProductUnits }
-
-    type EntityBody = Omit<Entity, "id">
-
-    type UserBody = Omit<UserType, "id"> & { password: string }
-
-    type TableID = { id: number }
-
-    type CatalogItem = { id: number; name: string }
-
-    type ProductUnit = { id: number; sale: number; profit: number }
-
-    type ProductUnits = [ProductUnit, ...Omit<ProductUnit, "profit">[]]
-
-    type LoginBody = { name: string; password: string }
-
-    type Code = { id: number; code: string }
+    type CatalogItem = ID & { name: string }
 
     type Entity = CatalogItem & {
         id_entity_type: number
@@ -77,20 +78,60 @@ declare global {
         email?: string
     }
 
+    type ProductUnit = ID & { sale: number; profit: Maybe<number> }
+
+    type ProductUnits = [ProductUnit, ...Omit<ProductUnit, "profit">[]]
+
+    type ProductCode = ID & { code: string; id_product: number }
+
     type Product = CatalogItem & {
+        codes: Omit<ProductCode, "id_product">[]
+        refundable: boolean | number
+        department: CatalogItem
+        supplier: CatalogItem
         units: ProductUnit[]
-        codes: { id: number; code: string }[]
-        id_department: number
-        refundable?: boolean
-        id_supplier: number
         amount: number
         buy: number
         min: number
     }
 
-    type UserType = CatalogItem & {
-        id_user_type: number
+    type User = CatalogItem & { role: CatalogItem; password: Maybe<string> }
+
+    type UserToken = Omit<LoginBody, "password"> & {
+        logged: boolean
+        role: string
     }
+
+    /* REPOSITORIES */
+
+    type EntityBody = Omit<Entity, "id">
+
+    type CatalogBody = Pick<CatalogItem, "name">
+
+    type ProductBody = Omit<Product, "supplier" | "department"> & {
+        units: ProductUnits
+        id_supplier: number
+        id_department: number
+    }
+
+    type ProductAction<T> = (product: ProductBody) => T
+
+    type ProductArr = Array<ProductUnit | ProductCode>
+
+    type ProductChanges = [boolean, boolean, boolean]
+
+    type UserBody = Omit<User, "id" | "admin"> & { id_user_type: number }
+
+    type LoginBody = CatalogBody & { password: Maybe<string> }
+
+    /* OTHER */
+
+    type CatalogParams = { id?: string; table?: string }
+
+    type CatalogMap = Record<
+        string,
+        { msgs: { del: string; add: string; upd: string }; table: string }
+    >
 }
 
 export {}
