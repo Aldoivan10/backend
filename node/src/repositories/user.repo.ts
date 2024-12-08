@@ -73,8 +73,8 @@ export default class UserRepo extends Repository<UserBody, User> {
     update(id: number, item: UserBody) {
         const { hashed } = this.passStm.get({ id })!
 
-        if (!this.samePass(hashed, item.password))
-            item.password = this.hashPass(item.password)
+        if (this.samePass(item.password, hashed)) item.password = hashed
+        else item.password = this.hashPass(item.password)
 
         const updated = this.updateStm.get({
             id,
