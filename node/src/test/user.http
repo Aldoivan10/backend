@@ -11,7 +11,7 @@ Content-Type: application/json
 {
     "id_user_type": 2,
     "name": "aldo 2",
-    "password": "Cas7illo1*"
+    "password": "Contrasenia"
 }
 
 
@@ -30,6 +30,6 @@ Content-Type: application/json
 
 {
     "id_user_type": 1,
-    "name": "aldo2",
-    "password": "Cas7illo1*"
+    "name": "root",
+    "password": "Contrasenia"
 }
