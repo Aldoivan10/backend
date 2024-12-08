@@ -5,7 +5,6 @@ declare global {
     namespace Express {
         interface Locals {
             error?: APIError
-            user?: UserToken
         }
     }
 
@@ -122,7 +121,7 @@ declare global {
 
     type UserBody = Omit<User, "id" | "admin"> & { id_user_type: number }
 
-    type LoginBody = CatalogBody & { password: Maybe<string> }
+    type LoginBody = CatalogItem & { password: Maybe<string> }
 
     /* OTHER */
 
