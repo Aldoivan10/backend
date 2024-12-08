@@ -1,30 +1,22 @@
-import { APIError, ValError } from "../model/error"
+import { JOSEError } from "jose/errors"
+import { APIError, AuthError, ValidError } from "../model/error"
 
 export const getError = (err: Error, status = 500) => {
-    const { message, stack } = err
-    let path = stack || "unknown"
-    let location = "unknown"
-    let msg = message
+    const { message, name } = err
 
-    if (message.startsWith("SQL")) {
-        const [name, ...data] = message.split(": ")
-        path = name
-        msg = data.join(": ")
-        location = "database"
-    } else if (message.includes("not valid JSON")) {
-        path = "body"
-        msg = message
-        location = "validation"
-        return new ValError({ error: { location, path, msg } }, 400)
-    }
+    if (message.includes("not valid JSON")) return ValidError.unprocessed()
+    if (err instanceof JOSEError) return AuthError.fromJWT(err)
 
     return new APIError({
         message: "A ocurrido un error inesperado",
         status,
-        error: {
-            location,
-            path,
-            msg,
-        },
+        details: [
+            {
+                location: "internal",
+                field: null,
+                type: name,
+                msg: message,
+            },
+        ],
     })
 }
