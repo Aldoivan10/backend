@@ -65,9 +65,9 @@ router.post(
     validationMW(loginVal),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { name }: LoginBody = req.body
-            res.clearCookie(`${name}_at`)
-                .clearCookie(`${name}_rt`)
+            const { username }: LoginBody = req.body
+            res.clearCookie(`${username}_at`)
+                .clearCookie(`${username}_rt`)
                 .json({ message: "Sesión cerrada" })
         } catch (err) {
             next(err)

@@ -65,7 +65,7 @@ declare global {
 
     type Obj = Record<string, any>
 
-    type CatalogItem = ID & { name: string }
+    type CatalogItem = ID & { name: string; username: string }
 
     type Entity = CatalogItem & {
         id_entity_type: number
@@ -96,7 +96,7 @@ declare global {
 
     type User = CatalogItem & { role: CatalogItem; password: Maybe<string> }
 
-    type UserToken = Omit<LoginBody, "password"> & {
+    type UserToken = Omit<CatalogItem, "username"> & {
         logged: boolean
         role: string
     }
@@ -121,7 +121,7 @@ declare global {
 
     type UserBody = Omit<User, "id" | "admin"> & { id_user_type: number }
 
-    type LoginBody = CatalogItem & { password: Maybe<string> }
+    type LoginBody = Omit<CatalogItem, "name"> & { password: Maybe<string> }
 
     /* OTHER */
 

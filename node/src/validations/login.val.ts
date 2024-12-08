@@ -1,7 +1,7 @@
 import { Schema } from "express-validator"
 
 export const loginVal: Schema = {
-    name: {
+    username: {
         isString: {
             errorMessage: "El nombre deben ser carácteres",
         },

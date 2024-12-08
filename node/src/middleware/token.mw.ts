@@ -35,7 +35,8 @@ export const requireAdminMW = async (
     next: NextFunction
 ) => {
     try {
-        const user: Maybe<UserToken> = req.body.user
+        const [accessToken] = getTokens(req)
+        const user = await getUser(accessToken)
         if (!user || !user.logged) throw AuthError.token()
         if (user.role !== "Administrador") throw AuthError.rol()
         next()

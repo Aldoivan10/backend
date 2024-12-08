@@ -22,7 +22,7 @@ export const singToken = async (payload: any, time: string) => {
 
 // Obtenemos los tokens de acceso
 export const getTokens = (req: Request) => {
-    const { name }: LoginBody = req.body
+    const { username }: LoginBody = req.body
     const cookies = req.cookies
-    return [cookies[`${name}_at`], cookies[`${name}_rt`]]
+    return [cookies[`${username}_at`], cookies[`${username}_rt`]]
 }

@@ -10,7 +10,7 @@ export default class UserRepo extends Repository<UserBody, User> {
     private insertStm: Statement<UserBody & ID, Obj>
     private updateStm: Statement<UserBody & ID, Obj>
     private passStm: Statement<ID, { hashed: Maybe<string> }>
-    private loginStm: Statement<CatalogBody, Obj>
+    private loginStm: Statement<LoginBody, Obj>
 
     constructor() {
         super("Usuario")
@@ -31,7 +31,7 @@ export default class UserRepo extends Repository<UserBody, User> {
             "SELECT contrasenia AS hashed FROM Usuario WHERE id=@id"
         )
         this.loginStm = this.db.prepare(
-            "SELECT U.id, U.nombre AS name, TU.nombre AS role, false AS logged FROM Usuario U INNER JOIN Tipo_Usuario TU ON U.id_tipo_usuario=TU.id WHERE U.nombre = @name"
+            "SELECT U.id, U.nombre AS name, TU.nombre AS role, false AS logged FROM Usuario U INNER JOIN Tipo_Usuario TU ON U.id_tipo_usuario=TU.id WHERE U.nombre = @username"
         )
     }
 
