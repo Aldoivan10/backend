@@ -22,7 +22,7 @@ export const tokenMW = async (
                 res.cookie(`${user!.name}_at`, newToken, TK_OPT)
             } else throw tokenError
         } finally {
-            req.body.user = user
+            res.locals.user = user
             next()
         }
     } catch (err) {
@@ -31,12 +31,12 @@ export const tokenMW = async (
 }
 
 export const requireAdminMW = async (
-    req: Request,
-    _: Response,
+    _: Request,
+    res: Response,
     next: NextFunction
 ) => {
     try {
-        const user: Maybe<UserToken> = req.body.user
+        const user: Maybe<UserToken> = res.locals.user
         if (!user || !user.logged) throw AuthError.token()
         if (user.role !== "Administrador") throw AuthError.rol()
         next()
