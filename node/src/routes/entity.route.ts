@@ -62,6 +62,8 @@ router.post(
 // Eliminar
 router.delete(
     "/",
+    tokenMW,
+    requireAdminMW,
     validationMW(GeneralVal.ids),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -78,6 +80,8 @@ router.delete(
 // Actualizar
 router.patch(
     "/:id(\\d+)",
+    tokenMW,
+    requireAdminMW,
     validationMW(entityVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
