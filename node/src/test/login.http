@@ -1,3 +1,4 @@
+### Identificarse
 POST http://localhost:3000/login
 Content-Type: application/json
 
@@ -5,11 +6,19 @@ Content-Type: application/json
     "username": "root"
 }
 
-###
+### Login como administrador
 POST http://localhost:3000/login/admin
 Content-Type: application/json
 
 {
     "username": "root",
     "password": "Cas7illo1*"
+}
+
+### Cerrar sesión como administrador
+POST http://localhost:3000/logout
+Content-Type: application/json
+
+{
+    "username": "root"
 }
