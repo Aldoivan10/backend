@@ -1,5 +1,9 @@
 import bcrypt from "bcrypt"
 import { Request } from "express"
+import { SignJWT } from "jose"
+import { TK_ALG, TK_KEY } from "../config"
+
+const encoder = new TextEncoder()
 
 // Creamos un placeholder de ? para un arreglo
 export const getPlaceholders = (arr: any[]) => {
@@ -52,4 +56,13 @@ export const toJSON = <T>(item?: Obj) => {
         }
     }
     return item as T
+}
+
+// Funcion para obtener el token
+export const getToken = async (payload: any, time: string) => {
+    const token = await new SignJWT(payload)
+        .setExpirationTime(time)
+        .setProtectedHeader({ alg: TK_ALG })
+        .sign(encoder.encode(TK_KEY))
+    return token
 }
