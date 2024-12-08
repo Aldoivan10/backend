@@ -46,7 +46,7 @@ export const productVal: Schema = {
                 "Los códigos deben ser un arreglo de al menos 1 elemento",
         },
         custom: {
-            options: (arr: { id: number; code: string }[]) => {
+            options: (arr: ProductCode[]) => {
                 const ids = new Set(arr.map((item) => item.id))
                 const codes = new Set(arr.map((item) => item.code))
                 if (ids.size !== arr.length)
