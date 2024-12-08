@@ -1,9 +1,5 @@
 import bcrypt from "bcrypt"
 import { Request } from "express"
-import { SignJWT } from "jose"
-import { TK_ALG, TK_KEY } from "../config"
-
-const encoder = new TextEncoder()
 
 // Creamos un placeholder de ? para un arreglo
 export const getPlaceholders = (arr: any[]) => {
@@ -39,13 +35,6 @@ export const isPass = (pass: string, hashed: string) => {
     return bcrypt.compareSync(pass, hashed)
 }
 
-// Obtenemos los tokens de acceso
-export const getTokens = (req: Request) => {
-    const { name }: LoginBody = req.body
-    const cookies = req.cookies
-    return [cookies[`${name}_at`], cookies[`${name}_rt`]]
-}
-
 // Mapea un objeto a JSON (si contienen objetos como string)
 export const toJSON = <T>(item?: Obj) => {
     if (item) {
@@ -56,13 +45,4 @@ export const toJSON = <T>(item?: Obj) => {
         }
     }
     return item as T
-}
-
-// Funcion para obtener el token
-export const getToken = async (payload: any, time: string) => {
-    const token = await new SignJWT(payload)
-        .setExpirationTime(time)
-        .setProtectedHeader({ alg: TK_ALG })
-        .sign(encoder.encode(TK_KEY))
-    return token
 }
