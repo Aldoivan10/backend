@@ -1,5 +1,6 @@
 import { SqliteError } from "better-sqlite3"
 import { NextFunction, Request, Response, Router } from "express"
+import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import EntityRepository from "../repositories/entity.repo"
@@ -40,6 +41,8 @@ router.get(
 // Insertar
 router.post(
     "/",
+    tokenMW,
+    requireAdminMW,
     validationMW(entityVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
