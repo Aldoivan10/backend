@@ -1,5 +1,5 @@
 import { Schema } from "express-validator"
-import { nameAttr } from "./util"
+import { nameAttr } from "../util/val.uti"
 
 export const userVal: Schema = {
     name: nameAttr(64),
