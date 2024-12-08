@@ -10,6 +10,7 @@ export default class UserRepo extends Repository<UserBody, User> {
     private insertStm: Statement<UserBody & ID, Obj>
     private updateStm: Statement<UserBody & ID, Obj>
     private passStm: Statement<ID, { hashed: Maybe<string> }>
+    private loginStm: Statement<CatalogBody, Obj>
 
     constructor() {
         super("Usuario")
@@ -29,6 +30,9 @@ export default class UserRepo extends Repository<UserBody, User> {
         this.passStm = this.db.prepare(
             "SELECT contrasenia AS hashed FROM Usuario WHERE id=@id"
         )
+        this.loginStm = this.db.prepare(
+            "SELECT U.id, U.nombre AS name, TU.nombre AS role, false AS logged FROM Usuario U INNER JOIN Tipo_Usuario TU ON U.id_tipo_usuario=TU.id WHERE U.nombre = @name"
+        )
     }
 
     all = (filter: Filters) =>
@@ -39,6 +43,21 @@ export default class UserRepo extends Repository<UserBody, User> {
 
     getByID = (id: number) =>
         this.removePass(toJSON<User>(this.getByIDStm.get({ id })))
+
+    auth = (data: LoginBody) => {
+        const user = this.loginStm.get(data)
+        if (!user) return null
+        return toJSON<UserToken>(user)
+    }
+
+    login(user: UserToken, password: Maybe<string>) {
+        const result = this.passStm.get(user)
+        if (this.samePass(password, result?.hashed)) {
+            user.logged = true
+            return true
+        }
+        return false
+    }
 
     insert(item: UserBody) {
         const id = this.nextID()!
@@ -83,7 +102,7 @@ export default class UserRepo extends Repository<UserBody, User> {
     }
 
     samePass(pass: Maybe<string>, hashed: Maybe<string>) {
-        return !!pass && !!hashed && !bcrypt.compareSync(pass, hashed)
+        return !!pass && !!hashed && bcrypt.compareSync(pass, hashed)
     }
 
     hashPass(pass: Maybe<string>) {
