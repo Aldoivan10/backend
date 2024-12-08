@@ -5,6 +5,7 @@ declare global {
     namespace Express {
         interface Locals {
             error?: APIError
+            user?: Maybe<UserToken>
         }
     }
 
