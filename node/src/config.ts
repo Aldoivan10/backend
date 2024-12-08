@@ -6,4 +6,10 @@ export const {
     AT_TIME = "15m",
     RT_TIME = "1d",
     DB_PATH,
+    TK_ALG = "HS256",
+    TK_OPT = {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+    },
 } = process.env as Env
