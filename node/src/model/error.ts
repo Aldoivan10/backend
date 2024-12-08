@@ -1,4 +1,10 @@
 import { FieldValidationError } from "express-validator"
+import {
+    JOSEError,
+    JWSSignatureVerificationFailed,
+    JWTExpired,
+    JWTInvalid,
+} from "jose/errors"
 
 export class APIError extends Error {
     id = `ERR${new Date().getTime()}`
@@ -61,43 +67,106 @@ export class ValidError extends APIError {
 }
 
 export class AuthError extends APIError {
-    constructor(args: Omit<APIErrorArgs, "status" | "message">) {
+    constructor({
+        status = 401,
+        code = "ERR_AUTH",
+        details,
+    }: Omit<APIErrorArgs, "message">) {
         super({
-            ...args,
-            status: 401,
+            code,
+            status,
+            details,
             message: "Usuario no autorizado",
-        })
-    }
-
-    /* static rol() {
-        return new AuthError({
-            error: {
-                msg: "No cuentas con los permisos necesarios",
-                location: "body",
-                path: "fields",
-            },
         })
     }
 
     static auth() {
         return new AuthError({
-            error: {
-                msg: "Credenciales incorrectas",
-                location: "body",
-                path: "fields",
-            },
+            details: [
+                {
+                    msg: "Credenciales incorrectas",
+                    type: "auth.failed",
+                    location: "login",
+                    field: null,
+                },
+            ],
+        })
+    }
+
+    static rol() {
+        return new AuthError({
+            details: [
+                {
+                    msg: "No cuentas con los permisos necesarios",
+                    location: "login.admin",
+                    type: "auth.role",
+                    field: null,
+                },
+            ],
         })
     }
 
     static token() {
         return new AuthError({
-            error: {
-                msg: "Aun no se ha autenticado el usuario",
-                location: "body",
-                path: "fields",
-            },
+            details: [
+                {
+                    msg: "Aun no se ha autenticado el usuario",
+                    type: "auth.token",
+                    location: "auth",
+                    field: null,
+                },
+            ],
         })
-    } */
+    }
+
+    static fromJWT(err: JOSEError) {
+        if (err instanceof JWTExpired) {
+            return new AuthError({
+                details: [
+                    {
+                        msg: "Token caducado",
+                        type: "auth.expired",
+                        location: "auth",
+                        field: null,
+                    },
+                ],
+            })
+        }
+        if (err instanceof JWTInvalid) {
+            return new AuthError({
+                details: [
+                    {
+                        msg: "Token inválido",
+                        type: "auth.invalid",
+                        location: "auth",
+                        field: null,
+                    },
+                ],
+            })
+        }
+        if (err instanceof JWSSignatureVerificationFailed) {
+            return new AuthError({
+                details: [
+                    {
+                        msg: "No se pudo verificar el token",
+                        type: "auth.verify",
+                        location: "auth",
+                        field: null,
+                    },
+                ],
+            })
+        }
+        return new AuthError({
+            details: [
+                {
+                    msg: err.message,
+                    type: err.code,
+                    location: err.name,
+                    field: null,
+                },
+            ],
+        })
+    }
 }
 
 export class DBError extends APIError {
@@ -178,7 +247,6 @@ export class DBError extends APIError {
     }
 
     static getField(err: SQLError) {
-        console.log(err)
         const arr = err.code.split("_")
         return arr[arr.length - 1]
     }
