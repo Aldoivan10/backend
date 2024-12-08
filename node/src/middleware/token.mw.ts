@@ -1,15 +1,44 @@
 import { NextFunction, Request, Response } from "express"
-import { jwtVerify } from "jose"
-import { TK_KEY } from "../config"
+import { JWTExpired } from "jose/errors"
+import { AT_TIME, TK_OPT } from "../config"
 import { AuthError } from "../model/error"
-import { getTokens } from "../util/util"
+import { getTokens, getUser, singToken } from "../util/token.util"
 
-export const tokenMW = (req: Request, _: Response, next: NextFunction) => {
+export const tokenMW = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const [accessToken, refreshToken] = getTokens(req)
         if (!accessToken || !refreshToken) throw AuthError.token()
-        const data = jwtVerify(accessToken, new TextEncoder().encode(TK_KEY))
-        console.log(data)
+        let user: Maybe<UserToken> = undefined
+        try {
+            user = await getUser(accessToken)
+        } catch (tokenError) {
+            if (tokenError instanceof JWTExpired) {
+                user = await getUser(refreshToken)
+                const newToken = await singToken(user, AT_TIME)
+                res.cookie(`${user!.name}_at`, newToken, TK_OPT)
+            } else throw tokenError
+        } finally {
+            next()
+        }
+    } catch (err) {
+        next(err)
+    }
+}
+
+export const requireAdminMW = async (
+    req: Request,
+    _: Response,
+    next: NextFunction
+) => {
+    try {
+        const user: Maybe<UserToken> = req.body.user
+        if (!user || !user.logged) throw AuthError.token()
+        if (user.role !== "Administrador") throw AuthError.rol()
+        next()
     } catch (err) {
         next(err)
     }
