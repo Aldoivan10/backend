@@ -12,7 +12,7 @@ const router = Router()
 const repo = new ProductRepository()
 
 // Obtener por ID
-router.get("/:id(\\d+)", async (req, res, next) => {
+router.get("/:id(\\d+)", tokenMW, async (req, res, next) => {
     try {
         const { id } = getBase(req)
         const data = repo.getByID(id)
@@ -24,7 +24,7 @@ router.get("/:id(\\d+)", async (req, res, next) => {
 })
 
 // Obtener por filtro like con *
-router.get("/:filter(.*\\*.*)", async (req, res, next) => {
+router.get("/:filter(.*\\*.*)", tokenMW, async (req, res, next) => {
     try {
         const { filter } = getBase(req)
         filter.filter = filter.filter
@@ -41,7 +41,7 @@ router.get("/:filter(.*\\*.*)", async (req, res, next) => {
 })
 
 // Obtener por filtro
-router.get("/:filter?", async (req, res, next) => {
+router.get("/:filter?", tokenMW, async (req, res, next) => {
     try {
         const { filter } = getBase(req)
         const data = repo.all(filter)
