@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { APIError } from "../model/error"
-import { getError } from "../util/error"
+import { getError } from "../util/error.util"
 
 export const errorMW = (
     err: APIError | Error,
