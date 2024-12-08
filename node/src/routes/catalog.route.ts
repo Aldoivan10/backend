@@ -1,6 +1,7 @@
 import { SqliteError } from "better-sqlite3"
 import { NextFunction, Request, Response, Router } from "express"
 import { checkSchema } from "express-validator"
+import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import CatalogRepository from "../repositories/catalog.repo"
@@ -78,20 +79,25 @@ async function check(req: Request, _: Response, next: NextFunction) {
 }
 
 // Obtener todos
-router.get(root, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { filter, table } = getData(req)
-        const items = repo.setTable(table).all(filter)
-        res.json({ data: items })
-    } catch (err: any) {
-        if (err instanceof SqliteError) next(DBError.query(err))
-        else next(err)
+router.get(
+    root,
+    tokenMW,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { filter, table } = getData(req)
+            const items = repo.setTable(table).all(filter)
+            res.json({ data: items })
+        } catch (err: any) {
+            if (err instanceof SqliteError) next(DBError.query(err))
+            else next(err)
+        }
     }
-})
+)
 
 // Obtener por ID
 router.get(
     `${root}/:id(\\d+)`,
+    tokenMW,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id, table } = getData(req)
@@ -107,6 +113,8 @@ router.get(
 // Crear nuevo
 router.post(
     root,
+    tokenMW,
+    requireAdminMW,
     validationMW(check),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -126,6 +134,8 @@ router.post(
 // Eliminar
 router.delete(
     root,
+    tokenMW,
+    requireAdminMW,
     validationMW(GeneralVal.ids),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -145,6 +155,8 @@ router.delete(
 // Actualizar nombre
 router.patch(
     `${root}/:id(\\d+)`,
+    tokenMW,
+    requireAdminMW,
     validationMW(check),
     async (req: Request, res: Response, next: NextFunction) => {
         try {

@@ -12,20 +12,25 @@ const router = Router()
 const repo = new EntityRepository()
 
 // Obtener todos
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { filter } = getBase(req)
-        const entitys = repo.all(filter)
-        res.json({ data: entitys })
-    } catch (err) {
-        if (err instanceof SqliteError) next(DBError.query(err))
-        else next(err)
+router.get(
+    "/",
+    tokenMW,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { filter } = getBase(req)
+            const entitys = repo.all(filter)
+            res.json({ data: entitys })
+        } catch (err) {
+            if (err instanceof SqliteError) next(DBError.query(err))
+            else next(err)
+        }
     }
-})
+)
 
 // Obtener por ID
 router.get(
     "/:id(\\d+)",
+    tokenMW,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = getBase(req)

@@ -1,5 +1,6 @@
 import { SqliteError } from "better-sqlite3"
 import { NextFunction, Request, Response, Router } from "express"
+import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import ProductRepository from "../repositories/product.repo"
@@ -54,6 +55,8 @@ router.get("/:filter?", async (req, res, next) => {
 // Insertar un producto
 router.post(
     "/",
+    tokenMW,
+    requireAdminMW,
     validationMW(productVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -70,6 +73,8 @@ router.post(
 // Actualizar
 router.patch(
     "/:id(\\d+)",
+    tokenMW,
+    requireAdminMW,
     validationMW(productVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -92,6 +97,8 @@ router.patch(
 // Eliminar
 router.delete(
     "/",
+    tokenMW,
+    requireAdminMW,
     validationMW(GeneralVal.ids),
     async (req: Request, res: Response, next: NextFunction) => {
         try {

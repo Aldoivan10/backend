@@ -1,5 +1,6 @@
 import { SqliteError } from "better-sqlite3"
 import { NextFunction, Request, Response, Router } from "express"
+import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import UserRepo from "../repositories/user.repo"
@@ -40,6 +41,8 @@ router.get(
 // Agregar usuario
 router.post(
     "/",
+    tokenMW,
+    requireAdminMW,
     validationMW(userVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -59,6 +62,8 @@ router.post(
 // Eliminar
 router.delete(
     "/",
+    tokenMW,
+    requireAdminMW,
     validationMW(GeneralVal.ids),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -78,6 +83,8 @@ router.delete(
 // Actualizar
 router.patch(
     "/:id(\\d+)",
+    tokenMW,
+    requireAdminMW,
     validationMW(userVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
