@@ -10,6 +10,10 @@ import { adminVal, loginVal } from "../validations/login.val"
 const router = Router()
 const repo = new UserRepo()
 
+router.get("/users", (_, res) => {
+    res.json({ data: repo.users() })
+})
+
 router.post(
     "/login",
     validationMW(loginVal),
