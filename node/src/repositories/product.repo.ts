@@ -6,12 +6,14 @@ export default class ProductRepository extends Repository<
     ProductBody,
     Product
 > {
-    private insertStm: Transaction<ProductAction<Product>>
-    private updateStm: Transaction<ProductAction<Maybe<Product>>>
+    private insertStm: Transaction<ProductTran<ProductBody, Product>>
+    private updateStm: Transaction<
+        ProductTran<ProductBody & ID, Maybe<Product>>
+    >
 
     constructor() {
         super("Producto_Vista")
-        const insertProductStm = this.db.prepare<ProductBody, unknown>(
+        const insertProductStm = this.db.prepare<ProductBody & ID, unknown>(
             "INSERT INTO Producto VALUES (@id, @id_department, @id_supplier, @name, @amount, @buy, @min, @refundable)"
         )
         const insertCodesStm = this.db.prepare<ProductCode, Obj>(
@@ -26,60 +28,56 @@ export default class ProductRepository extends Repository<
         const delUnitsStm = this.db.prepare<ID, unknown>(
             "DELETE FROM Producto_Venta WHERE id_producto=@id"
         )
-        const updateStm = this.db.prepare<ProductBody, ID>(
+        const updateStm = this.db.prepare<ProductBody & ID, ID>(
             "UPDATE Producto SET id_departamento=@id_department,id_proveedor=@id_supplier,nombre=@name,cantidad=@amount,compra=@buy,min=@min,reembolsable=@refundable WHERE id=@id RETURNING *"
         )
 
         this.allStm = this.db.prepare<Filters, Obj>(
             this.allQuery(["*"], "name", "name")
         )
-        this.getByIDStm = this.db.prepare<ID, Obj>(this.getByIDQuery(["*"]))
-        this.insertStm = this.db.transaction<ProductAction<Product>>(
-            (product) => {
-                const id = this.nextID()!
-                const codes = this.getCodes(id, product)
-                const units = this.getUnits(id, product)
+        this.getByIDStm = this.db.prepare(this.getByIDQuery(["*"]))
+        this.insertStm = this.db.transaction((product) => {
+            const id = this.nextID()!
+            const codes = this.getCodes(id, product)
+            const units = this.getUnits(id, product)
 
-                insertProductStm.run({
-                    ...product,
-                    id,
-                    refundable: product.refundable ? 1 : 0,
-                })
+            insertProductStm.run({
+                id,
+                ...product,
+                refundable: Number(product.refundable),
+            })
 
-                for (const code of codes) insertCodesStm.run(code)
-                for (const unit of units) insertUnitsStm.run(unit)
-                return this.getByID(id)
+            for (const code of codes) insertCodesStm.run(code)
+            for (const unit of units) insertUnitsStm.run(unit)
+            return this.getByID(id)
+        })
+        this.updateStm = this.db.transaction((product) => {
+            const changes: ProductChanges = [false, false, false]
+            const oldProduct = this.getByID(product.id)
+
+            const newCodes = this.getCodes(product.id, product)
+            const oldCodes = this.getCodes(oldProduct.id, oldProduct)
+
+            if (this.hasChanges(oldCodes, newCodes)) {
+                changes[0] = true
+                delCodesStm.run(product)
+                for (const code of newCodes) insertCodesStm.run(code)
             }
-        )
-        this.updateStm = this.db.transaction<ProductAction<Maybe<Product>>>(
-            (product) => {
-                const changes: ProductChanges = [false, false, false]
-                const oldProduct = this.getByID(product.id)
 
-                const newCodes = this.getCodes(product.id, product)
-                const oldCodes = this.getCodes(oldProduct.id, oldProduct)
+            const newUnits = this.getUnits(product.id, product)
+            const oldUnits = this.getUnits(oldProduct.id, oldProduct)
 
-                if (this.hasChanges(oldCodes, newCodes)) {
-                    changes[0] = true
-                    delCodesStm.run(product)
-                    for (const code of newCodes) insertCodesStm.run(code)
-                }
-
-                const newUnits = this.getUnits(product.id, product)
-                const oldUnits = this.getUnits(oldProduct.id, oldProduct)
-
-                if (this.hasChanges(oldUnits, newUnits)) {
-                    changes[1] = true
-                    delUnitsStm.run(product)
-                    for (const unit of newUnits) insertUnitsStm.run(unit)
-                }
-
-                const item = updateStm.get(product)
-                changes[2] = Boolean(item)
-
-                return changes.some(Boolean) ? this.getByID(product.id) : null
+            if (this.hasChanges(oldUnits, newUnits)) {
+                changes[1] = true
+                delUnitsStm.run(product)
+                for (const unit of newUnits) insertUnitsStm.run(unit)
             }
-        )
+
+            const item = updateStm.get(product)
+            changes[2] = Boolean(item)
+
+            return changes.some(Boolean) ? this.getByID(product.id) : null
+        })
     }
 
     all = (filter: Filters) => this.allStm.all(filter).map(toJSON<Product>)
@@ -99,7 +97,7 @@ export default class ProductRepository extends Repository<
     }
 
     update = (id: number, item: ProductBody) =>
-        this.updateStm({ ...item, refundable: item.refundable ? 1 : 0, id })
+        this.updateStm({ ...item, refundable: Number(item.refundable), id })
 
     hasChanges(oldArr: ProductArr, newArr: ProductArr) {
         if (oldArr.some((old) => !newArr.find((_) => old.id === _.id)))
