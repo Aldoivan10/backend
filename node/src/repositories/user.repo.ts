@@ -11,6 +11,7 @@ export default class UserRepo extends Repository<UserBody, User> {
     private updateStm: Statement<UserBody & ID, Obj>
     private passStm: Statement<ID, { hashed: Maybe<string> }>
     private loginStm: Statement<LoginBody, Obj>
+    private availibleStm: Statement<[], Obj>
 
     constructor() {
         super("Usuario")
@@ -33,7 +34,17 @@ export default class UserRepo extends Repository<UserBody, User> {
         this.loginStm = this.db.prepare(
             "SELECT U.id, U.nombre AS name, TU.nombre AS role, false AS logged FROM Usuario U INNER JOIN Tipo_Usuario TU ON U.id_tipo_usuario=TU.id WHERE U.nombre = @username"
         )
+        this.availibleStm = this.db.prepare(
+            "SELECT name, shortcuts FROM Usuario_Vista ORDER BY name"
+        )
     }
+
+    users = () =>
+        this.availibleStm.all().map((obj) => {
+            const user = toJSON<InitUser>(obj)
+            user.shortcuts.forEach((sc) => (sc.view = Boolean(sc.view)))
+            return user
+        })
 
     all = (filter: Filters) =>
         this.allStm
