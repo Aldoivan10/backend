@@ -95,12 +95,21 @@ declare global {
         min: number
     }
 
-    type User = CatalogItem & { role: CatalogItem; password: Maybe<string> }
+    type User = CatalogItem & {
+        role: CatalogItem
+        password: Maybe<string>
+    }
 
     type UserToken = Omit<CatalogItem, "username"> & {
         logged: boolean
         role: string
     }
+
+    type InitUser = Omit<User, "password" | "role" | "id"> & {
+        shortcuts: { action: string; shortcut: string; view: boolean }[]
+    }
+
+    type ProductTran<I, O> = (product: I) => O
 
     /* REPOSITORIES */
 
@@ -108,13 +117,11 @@ declare global {
 
     type CatalogBody = Pick<CatalogItem, "name">
 
-    type ProductBody = Omit<Product, "supplier" | "department"> & {
+    type ProductBody = Omit<Product, "id" | "supplier" | "department"> & {
         units: ProductUnits
         id_supplier: number
         id_department: number
     }
-
-    type ProductAction<T> = (product: ProductBody) => T
 
     type ProductArr = Array<ProductUnit | ProductCode>
 
