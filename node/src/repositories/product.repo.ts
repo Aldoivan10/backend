@@ -20,13 +20,13 @@ export default class ProductRepository extends Repository<
             `INSERT INTO Producto_Codigo VALUES (@id_product, @id, @code)`
         )
         const insertUnitsStm = this.db.prepare<ProductUnit, Obj>(
-            `INSERT INTO Producto_Venta VALUES (@id_product, @id, @profit, @sale)`
+            `INSERT INTO Producto_Unidad VALUES (@id_product, @id, @profit, @sale)`
         )
         const delCodesStm = this.db.prepare<ID, unknown>(
             "DELETE FROM Producto_Codigo WHERE id_producto=@id"
         )
         const delUnitsStm = this.db.prepare<ID, unknown>(
-            "DELETE FROM Producto_Venta WHERE id_producto=@id"
+            "DELETE FROM Producto_Unidad WHERE id_producto=@id"
         )
         const updateStm = this.db.prepare<ProductBody & ID, ID>(
             "UPDATE Producto SET id_departamento=@id_department,id_proveedor=@id_supplier,nombre=@name,cantidad=@amount,compra=@buy,min=@min,reembolsable=@refundable WHERE id=@id RETURNING *"
