@@ -131,6 +131,10 @@ declare global {
 
     type LoginBody = Omit<CatalogItem, "name"> & { password: Maybe<string> }
 
+    type ShortcutBody = ID & { shortcut: string }
+
+    type ShortcutsBody = { shortcuts: Array<ShortcutBody> }
+
     /* OTHER */
 
     type CatalogParams = { id?: string; table?: string }

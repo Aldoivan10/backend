@@ -6,6 +6,7 @@ import { DBError } from "../model/error"
 import UserRepo from "../repositories/user.repo"
 import { getBase } from "../util/util"
 import * as GeneralVal from "../validations/general.val"
+import { shortcutVal } from "../validations/shortcut.val"
 import { userVal } from "../validations/user.val"
 
 const router = Router()
@@ -38,6 +39,28 @@ router.get(
             res.json({ data: user })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
+            else next(err)
+        }
+    }
+)
+
+// Cambiar shortcuts
+router.patch(
+    "/shortcuts",
+    tokenMW,
+    validationMW(shortcutVal),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = res.locals.user
+            const { shortcuts } = req.body as { shortcuts: ShortcutBody[] }
+            const changes = repo.shortcuts(user!.id, shortcuts)
+            res.status(201).json({
+                message: changes
+                    ? "Se actualizaron los atajos"
+                    : "No hubo cambios",
+            })
+        } catch (err) {
+            if (err instanceof SqliteError) next(DBError.insert(err))
             else next(err)
         }
     }

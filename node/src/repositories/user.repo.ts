@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt"
-import { Statement } from "better-sqlite3"
+import { Statement, Transaction } from "better-sqlite3"
 import { PASS_SALT } from "../config"
 import { getPlaceholders, toJSON } from "../util/util"
 import Repository from "./repository"
@@ -12,11 +12,17 @@ export default class UserRepo extends Repository<UserBody, User> {
     private passStm: Statement<ID, { hashed: Maybe<string> }>
     private loginStm: Statement<LoginBody, Obj>
     private availibleStm: Statement<[], Obj>
+    private shortcutsStm: Transaction<
+        (id: number, shortcuts: ShortcutBody[]) => boolean
+    >
 
     constructor() {
         super("Usuario")
         const select =
             "SELECT U.id, U.nombre AS name, U.contrasenia AS password, JSON_Object('id', TU.id, 'name', TU.nombre) AS role FROM Usuario U INNER JOIN Tipo_Usuario TU ON U.id_tipo_usuario=TU.id"
+        const insertSCStm = this.db.prepare<[string, number, number], unknown>(
+            "UPDATE Usuario_Atajo SET atajo=? WHERE id_usuario=? AND id_atajo=? RETURNING *"
+        )
 
         this.allStm = this.db.prepare(
             `${select} WHERE U.nombre LIKE @filter ORDER BY U.nombre LIMIT @limit OFFSET @offset`
@@ -36,6 +42,13 @@ export default class UserRepo extends Repository<UserBody, User> {
         )
         this.availibleStm = this.db.prepare(
             "SELECT name, shortcuts FROM Usuario_Vista ORDER BY name"
+        )
+        this.shortcutsStm = this.db.transaction((id_user, shortcuts) =>
+            shortcuts
+                .map(({ id, shortcut }) =>
+                    insertSCStm.get(shortcut, id_user, id)
+                )
+                .some(Boolean)
         )
     }
 
@@ -97,6 +110,9 @@ export default class UserRepo extends Repository<UserBody, User> {
         const user = this.getByIDStm.get({ id })
         return this.removePass(toJSON<User>(user))
     }
+
+    shortcuts = (id: number, shortcuts: ShortcutBody[]) =>
+        this.shortcutsStm(id, shortcuts)
 
     delete = (ids: number[]) => {
         const placeholders = getPlaceholders(ids)
