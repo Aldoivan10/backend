@@ -52,7 +52,7 @@ router.patch(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = res.locals.user
-            const { shortcuts } = req.body as { shortcuts: ShortcutBody[] }
+            const { shortcuts }: ShortcutsBody = req.body
             const changes = repo.shortcuts(user!.id, shortcuts)
             res.status(201).json({
                 message: changes
