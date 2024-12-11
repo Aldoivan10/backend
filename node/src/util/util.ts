@@ -7,7 +7,7 @@ export const getPlaceholders = (arr: any[]) => {
 }
 
 // Convertir los campos de un objeto a otro objeto (DTO)
-export const mapTo = <T>(obj?: Obj, mapper?: Record<string, string>) => {
+export const mapTo = <T>(obj: Maybe<Obj>, mapper?: Record<string, string>) => {
     if (!obj) return null
     if (!mapper) return obj as T
     const mapped: Obj = {}
@@ -36,13 +36,20 @@ export const isPass = (pass: string, hashed: string) => {
 }
 
 // Mapea un objeto a JSON (si contienen objetos como string)
-export const toJSON = <T>(item?: Obj) => {
+export const toJSON = <T>(item: Maybe<Obj>) => {
     if (item) {
         for (const key in item) {
             try {
-                item[key] = JSON.parse(item[key])
+                let val = JSON.parse(item[key])
+                if (Array.isArray(val)) val.map(toJSON<any>)
+                if (typeof val === "object") val = toJSON<Object>(val)
+                item[key] = val
             } catch (e) {}
         }
+        return item as T
     }
-    return item as T
+    return null
 }
+
+export const notFalsy = <T>(val: Maybe<T>): val is T =>
+    val !== null && val !== undefined

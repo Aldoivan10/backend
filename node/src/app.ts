@@ -6,6 +6,7 @@ import { logMW } from "./middleware/log.mw"
 import auth from "./routes/auth.route"
 import catalogRoute from "./routes/catalog.route"
 import entityRoute from "./routes/entity.route"
+import kitRoute from "./routes/kit.route"
 import productRoute from "./routes/product.route"
 import userRoute from "./routes/user.route"
 
@@ -33,6 +34,7 @@ app.use(auth)
 app.use("/product", productRoute)
 app.use("/entity", entityRoute)
 app.use("/user", userRoute)
+app.use("/kit", kitRoute)
 app.use(catalogRoute)
 // Manejador de errores
 app.use(errorMW)

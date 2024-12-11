@@ -109,7 +109,9 @@ declare global {
         shortcuts: { action: string; shortcut: string; view: boolean }[]
     }
 
-    type ProductTran<I, O> = (product: I) => O
+    type ProductTran<I, O> = (item: I) => O
+
+    type Kit = CatalogBody & { products: Product[] }
 
     /* REPOSITORIES */
 
@@ -134,6 +136,12 @@ declare global {
     type ShortcutBody = ID & { shortcut: string }
 
     type ShortcutsBody = { shortcuts: Array<ShortcutBody> }
+
+    type KitBody = CatalogBody & {
+        products: Array<Pick<Product, "id" | "amount"> & { unit: number }>
+    }
+
+    type KitProduct = ID & { unit: number }
 
     /* OTHER */
 
