@@ -29,7 +29,7 @@ export default abstract class Repository<I, O> {
     }
 
     public getByID(id: number) {
-        return mapTo<O>(this.getByIDStm.get({ id }), this.mapper)
+        return this.mapFunc(this.getByIDStm.get({ id }))
     }
 
     public delete(ids: number[]) {
