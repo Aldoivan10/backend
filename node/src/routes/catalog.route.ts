@@ -79,25 +79,20 @@ async function check(req: Request, _: Response, next: NextFunction) {
 }
 
 // Obtener todos
-router.get(
-    root,
-    tokenMW,
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { filter, table } = getData(req)
-            const items = repo.setTable(table).all(filter)
-            res.json({ data: items })
-        } catch (err: any) {
-            if (err instanceof SqliteError) next(DBError.query(err))
-            else next(err)
-        }
+router.get(root, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { filter, table } = getData(req)
+        const items = repo.setTable(table).all(filter)
+        res.json({ data: items })
+    } catch (err: any) {
+        if (err instanceof SqliteError) next(DBError.query(err))
+        else next(err)
     }
-)
+})
 
 // Obtener por ID
 router.get(
     `${root}/:id(\\d+)`,
-    tokenMW,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id, table } = getData(req)
