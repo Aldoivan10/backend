@@ -1,14 +1,15 @@
 import { Database, Statement } from "better-sqlite3"
 import db from "../model/db"
-import { getPlaceholders, mapTo } from "../util/util"
+import { getPlaceholders, mapTo, notFalsy, toJSON } from "../util/util"
 
 export default abstract class Repository<I, O> {
     protected db: Database = db
     protected table: string
     protected allStm!: Statement<Filters, Obj>
-    protected getByIDStm!: Statement<ID, Obj>
+    protected getByIDStm!: Statement<ID, Maybe<Obj>>
     protected mapper?: Record<string, string>
-    protected mapFunc = (item?: Obj) => mapTo<Maybe<O>>(item, this.mapper)
+    protected mapFunc = (item: Maybe<Obj>) =>
+        mapTo<O>(toJSON<Obj>(item), this.mapper)
 
     constructor(table: string) {
         this.table = table
@@ -23,16 +24,23 @@ export default abstract class Repository<I, O> {
         this.getByIDStm = this.db.prepare(this.getByIDQuery(columns))
     }
 
-    all = (filter: Filters) => this.allStm.all(filter).map(this.mapFunc)
+    public all(filter: Filters) {
+        return this.allStm.all(filter).map(this.mapFunc).filter(notFalsy)
+    }
 
-    getByID = (id: number) => mapTo<O>(this.getByIDStm.get({ id }), this.mapper)
+    public getByID(id: number) {
+        return mapTo<O>(this.getByIDStm.get({ id }), this.mapper)
+    }
 
-    delete = (ids: number[]) => {
+    public delete(ids: number[]) {
         const placeholders = getPlaceholders(ids)
         const stm = this.db.prepare<number[], Obj>(
             `DELETE FROM ${this.table} WHERE id IN (${placeholders}) RETURNING *`
         )
-        return stm.all(...ids).map(this.mapFunc)
+        return stm
+            .all(...ids)
+            .map(this.mapFunc)
+            .filter(notFalsy)
     }
 
     abstract insert(item: I): O

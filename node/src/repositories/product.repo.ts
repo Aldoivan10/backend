@@ -1,5 +1,4 @@
 import { Transaction } from "better-sqlite3"
-import { getPlaceholders, toJSON } from "../util/util"
 import Repository from "./repository"
 
 export default class ProductRepository extends Repository<
@@ -10,9 +9,22 @@ export default class ProductRepository extends Repository<
     private updateStm: Transaction<
         ProductTran<ProductBody & ID, Maybe<Product>>
     >
+    protected mapper: Record<string, string> = {
+        id: "id",
+        min: "min",
+        name: "nombre",
+        codes: "codigos",
+        units: "unidades",
+        amount: "cantidad",
+        supplier: "proveedor",
+        department: "departamento",
+        refundable: "reembolsable",
+    }
 
     constructor() {
         super("Producto_Vista")
+        this.init({ columns: Object.values(this.mapper) })
+
         const insertProductStm = this.db.prepare<ProductBody & ID, unknown>(
             "INSERT INTO Producto VALUES (@id, @id_department, @id_supplier, @name, @amount, @buy, @min, @refundable)"
         )
@@ -32,10 +44,6 @@ export default class ProductRepository extends Repository<
             "UPDATE Producto SET id_departamento=@id_department,id_proveedor=@id_supplier,nombre=@name,cantidad=@amount,compra=@buy,min=@min,reembolsable=@refundable WHERE id=@id RETURNING *"
         )
 
-        this.allStm = this.db.prepare<Filters, Obj>(
-            this.allQuery(["*"], "name", "name")
-        )
-        this.getByIDStm = this.db.prepare(this.getByIDQuery(["*"]))
         this.insertStm = this.db.transaction((product) => {
             const id = this.nextID()!
             const codes = this.getCodes(id, product)
@@ -54,6 +62,8 @@ export default class ProductRepository extends Repository<
         this.updateStm = this.db.transaction((product) => {
             const changes: ProductChanges = [false, false, false]
             const oldProduct = this.getByID(product.id)
+
+            if (!oldProduct) return null
 
             const newCodes = this.getCodes(product.id, product)
             const oldCodes = this.getCodes(oldProduct.id, oldProduct)
@@ -80,21 +90,7 @@ export default class ProductRepository extends Repository<
         })
     }
 
-    all = (filter: Filters) => this.allStm.all(filter).map(toJSON<Product>)
-
-    getByID = (id: number) => toJSON<Product>(this.getByIDStm.get({ id }))
-
     insert = (item: ProductBody) => this.insertStm(item)
-
-    delete = (ids: number[]) => {
-        const products = ids.map((id) => this.getByID(id)).filter(Boolean)
-        const placeholders = getPlaceholders(ids)
-        const stm = this.db.prepare<number[], ID>(
-            `DELETE FROM Producto WHERE id IN (${placeholders}) RETURNING id`
-        )
-        const deleted = stm.all(...ids).map((item) => item.id)
-        return products.filter((product) => deleted.includes(product.id))
-    }
 
     update = (id: number, item: ProductBody) =>
         this.updateStm({ ...item, refundable: Number(item.refundable), id })

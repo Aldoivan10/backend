@@ -1,12 +1,10 @@
 import bcrypt from "bcrypt"
 import { Statement, Transaction } from "better-sqlite3"
 import { PASS_SALT } from "../config"
-import { getPlaceholders, toJSON } from "../util/util"
+import { notFalsy, toJSON } from "../util/util"
 import Repository from "./repository"
 
 export default class UserRepo extends Repository<UserBody, User> {
-    protected allStm: Statement<Filters, Obj>
-    protected getByIDStm: Statement<ID, Obj>
     private insertStm: Statement<UserBody & ID, Obj>
     private updateStm: Statement<UserBody & ID, Obj>
     private passStm: Statement<ID, { hashed: Maybe<string> }>
@@ -15,19 +13,19 @@ export default class UserRepo extends Repository<UserBody, User> {
     private shortcutsStm: Transaction<
         (id: number, shortcuts: ShortcutBody[]) => boolean
     >
+    protected mapper: Record<string, string> = {
+        id: "id",
+        role: "role",
+        name: "nombre",
+        password: "contrasenia",
+    }
 
     constructor() {
-        super("Usuario")
-        const select =
-            "SELECT U.id, U.nombre AS name, U.contrasenia AS password, JSON_Object('id', TU.id, 'name', TU.nombre) AS role FROM Usuario U INNER JOIN Tipo_Usuario TU ON U.id_tipo_usuario=TU.id"
+        super("Usuario_Vista")
+        this.init({ columns: Object.values(this.mapper) })
         const insertSCStm = this.db.prepare<[string, number, number], unknown>(
             "UPDATE Usuario_Atajo SET atajo=? WHERE id_usuario=? AND id_atajo=? RETURNING *"
         )
-
-        this.allStm = this.db.prepare(
-            `${select} WHERE U.nombre LIKE @filter ORDER BY U.nombre LIMIT @limit OFFSET @offset`
-        )
-        this.getByIDStm = this.db.prepare(`${select} WHERE U.id = @id`)
         this.insertStm = this.db.prepare(
             "INSERT INTO Usuario VALUES (@id, @id_user_type, @name, @password)"
         )
@@ -41,7 +39,7 @@ export default class UserRepo extends Repository<UserBody, User> {
             "SELECT U.id, U.nombre AS name, TU.nombre AS role, false AS logged FROM Usuario U INNER JOIN Tipo_Usuario TU ON U.id_tipo_usuario=TU.id WHERE U.nombre = @username"
         )
         this.availibleStm = this.db.prepare(
-            "SELECT name, shortcuts FROM Usuario_Vista ORDER BY name"
+            "SELECT name, shortcuts FROM Usuarios_Vista ORDER BY name"
         )
         this.shortcutsStm = this.db.transaction((id_user, shortcuts) =>
             shortcuts
@@ -52,29 +50,43 @@ export default class UserRepo extends Repository<UserBody, User> {
         )
     }
 
-    users = () =>
-        this.availibleStm.all().map((obj) => {
-            const user = toJSON<InitUser>(obj)
-            user.shortcuts.forEach((sc) => (sc.view = Boolean(sc.view)))
-            return user
-        })
+    public all(filter: Filters) {
+        const users = super.all(filter)
+        users.forEach(this.removePass)
+        return users
+    }
 
-    all = (filter: Filters) =>
-        this.allStm
-            .all(filter)
-            .map(toJSON<User>)
-            .map(this.removePass)
+    public getByID(id: number) {
+        const user = super.getByID(id)
+        this.removePass(user)
+        return user
+    }
 
-    getByID = (id: number) =>
-        this.removePass(toJSON<User>(this.getByIDStm.get({ id })))
+    public delete(ids: number[]) {
+        const users = super.delete(ids)
+        users.forEach(this.removePass)
+        return users
+    }
 
-    auth = (data: LoginBody) => {
+    public users() {
+        return this.availibleStm
+            .all()
+            .map((obj) => {
+                const user = toJSON<InitUser>(obj)
+                if (user)
+                    user.shortcuts.forEach((sc) => (sc.view = Boolean(sc.view)))
+                return user
+            })
+            .filter(notFalsy)
+    }
+
+    public auth(data: LoginBody) {
         const user = this.loginStm.get(data)
         if (!user) return null
         return toJSON<UserToken>(user)
     }
 
-    login(user: UserToken, password: Maybe<string>) {
+    public login(user: UserToken, password: Maybe<string>) {
         const result = this.passStm.get(user)
         if (this.samePass(password, result?.hashed)) {
             user.logged = true
@@ -83,7 +95,7 @@ export default class UserRepo extends Repository<UserBody, User> {
         return false
     }
 
-    insert(item: UserBody) {
+    public insert(item: UserBody) {
         const id = this.nextID()!
         this.insertStm.run({
             id,
@@ -91,10 +103,10 @@ export default class UserRepo extends Repository<UserBody, User> {
             password: this.hashPass(item.password),
         })
         const user = this.getByIDStm.get({ id })
-        return this.removePass(toJSON<User>(user))
+        return this.removePass(toJSON<User>(user))!
     }
 
-    update(id: number, item: UserBody) {
+    public update(id: number, item: UserBody) {
         const { hashed } = this.passStm.get({ id })!
 
         if (this.samePass(item.password, hashed)) item.password = hashed
@@ -111,32 +123,19 @@ export default class UserRepo extends Repository<UserBody, User> {
         return this.removePass(toJSON<User>(user))
     }
 
-    shortcuts = (id: number, shortcuts: ShortcutBody[]) =>
-        this.shortcutsStm(id, shortcuts)
-
-    delete = (ids: number[]) => {
-        const placeholders = getPlaceholders(ids)
-        const users = ids
-            .map((id) => this.getByIDStm.get({ id }))
-            .filter(Boolean)
-            .map(toJSON<User>)
-            .map(this.removePass)
-        const stm = this.db.prepare<number[], ID>(
-            `DELETE FROM ${this.table} WHERE id IN (${placeholders}) RETURNING id`
-        )
-        const deleted = stm.all(...ids).map((item) => item.id)
-        return users.filter((user) => deleted.includes(user.id))
+    public shortcuts(id: number, shortcuts: ShortcutBody[]) {
+        return this.shortcutsStm(id, shortcuts)
     }
 
-    samePass(pass: Maybe<string>, hashed: Maybe<string>) {
+    private samePass(pass: Maybe<string>, hashed: Maybe<string>) {
         return !!pass && !!hashed && bcrypt.compareSync(pass, hashed)
     }
 
-    hashPass(pass: Maybe<string>) {
+    private hashPass(pass: Maybe<string>) {
         return pass ? bcrypt.hashSync(pass, +PASS_SALT) : null
     }
 
-    removePass(user: User) {
+    private removePass(user: Maybe<User>) {
         if (user) delete user.password
         return user
     }
