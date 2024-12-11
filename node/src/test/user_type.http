@@ -9,7 +9,8 @@ POST http://localhost:3000/user_type
 Content-Type: application/json
 
 {
-    "name": "Administrador"
+    "name": "Administrador",
+    "username": "Administrador"
 }
 
 
@@ -18,7 +19,8 @@ DELETE http://localhost:3000/user_type/
 Content-Type: application/json
 
 {
-    "ids": [2]
+    "ids": [2],
+    "username": "Administrador"
 }
 
 
@@ -27,5 +29,6 @@ PATCH  http://localhost:3000/user_type/1
 Content-Type: application/json
 
 {
-    "name": "Entidad nuevo nombre"
+    "name": "Entidad nuevo nombre",
+    "username": "Administrador"
 }

@@ -11,7 +11,8 @@ Content-Type: application/json
 {
     "id_user_type": 2,
     "name": "aldo 2",
-    "password": "Contrasenia"
+    "password": "123",
+    "username": "Administrador"
 }
 
 
@@ -20,7 +21,8 @@ DELETE http://localhost:3000/user
 Content-Type: application/json
 
 {
-    "ids": [2,3]
+    "ids": [2,3],
+    "username": "Administrador"
 }
 
 

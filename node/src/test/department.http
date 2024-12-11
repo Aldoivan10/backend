@@ -9,7 +9,8 @@ POST http://localhost:3000/department
 Content-Type: application/json
 
 {
-    "name": "Departamento 1"
+    "name": "Departamento 1",
+    "username": "Administrador"
 }
 
 
@@ -18,7 +19,8 @@ DELETE http://localhost:3000/department/
 Content-Type: application/json
 
 {
-    "ids": [1]
+    "ids": [1],
+    "username": "Administrador"
 }
 
 
@@ -27,5 +29,6 @@ PATCH  http://localhost:3000/department/1
 Content-Type: application/json
 
 {
-    "name": "Unidad nuevo nombre"
+    "name": "Unidad nuevo nombre",
+    "username": "Administrador"
 }

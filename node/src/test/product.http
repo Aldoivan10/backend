@@ -36,7 +36,8 @@ Content-Type: application/json
         "id": 2,
         "sale": 200
     }],
-    "name": "Cabezal"
+    "name": "Cabezal",
+    "username": "Administrador"
 }
 
 
@@ -45,7 +46,8 @@ DELETE http://localhost:3000/product/
 Content-Type: application/json
 
 {
-    "ids": [1,2,3]
+    "ids": [4],
+    "username": "Administrador"
 }
 
 
@@ -71,5 +73,6 @@ Content-Type: application/json
         "sale": 100,
         "profit": 10
     }],
-    "name": "Nuevo cable"
+    "name": "Nuevo cable",
+    "username": "Administrador"
 }

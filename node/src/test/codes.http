@@ -9,7 +9,8 @@ POST http://localhost:3000/code
 Content-Type: application/json
 
 {
-    "name": "Código de prueba"
+    "name": "Código de prueba",
+    "username": "Administrador"
 }
 
 
@@ -18,7 +19,8 @@ DELETE http://localhost:3000/code/
 Content-Type: application/json
 
 {
-    "ids": [1]
+    "ids": [1],
+    "username": "Administrador"
 }
 
 
@@ -27,5 +29,6 @@ PATCH  http://localhost:3000/code/3
 Content-Type: application/json
 
 {
-    "name": "Código actualizado"
+    "name": "Código actualizado",
+    "username": "Administrador"
 }
