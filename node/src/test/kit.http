@@ -19,3 +19,19 @@ Content-Type: application/json
     ],
     "username": "Administrador"
 }
+
+### Actualizar kit
+PATCH  http://localhost:3000/kit/2
+Content-Type: application/json
+
+{
+    "name": "Kit 2",
+    "products": [
+        {
+            "id": 3,
+            "unit": 1,
+            "amount": 20
+        }
+    ],
+    "username": "Administrador"
+}

@@ -44,4 +44,10 @@ export const KitVal: Schema = {
             errorMessage: "El ID de la unidad debe ser un número positivo",
         },
     },
+    "products.*.amount": {
+        isInt: {
+            options: { gt: 0 },
+            errorMessage: "La cantidad debe ser un número positivo mayor a 0",
+        },
+    },
 }

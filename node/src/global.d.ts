@@ -66,7 +66,7 @@ declare global {
 
     type Obj = Record<string, any>
 
-    type CatalogItem = ID & { name: string; username: string }
+    type CatalogItem = ID & { name: string; username?: string }
 
     type Entity = CatalogItem & {
         id_entity_type: number
@@ -141,7 +141,7 @@ declare global {
         products: Array<Pick<Product, "id" | "amount"> & { unit: number }>
     }
 
-    type KitProduct = ID & { unit: number }
+    type KitProduct = ID & { unit: number; amount: number }
 
     /* OTHER */
 
