@@ -43,7 +43,7 @@ router.post(
     validationMW(entityVal),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const params: Entity = req.body
+            const params: EntityBody = req.body
             const entity = repo.insert(params)
             res.status(201).json({
                 message: "Entidad creada",
@@ -83,7 +83,7 @@ router.patch(
     (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = getBase(req)
-            const params: Entity = req.body
+            const params: EntityBody = req.body
             const entity = repo.update(id, params)
 
             res.send({
