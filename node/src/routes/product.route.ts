@@ -12,7 +12,7 @@ const router = Router()
 const repo = new ProductRepository()
 
 // Obtener por ID
-router.get("/:id(\\d+)", async (req, res, next) => {
+router.get("/:id(\\d+)", (req, res, next) => {
     try {
         const { id } = getBase(req)
         const data = repo.getByID(id)
@@ -24,7 +24,7 @@ router.get("/:id(\\d+)", async (req, res, next) => {
 })
 
 // Obtener por filtro like con *
-router.get("/:filter(.*\\*.*)", async (req, res, next) => {
+router.get("/:filter(.*\\*.*)", (req, res, next) => {
     try {
         const { filter } = getBase(req)
         filter.filter = filter.filter
@@ -41,7 +41,7 @@ router.get("/:filter(.*\\*.*)", async (req, res, next) => {
 })
 
 // Obtener por filtro
-router.get("/:filter?", async (req, res, next) => {
+router.get("/:filter?", (req, res, next) => {
     try {
         const { filter } = getBase(req)
         const data = repo.all(filter)
@@ -58,7 +58,7 @@ router.post(
     tokenMW,
     requireAdminMW,
     validationMW(productVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const product: ProductBody = req.body
             const item = repo.insert(product)
@@ -76,7 +76,7 @@ router.patch(
     tokenMW,
     requireAdminMW,
     validationMW(productVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = getBase(req)
             const product: ProductBody = req.body
@@ -100,7 +100,7 @@ router.delete(
     tokenMW,
     requireAdminMW,
     validationMW(GeneralVal.ids),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { ids } = getBase(req)
             const products = repo.delete(ids)

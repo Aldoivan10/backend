@@ -13,7 +13,7 @@ const router = Router()
 const repo = new UserRepo()
 
 // Obtener todos
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", (req: Request, res: Response, next: NextFunction) => {
     try {
         const { filter } = getBase(req)
         const data = repo.all(filter)
@@ -25,26 +25,23 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 })
 
 // Obtener por ID
-router.get(
-    "/:id(\\d+)",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { id } = getBase(req)
-            const user = repo.getByID(id)
-            res.json({ data: user })
-        } catch (err) {
-            if (err instanceof SqliteError) next(DBError.query(err))
-            else next(err)
-        }
+router.get("/:id(\\d+)", (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = getBase(req)
+        const user = repo.getByID(id)
+        res.json({ data: user })
+    } catch (err) {
+        if (err instanceof SqliteError) next(DBError.query(err))
+        else next(err)
     }
-)
+})
 
 // Cambiar shortcuts
 router.patch(
     "/shortcuts",
     tokenMW,
     validationMW(shortcutVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = res.locals.user
             const { shortcuts }: ShortcutsBody = req.body
@@ -67,7 +64,7 @@ router.post(
     tokenMW,
     requireAdminMW,
     validationMW(userVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const user: UserBody = req.body
             const data = repo.insert(user)
@@ -88,7 +85,7 @@ router.delete(
     tokenMW,
     requireAdminMW,
     validationMW(GeneralVal.ids),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { ids } = getBase(req)
             const data = repo.delete(ids)
@@ -109,7 +106,7 @@ router.patch(
     tokenMW,
     requireAdminMW,
     validationMW(userVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = getBase(req)
             const user: UserBody = req.body

@@ -79,7 +79,7 @@ async function check(req: Request, _: Response, next: NextFunction) {
 }
 
 // Obtener todos
-router.get(root, async (req: Request, res: Response, next: NextFunction) => {
+router.get(root, (req: Request, res: Response, next: NextFunction) => {
     try {
         const { filter, table } = getData(req)
         const items = repo.setTable(table).all(filter)
@@ -93,7 +93,7 @@ router.get(root, async (req: Request, res: Response, next: NextFunction) => {
 // Obtener por ID
 router.get(
     `${root}/:id(\\d+)`,
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id, table } = getData(req)
             const item = repo.setTable(table).getByID(id)
@@ -111,7 +111,7 @@ router.post(
     tokenMW,
     requireAdminMW,
     validationMW(check),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { table, item, msgs } = getData(req)
             const created = repo.setTable(table).insert(item)
@@ -132,7 +132,7 @@ router.delete(
     tokenMW,
     requireAdminMW,
     validationMW(GeneralVal.ids),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { table, ids, msgs } = getData(req)
             const items = repo.setTable(table).delete(ids)
@@ -153,7 +153,7 @@ router.patch(
     tokenMW,
     requireAdminMW,
     validationMW(check),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { table, id, item, msgs } = getData(req)
             const updated = repo.setTable(table).update(id, item)

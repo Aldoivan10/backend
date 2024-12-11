@@ -12,7 +12,7 @@ const router = Router()
 const repo = new EntityRepository()
 
 // Obtener todos
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", (req: Request, res: Response, next: NextFunction) => {
     try {
         const { filter } = getBase(req)
         const entitys = repo.all(filter)
@@ -24,19 +24,16 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 })
 
 // Obtener por ID
-router.get(
-    "/:id(\\d+)",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { id } = getBase(req)
-            const entity = repo.getByID(id)
-            res.json({ data: entity })
-        } catch (err) {
-            if (err instanceof SqliteError) next(DBError.query(err))
-            else next(err)
-        }
+router.get("/:id(\\d+)", (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = getBase(req)
+        const entity = repo.getByID(id)
+        res.json({ data: entity })
+    } catch (err) {
+        if (err instanceof SqliteError) next(DBError.query(err))
+        else next(err)
     }
-)
+})
 
 // Insertar
 router.post(
@@ -44,7 +41,7 @@ router.post(
     tokenMW,
     requireAdminMW,
     validationMW(entityVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const params: Entity = req.body
             const entity = repo.insert(params)
@@ -65,7 +62,7 @@ router.delete(
     tokenMW,
     requireAdminMW,
     validationMW(GeneralVal.ids),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { ids } = getBase(req)
             const entitys = repo.delete(ids)
@@ -83,7 +80,7 @@ router.patch(
     tokenMW,
     requireAdminMW,
     validationMW(entityVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = getBase(req)
             const params: Entity = req.body
