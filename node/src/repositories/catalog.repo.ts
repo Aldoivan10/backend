@@ -17,7 +17,7 @@ export default class CatalogRepository extends Repository<
         super("Catalogo")
     }
 
-    setTable(table: string) {
+    public setTable(table: string) {
         this.table = table
         this.init({ columns: Object.values(this.mapper) })
         this.insertStm = this.db.prepare(
@@ -29,7 +29,7 @@ export default class CatalogRepository extends Repository<
         return this
     }
 
-    insert(item: CatalogBody) {
+    public insert(item: CatalogBody) {
         if (this.insertStm) {
             const id = this.nextID()!
             const catalog = toBD<CatalogItem>(
@@ -41,7 +41,7 @@ export default class CatalogRepository extends Repository<
         throw new Error("Method not implemented.")
     }
 
-    update(id: number, item: CatalogBody) {
+    public update(id: number, item: CatalogBody) {
         if (this.updateStm) {
             const catalog = toBD<CatalogItem>(
                 { ...item, id },

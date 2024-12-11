@@ -28,13 +28,13 @@ export default class EntityRepository extends Repository<EntityBody, Entity> {
         )
     }
 
-    insert(item: EntityBody) {
+    public insert(item: EntityBody) {
         const id = this.nextID()!
         const entity = toBD<Entity>({ ...item, id }, Object.keys(this.mapper))
         return this.mapFunc(this.insertStm.get(entity))!
     }
 
-    update(id: number, item: EntityBody) {
+    public update(id: number, item: EntityBody) {
         const entity = toBD<Entity>({ ...item, id }, Object.keys(this.mapper))
         return this.mapFunc(this.updateStm.get(entity))
     }
