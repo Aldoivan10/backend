@@ -6,8 +6,9 @@
         "allowJs": true, // Permitir archivos JS
         "esModuleInterop": true, // Habilitar interoperabilidad de módulos
         "isolatedModules": true, // Habilitar la comprobación de módulos independientes,}
-        "resolveJsonModule": true // Habilitar la resolución de módulos JSON
+        "resolveJsonModule": true, // Habilitar la resolución de módulos JSON,
+        "lib": ["ESNext", "dom"] // Incluir librerías
     },
     "include": ["src/**/*"], // Incluir archivos
-    "exclude": ["node_modules", "dist"] // Excluir archivos
+    "exclude": ["node_modules", "dist"] // Excluir archivos,
 }
