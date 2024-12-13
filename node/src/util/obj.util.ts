@@ -1,11 +1,6 @@
 import bcrypt from "bcrypt"
 import { Request } from "express"
 
-// Creamos un placeholder de ? para un arreglo
-export const getPlaceholders = (arr: any[]) => {
-    return arr.map((_) => "?").join()
-}
-
 // Convertir los campos de un objeto a otro objeto (DTO)
 export const mapTo = <T>(obj: Maybe<Obj>, mapper?: Record<string, string>) => {
     if (!obj) return null
