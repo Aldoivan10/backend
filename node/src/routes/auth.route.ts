@@ -3,12 +3,12 @@ import { AT_TIME, RT_TIME, TK_OPT } from "../config"
 import { tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { AuthError } from "../model/error"
-import UserRepo from "../repositories/user.repo"
+import AuthRepo from "../repositories/auth.repo"
 import { singToken } from "../util/token.util"
 import { adminVal, loginVal } from "../validations/login.val"
 
 const router = Router()
-const repo = new UserRepo()
+const repo = new AuthRepo()
 
 router.get("/users", (_, res) => {
     res.json({ data: repo.users() })
