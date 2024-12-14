@@ -4,7 +4,7 @@ import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import ProductRepository from "../repositories/product.repo"
-import { getBase } from "../util/util"
+import { getBase } from "../util/obj.util"
 import * as GeneralVal from "../validations/general.val"
 import { productVal } from "../validations/product.val"
 
@@ -102,8 +102,11 @@ router.delete(
     validationMW(GeneralVal.ids),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { ids } = getBase(req)
-            const products = repo.delete(ids)
+            const { ids, user } = getBase(req)
+            const products = repo.delete({
+                ids,
+                username: user?.name,
+            })
             res.send({ message: "Productos eliminados", products })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.delete(err))

@@ -4,7 +4,7 @@ import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import KitRepo from "../repositories/kit.repo"
-import { getBase } from "../util/util"
+import { getBase } from "../util/obj.util"
 import * as GeneralVal from "../validations/general.val"
 import { KitVal } from "../validations/kit.val"
 
@@ -82,8 +82,8 @@ router.delete(
     validationMW(GeneralVal.ids),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { ids } = getBase(req)
-            const kits = repo.delete(ids)
+            const { ids, user } = getBase(req)
+            const kits = repo.delete({ ids, username: user?.name })
             res.send({ message: "Kits eliminados", data: kits })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.delete(err))

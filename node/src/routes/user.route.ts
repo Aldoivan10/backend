@@ -4,7 +4,7 @@ import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import UserRepo from "../repositories/user.repo"
-import { getBase } from "../util/util"
+import { getBase } from "../util/obj.util"
 import * as GeneralVal from "../validations/general.val"
 import { shortcutVal } from "../validations/shortcut.val"
 import { userVal } from "../validations/user.val"
@@ -87,8 +87,11 @@ router.delete(
     validationMW(GeneralVal.ids),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { ids } = getBase(req)
-            const data = repo.delete(ids)
+            const { ids, user } = getBase(req, res)
+            const data = repo.delete({
+                ids,
+                username: user?.name,
+            })
             res.send({
                 message: "Usuarios eliminados",
                 data,

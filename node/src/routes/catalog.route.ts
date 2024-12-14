@@ -5,7 +5,7 @@ import { requireAdminMW, tokenMW } from "../middleware/token.mw"
 import { validationMW } from "../middleware/validation.mw"
 import { DBError } from "../model/error"
 import CatalogRepository from "../repositories/catalog.repo"
-import { getBase } from "../util/util"
+import { getBase } from "../util/obj.util"
 import catalogVal from "../validations/catalog.val"
 import * as GeneralVal from "../validations/general.val"
 
@@ -56,16 +56,18 @@ const router = Router()
 const repo = new CatalogRepository()
 const root = `/:table(${Object.keys(catalogs).join("|")})`
 
-function getData(req: Request) {
+function getData(req: Request, res?: Response) {
     const { filter, ids } = getBase(req)
     const item: CatalogBody = req.body
     const { id, table }: CatalogParams = req.params
+    const username = res?.locals.user?.name
     const catalog = catalogs[table]
     return {
         ids,
         item,
         filter,
         id: +id,
+        username,
         msgs: catalog.msgs,
         table: catalog.table,
     }
@@ -134,8 +136,8 @@ router.delete(
     validationMW(GeneralVal.ids),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { table, ids, msgs } = getData(req)
-            const items = repo.setTable(table).delete(ids)
+            const { table, ids, msgs, username } = getData(req, res)
+            const items = repo.setTable(table).delete({ ids, username })
             res.send({
                 message: msgs.del,
                 data: items,
