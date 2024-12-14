@@ -149,7 +149,10 @@ declare global {
 
     type CatalogMap = Record<
         string,
-        { msgs: { del: string; add: string; upd: string }; table: string }
+        {
+            msgs: { del: string; add: string; upd: string }
+            table: string
+        }
     >
 }
 

@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt"
-import { Request } from "express"
+import { Request, Response } from "express"
 
 // Convertir los campos de un objeto a otro objeto (DTO)
 export const mapTo = <T>(obj: Maybe<Obj>, mapper?: Record<string, string>) => {
@@ -17,12 +17,18 @@ export const toBD = <T>(obj: Obj, attrs: string[]) => {
 }
 
 // Obtenemos los datos base de cada petición
-export const getBase = (req: Request) => {
+export const getBase = (req: Request, res?: Response) => {
     const { filter = "%", limit = 10, offset = 0 }: Filters = req.query
     const id: number = +req.params.id
     const pathFilter = req.params.filter
     const ids: number[] = req.body.ids ?? []
-    return { id, ids, filter: { filter: pathFilter ?? filter, limit, offset } }
+    const user = res?.locals.user
+    return {
+        id,
+        ids,
+        user,
+        filter: { filter: pathFilter ?? filter, limit, offset },
+    }
 }
 
 // Validamos que la contraseña sea correcta
