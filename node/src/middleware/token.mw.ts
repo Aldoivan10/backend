@@ -2,10 +2,7 @@ import { NextFunction, Request, Response } from "express"
 import { JWTExpired } from "jose/errors"
 import { AT_TIME, TK_OPT } from "../config"
 import { AuthError } from "../model/error"
-import AuthRepo from "../repositories/auth.repo"
 import { getTokens, getUser, singToken } from "../util/token.util"
-
-const repo = new AuthRepo()
 
 export const tokenMW = async (
     req: Request,
@@ -26,7 +23,6 @@ export const tokenMW = async (
             } else throw tokenError
         } finally {
             res.locals.user = user
-            repo.update(1, user!.name)
             next()
         }
     } catch (err) {
