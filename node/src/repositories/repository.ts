@@ -1,24 +1,30 @@
 import { Database, Statement, Transaction } from "better-sqlite3"
 import db from "../model/db"
 import { arrConj, getPlaceholders } from "../util/array.util"
-import { mapTo, notFalsy, toJSON } from "../util/util"
+import { mapTo, notFalsy, toJSON } from "../util/obj.util"
 
 export default abstract class Repository<
-    I extends CatalogBody,
-    O extends CatalogItem
+    I extends Object,
+    O extends CatalogBody
 > {
     protected db: Database = db
     protected table: string
     protected allStm!: Statement<Filters, Obj>
     protected getByIDStm!: Statement<ID, Maybe<Obj>>
-    protected deleteStm!: Transaction<(args: DeleteArgs) => Array<Maybe<Obj>>>
+    protected deleteStm!: Transaction<(args: DeleteArgs) => Array<Maybe<O>>>
+    protected logStm!: Statement<CatalogItem, unknown>
+    protected changeStm!: Statement<ID & { desc: string }, unknown>
+
     protected mapper?: Record<string, string>
     protected abstract insertStm: Statement<I, O> | Transaction<(input: I) => O>
     protected abstract updateStm:
         | Statement<I, O>
         | Transaction<(input: I, id: number) => O>
+
     protected mapFunc = (item: Maybe<Obj>) =>
         mapTo<O>(toJSON<Obj>(item), this.mapper)
+    protected mapArr = (items: Maybe<Obj>[]) =>
+        items.map(this.mapFunc).filter(notFalsy)
 
     constructor(table: string) {
         this.table = table
@@ -29,32 +35,31 @@ export default abstract class Repository<
         order = "nombre",
         filter = "nombre",
     }: RepoArgs) => {
-        const deleteLogStm = this.db.prepare<CatalogItem, unknown>(
-            "INSERT INTO Log VALUES (@id, @name)"
+        this.logStm = this.db.prepare(
+            "INSERT INTO Log (id, usuario) VALUES (@id, @name)"
         )
-        const deleteDescStm = this.db.prepare<ID & { desc: string }, unknown>(
+        this.changeStm = this.db.prepare(
             "INSERT INTO Log_Cambio VALUES (@id, @desc)"
         )
-
         this.allStm = this.db.prepare(this.allQuery(columns, order, filter))
         this.getByIDStm = this.db.prepare(this.getByIDQuery(columns))
         this.deleteStm = this.db.transaction(
-            ({ ids, username, table = this.table }) => {
+            ({ ids, username = "Desconocido", target }) => {
                 const placeholders = getPlaceholders(ids)
+                const logID = this.addLog(username)
                 const stm = this.db.prepare<number[], Obj>(
                     `DELETE FROM ${this.table} WHERE id IN (${placeholders}) RETURNING *`
                 )
-                const items = stm
-                    .all(...ids)
-                    .map(this.mapFunc)
-                    .filter(notFalsy)
-                const logID = this.nextID("Log")!
-                const names = items.map((item) => item.name)
-                const desc = `<strong>${username} <span class="danger">eliminó</span></strong> (${table}): ${arrConj(
-                    names
-                )}`
-                deleteLogStm.run({ id: logID, name: username })
-                deleteDescStm.run({ id: logID, desc })
+                const items = this.mapArr(stm.all(...ids))
+                this.changeStm.run({
+                    id: logID,
+                    desc: this.getChange({
+                        target,
+                        type: "del",
+                        user: username,
+                        items: items.map((item) => item.name),
+                    }),
+                })
                 return items
             }
         )
@@ -104,5 +109,26 @@ export default abstract class Repository<
             WHERE ${table ?? this.table}.id = miss_id.id + 1
         )`
         return this.db.prepare<[], ID>(query).get()?.id
+    }
+
+    protected addLog(user: string) {
+        const logID = this.nextID("Log")!
+        this.logStm.run({ id: logID, name: user })
+        return logID
+    }
+
+    protected getChange({ type, user, target, items }: ChangeArgs) {
+        const change = target ? ` ${target}: ` : ":"
+        const strArr = arrConj(items)
+        switch (type) {
+            case "add":
+                return `<strong><span class="text-primary">${user}</span> <span class="text-success">creó</span>${change}</strong>${strArr}`
+            case "upd":
+                return `<strong><span class="text-primary">${user}</span> <span class="text-warning">modificó</span>${change}</strong>${strArr}`
+            case "del":
+                return `<strong><span class="text-primary">${user}</span> <span class="text-error">eliminó</span>${change}</strong>${strArr}`
+            default:
+                throw new Error("Invalid change type")
+        }
     }
 }
