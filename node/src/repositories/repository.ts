@@ -16,9 +16,11 @@ export default abstract class Repository<
     protected changeStm!: Statement<ID & { desc: string }, unknown>
 
     protected mapper?: Record<string, string>
-    protected abstract insertStm: Statement<I, O> | Transaction<(input: I) => O>
+    protected abstract insertStm:
+        | Statement<I, Obj>
+        | Transaction<(input: I) => O>
     protected abstract updateStm:
-        | Statement<I, O>
+        | Statement<I, Obj>
         | Transaction<(input: I, id: number) => O>
 
     protected mapFunc = (item: Maybe<Obj>) =>

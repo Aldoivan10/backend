@@ -1,5 +1,5 @@
 import { Statement } from "better-sqlite3"
-import { toBD } from "../util/util"
+import { toBD } from "../util/obj.util"
 import Repository from "./repository"
 
 export default class CatalogRepository extends Repository<
@@ -10,8 +10,8 @@ export default class CatalogRepository extends Repository<
         id: "id",
         name: "nombre",
     }
-    private insertStm?: Statement<CatalogItem, Obj>
-    private updateStm?: Statement<CatalogItem, Obj>
+    protected insertStm!: Statement<CatalogBody, Obj>
+    protected updateStm!: Statement<CatalogBody, Obj>
 
     constructor() {
         super("Catalogo")
@@ -50,5 +50,16 @@ export default class CatalogRepository extends Repository<
             return this.mapFunc(this.updateStm.get(catalog))
         }
         throw new Error("Method not implemented.")
+    }
+
+    public delete(args: Omit<DeleteArgs, "target">) {
+        const msgs: Record<string, string> = {
+            code: "los códigos",
+            unit: "las unidades",
+            entity_type: "los tipos de entidad",
+            department: "los departamentos",
+            user_type: "los tipos de usuario",
+        }
+        return super.delete({ ...args, target: msgs[this.table] })
     }
 }

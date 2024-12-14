@@ -5,9 +5,9 @@ export default class ProductRepository extends Repository<
     ProductBody,
     Product
 > {
-    private insertStm: Transaction<ProductTran<ProductBody, Product>>
-    private updateStm: Transaction<
-        ProductTran<ProductBody & ID, Maybe<Product>>
+    protected insertStm: Transaction<(product: ProductBody) => Product>
+    protected updateStm: Transaction<
+        (product: ProductBody, id: number) => Maybe<Product>
     >
     protected mapper: Record<string, string> = {
         id: "id",
@@ -40,7 +40,7 @@ export default class ProductRepository extends Repository<
         const delUnitsStm = this.db.prepare<ID, unknown>(
             "DELETE FROM Producto_Unidad WHERE id_producto=@id"
         )
-        const updateStm = this.db.prepare<ProductBody & ID, ID>(
+        const updateStm = this.db.prepare<ProductBody, ID>(
             "UPDATE Producto SET id_departamento=@id_department,id_proveedor=@id_supplier,nombre=@name,cantidad=@amount,compra=@buy,min=@min,reembolsable=@refundable WHERE id=@id RETURNING *"
         )
 
@@ -59,43 +59,54 @@ export default class ProductRepository extends Repository<
             for (const unit of units) insertUnitsStm.run(unit)
             return this.getByID(id)
         })
-        this.updateStm = this.db.transaction((product) => {
+        this.updateStm = this.db.transaction((product, id) => {
             const changes: ProductChanges = [false, false, false]
-            const oldProduct = this.getByID(product.id)
+            const oldProduct = this.getByID(id)
+            const objID = { id }
 
             if (!oldProduct) return null
 
-            const newCodes = this.getCodes(product.id, product)
+            const newCodes = this.getCodes(id, product)
             const oldCodes = this.getCodes(oldProduct.id, oldProduct)
 
             if (this.hasChanges(oldCodes, newCodes)) {
                 changes[0] = true
-                delCodesStm.run(product)
+                delCodesStm.run(objID)
                 for (const code of newCodes) insertCodesStm.run(code)
             }
 
-            const newUnits = this.getUnits(product.id, product)
+            const newUnits = this.getUnits(id, product)
             const oldUnits = this.getUnits(oldProduct.id, oldProduct)
 
             if (this.hasChanges(oldUnits, newUnits)) {
                 changes[1] = true
-                delUnitsStm.run(product)
+                delUnitsStm.run(objID)
                 for (const unit of newUnits) insertUnitsStm.run(unit)
             }
 
             const item = updateStm.get(product)
             changes[2] = Boolean(item)
 
-            return changes.some(Boolean) ? this.getByID(product.id) : null
+            return changes.some(Boolean) ? this.getByID(id) : null
         })
     }
 
-    insert = (item: ProductBody) => this.insertStm(item)
+    public insert(item: ProductBody) {
+        return this.insertStm(item)
+    }
 
-    update = (id: number, item: ProductBody) =>
-        this.updateStm({ ...item, refundable: Number(item.refundable), id })
+    public update(id: number, item: ProductBody) {
+        return this.updateStm(
+            { ...item, refundable: Number(item.refundable) },
+            id
+        )
+    }
 
-    hasChanges(oldArr: ProductArr, newArr: ProductArr) {
+    public delete(args: Omit<DeleteArgs, "target">) {
+        return super.delete({ ...args, target: "los productos" })
+    }
+
+    protected hasChanges(oldArr: ProductArr, newArr: ProductArr) {
         if (oldArr.some((old) => !newArr.find((_) => old.id === _.id)))
             return true
         if ("code" in oldArr[0]) {
@@ -129,14 +140,14 @@ export default class ProductRepository extends Repository<
         return false
     }
 
-    getCodes(id: number, product: Pick<Product, "codes">) {
+    protected getCodes(id: number, product: Pick<Product, "codes">) {
         return product.codes.map((_) => ({
             ..._,
             id_product: id,
         }))
     }
 
-    getUnits(id: number, product: Pick<Product, "units">) {
+    protected getUnits(id: number, product: Pick<Product, "units">) {
         return product.units.map((unit) => ({
             ...unit,
             id_product: id,

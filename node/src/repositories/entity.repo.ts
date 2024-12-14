@@ -1,5 +1,5 @@
 import { Statement } from "better-sqlite3"
-import { toBD } from "../util/util"
+import { toBD } from "../util/obj.util"
 import Repository from "./repository"
 
 export default class EntityRepository extends Repository<EntityBody, Entity> {
@@ -14,8 +14,8 @@ export default class EntityRepository extends Repository<EntityBody, Entity> {
         phone: "telefono",
         email: "correo",
     }
-    private insertStm: Statement<Entity, Obj>
-    private updateStm: Statement<Entity, Obj>
+    protected insertStm: Statement<Entity, Obj>
+    protected updateStm: Statement<Entity, Obj>
 
     constructor() {
         super("Entidad")
@@ -37,5 +37,9 @@ export default class EntityRepository extends Repository<EntityBody, Entity> {
     public update(id: number, item: EntityBody) {
         const entity = toBD<Entity>({ ...item, id }, Object.keys(this.mapper))
         return this.mapFunc(this.updateStm.get(entity))
+    }
+
+    public delete(args: Omit<DeleteArgs, "target">) {
+        return super.delete({ ...args, target: "las entidades" })
     }
 }

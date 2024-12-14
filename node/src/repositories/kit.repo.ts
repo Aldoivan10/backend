@@ -2,8 +2,8 @@ import { Transaction } from "better-sqlite3"
 import Repository from "./repository"
 
 export default class KitRepo extends Repository<KitBody, Kit> {
-    private insertStm: Transaction<(kit: KitBody) => Kit>
-    private updateStm: Transaction<(id: number, kit: KitBody) => Maybe<Kit>>
+    protected insertStm: Transaction<(kit: KitBody) => Kit>
+    protected updateStm: Transaction<(kit: KitBody, id: number) => Maybe<Kit>>
 
     protected mapper: Record<string, string> = {
         id: "id",
@@ -39,10 +39,10 @@ export default class KitRepo extends Repository<KitBody, Kit> {
             for (const product of kit.products) {
                 inserProductStm.run({ kit: kitID, ...product })
             }
-            return this.getByID(kitID)
+            return this.getByID(kitID)!
         })
 
-        this.updateStm = this.db.transaction((id, kit) => {
+        this.updateStm = this.db.transaction((kit, id) => {
             const item = updateKitStm.get({ id, name: kit.name })
             const products = selectProductsStm.all(id)
 
@@ -67,6 +67,10 @@ export default class KitRepo extends Repository<KitBody, Kit> {
     }
 
     public update(id: number, item: KitBody) {
-        return this.updateStm(id, item)
+        return this.updateStm(item, id)
+    }
+
+    public delete(args: Omit<DeleteArgs, "target">) {
+        return super.delete({ ...args, target: "los kits" })
     }
 }
