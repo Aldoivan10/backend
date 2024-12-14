@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt"
 import { Request, Response } from "express"
 
 // Convertir los campos de un objeto a otro objeto (DTO)
@@ -31,11 +30,6 @@ export const getBase = (req: Request, res?: Response) => {
     }
 }
 
-// Validamos que la contraseña sea correcta
-export const isPass = (pass: string, hashed: string) => {
-    return bcrypt.compareSync(pass, hashed)
-}
-
 // Mapea un objeto a JSON (si contienen objetos como string)
 export const toJSON = <T>(item: Maybe<Obj>) => {
     if (item) {
@@ -52,5 +46,6 @@ export const toJSON = <T>(item: Maybe<Obj>) => {
     return null
 }
 
+// Función para filtrar valores falsy
 export const notFalsy = <T>(val: Maybe<T>): val is T =>
     val !== null && val !== undefined
