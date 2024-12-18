@@ -23,7 +23,10 @@ export class FilterDto {
     @Transform(({ value }: { value: string[] }) =>
         value.reduce((arr, item) => {
             const regex = /[a-z0-9]+(_(ASC|DESC)$)?/i
-            if (regex.test(item)) arr.push(item)
+            if (regex.test(item)) {
+                const [column, order = ""] = item.split("_")
+                arr.push(`${column} ${order.toUpperCase()}`.trim())
+            }
             return arr
         }, [] as string[])
     )
