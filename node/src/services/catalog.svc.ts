@@ -1,8 +1,8 @@
 import { CatalogDTO } from "../dtos/catalog.dto"
 import { CatalogRepository } from "../repositories/catalog.repo"
-import { BaseService } from "./base.svc"
+import { Service } from "./service"
 
-export class CatalogService extends BaseService<CatalogBody, CatalogDTO> {
+export class CatalogService extends Service<CatalogBody, CatalogDTO> {
     protected repo: CatalogRepository
     private targetMsgs: Record<string, string> = {
         code: "el código",

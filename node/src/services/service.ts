@@ -3,7 +3,7 @@ import Repository from "../repositories/repository"
 import { arrConj } from "../utils/array.util"
 import { notFalsy } from "../utils/obj.util"
 
-export abstract class BaseService<I extends Record<string, any>, O> {
+export abstract class Service<I extends Record<string, any>, O> {
     protected abstract repo: Repository<I>
 
     constructor(protected readonly dto: ClassConstructor<O>) {}
