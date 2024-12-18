@@ -1,7 +1,10 @@
 import { Database, Statement, Transaction } from "better-sqlite3"
+import db from "../models/db"
 import { getPlaceholders } from "../utils/array.util"
 
 export default abstract class Repository<I extends Record<string, any>> {
+    protected readonly db: Database = db
+
     protected getByIDStm!: Statement<number, Maybe<Obj>>
     protected deleteStm!: Transaction<Repo.Delete>
     protected logStm!: Statement<Repo.Change, unknown>
@@ -10,11 +13,7 @@ export default abstract class Repository<I extends Record<string, any>> {
     protected abstract insertStm: Transaction<Repo.Insert<I>>
     protected abstract updateStm: Transaction<Repo.Update<I>>
 
-    constructor(
-        protected table: string,
-        protected readonly columns: string,
-        protected readonly db: Database = db
-    ) {
+    constructor(protected table: string, protected readonly columns: string) {
         this.logStm = db.prepare("INSERT INTO Log (id, usuario) VALUES (?, ?)")
         this.changeStm = db.prepare("INSERT INTO Log_Cambio VALUES (?, ?)")
         this.getByIDStm = this.db.prepare(
