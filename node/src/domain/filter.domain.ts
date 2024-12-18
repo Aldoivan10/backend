@@ -20,7 +20,7 @@ export class FilterDomain {
 
     constructor(
         private readonly allowedColumns: string[],
-        private readonly filters?: FilterDto
+        filters?: FilterDto
     ) {
         this.setFilters(filters?.filters)
         this.setOffset(filters?.offset)
@@ -49,7 +49,7 @@ export class FilterDomain {
     }
 
     public setOrder(orders?: string[]) {
-        if (orders)
+        if (orders && orders.length)
             this.order =
                 "ORDER BY " +
                 orders.map(this.getOrder.bind(this)).map(Boolean).join()
