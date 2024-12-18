@@ -10,7 +10,7 @@ export class FilterDomain {
         like: "LIKE",
     }
     private orders = ["ASC", "DESC"]
-    private data: Record<string, string> = {}
+    private data: FilterData = {}
     private filter = ""
 
     private where?: string
@@ -28,14 +28,16 @@ export class FilterDomain {
         this.setLimit(filters?.limit)
     }
 
-    public setFilters(filters?: Record<string, string | number>) {
-        if (filters)
+    public setFilters(filters?: FilterData) {
+        if (filters) {
             this.where =
                 "WHERE " +
                 Object.keys(filters)
                     .map(this.getClause.bind(this))
                     .map(Boolean)
                     .join(" AND ")
+            this.data = filters
+        }
     }
 
     public setOffset(offset?: number) {
@@ -53,11 +55,6 @@ export class FilterDomain {
                 orders.map(this.getOrder.bind(this)).map(Boolean).join()
     }
 
-    private setData(
-        filters?: Record<string, string | number>,
-        orders?: Record<string, Maybe<string>>
-    ) {}
-
     public build() {
         const arr = [this.where, this.order, this.offset, this.limit]
         this.filter = arr.filter(Boolean).join(" ")
@@ -66,6 +63,10 @@ export class FilterDomain {
 
     public getFilter() {
         return this.filter
+    }
+
+    public getData() {
+        return this.data
     }
 
     private getClause(key: string) {
