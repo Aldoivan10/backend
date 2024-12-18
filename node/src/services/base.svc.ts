@@ -9,7 +9,10 @@ export abstract class BaseService<I extends Record<string, any>, O> {
     constructor(protected readonly dto: ClassConstructor<O>) {}
 
     public all(data: FilterData, filter: string = "") {
-        return this.repo.all(data, filter).map(this.mapper).filter(notFalsy)
+        return this.repo
+            .all(data, filter)
+            .map(this.mapper.bind(this))
+            .filter(notFalsy)
     }
 
     protected getByID(id: number) {
@@ -25,7 +28,10 @@ export abstract class BaseService<I extends Record<string, any>, O> {
     }
 
     protected delete(ids: number[], log: Repo.Log) {
-        return this.repo.delete(ids, log).map(this.mapper).filter(notFalsy)
+        return this.repo
+            .delete(ids, log)
+            .map(this.mapper.bind(this))
+            .filter(notFalsy)
     }
 
     abstract add(body: I, username: string): O
