@@ -1,65 +1,55 @@
-import { Statement } from "better-sqlite3"
-import { toBD } from "../util/obj.util"
+import { Transaction } from "better-sqlite3"
 import Repository from "./repository"
 
-export default class CatalogRepository extends Repository<
-    CatalogBody,
-    CatalogItem
-> {
-    protected mapper: Record<string, string> = {
-        id: "id",
-        name: "nombre",
-    }
-    protected insertStm!: Statement<CatalogBody, Obj>
-    protected updateStm!: Statement<CatalogBody, Obj>
+export class CatalogRepository extends Repository<CatalogBody> {
+    protected insertStm!: Transaction<Repo.Insert<CatalogBody>>
+    protected updateStm!: Transaction<Repo.Update<CatalogBody>>
 
     constructor() {
-        super("Catalogo")
+        super("Catalogo", "id, nombre")
     }
 
     public setTable(table: string) {
-        this.table = table
-        this.init({ columns: Object.values(this.mapper) })
-        this.insertStm = this.db.prepare(
+        if (this.table === table) return this
+        const insertItemStm = this.db.prepare<CatalogBody & ID, Obj>(
             `INSERT INTO ${table} VALUES (@id, @name) RETURNING *`
         )
-        this.updateStm = this.db.prepare(
+        const updateItemStm = this.db.prepare<CatalogBody & ID, Obj>(
             `UPDATE ${table} SET nombre=@name WHERE id=@id RETURNING *`
         )
+        this.insertStm = this.db.transaction((item, log) => {
+            const id = this.nextID()!
+            if (log) {
+                const logID = this.addLog(log.user)
+                this.changeStm.run(logID, log.desc)
+            }
+            return insertItemStm.get({ id, ...item })
+        })
+
+        this.updateStm = this.db.transaction((id, item, log) => {
+            if (log) {
+                const logID = this.addLog(log.user)
+                this.changeStm.run(logID, log.desc)
+            }
+            return updateItemStm.get({ id, ...item })
+        })
+
+        this.table = table
+
         return this
     }
 
-    public insert(item: CatalogBody) {
-        if (this.insertStm) {
-            const id = this.nextID()!
-            const catalog = toBD<CatalogItem>(
-                { ...item, id },
-                Object.keys(this.mapper)
-            )
-            return this.mapFunc(this.insertStm.get(catalog))!
-        }
+    public insert(item: CatalogBody, log: Repo.Log) {
+        if (this.insertStm) return this.insertStm(item, log)
         throw new Error("Method not implemented.")
     }
 
-    public update(id: number, item: CatalogBody) {
-        if (this.updateStm) {
-            const catalog = toBD<CatalogItem>(
-                { ...item, id },
-                Object.keys(this.mapper)
-            )
-            return this.mapFunc(this.updateStm.get(catalog))
-        }
+    public update(id: number, item: CatalogBody, log: Repo.Log) {
+        if (this.updateStm) return this.updateStm(id, item, log)
         throw new Error("Method not implemented.")
     }
 
-    public delete(args: Omit<DeleteArgs, "target">) {
-        const msgs: Record<string, string> = {
-            code: "los códigos",
-            unit: "las unidades",
-            entity_type: "los tipos de entidad",
-            department: "los departamentos",
-            user_type: "los tipos de usuario",
-        }
-        return super.delete({ ...args, target: msgs[this.table] })
+    public delete(ids: number[], log: Repo.Log) {
+        return super.delete(ids, log)
     }
 }
