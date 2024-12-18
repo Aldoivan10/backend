@@ -19,7 +19,7 @@ export class CatalogService extends BaseService<CatalogBody, CatalogDTO> {
         user_type: "los tipos de usuario",
     }
 
-    constructor(protected table: string = "unit") {
+    constructor(protected table: string = "Codigo") {
         super(CatalogDTO)
         this.repo = new CatalogRepository()
     }
