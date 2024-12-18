@@ -1,13 +1,6 @@
 import { FilterDto } from "../dtos/filter.dto"
 
 export class FilterDomain {
-    private where?: string
-    private offset?: string
-    private limit?: string
-    private order?: string
-
-    private filter = ""
-
     private operatorMap: Record<string, string> = {
         gt: ">",
         gte: ">=",
@@ -17,6 +10,13 @@ export class FilterDomain {
         like: "LIKE",
     }
     private orders = ["ASC", "DESC"]
+    private data: Record<string, string> = {}
+    private filter = ""
+
+    private where?: string
+    private offset?: string
+    private limit?: string
+    private order?: string
 
     constructor(
         private readonly allowedColumns: string[],
@@ -46,15 +46,17 @@ export class FilterDomain {
         if (limit) this.limit = `LIMIT ${limit}`
     }
 
-    public setOrder(orders?: Record<string, Maybe<string>>) {
+    public setOrder(orders?: string[]) {
         if (orders)
             this.order =
                 "ORDER BY " +
-                Object.entries(orders)
-                    .map(this.getOrder.bind(this))
-                    .map(Boolean)
-                    .join()
+                orders.map(this.getOrder.bind(this)).map(Boolean).join()
     }
+
+    private setData(
+        filters?: Record<string, string | number>,
+        orders?: Record<string, Maybe<string>>
+    ) {}
 
     public build() {
         const arr = [this.where, this.order, this.offset, this.limit]
@@ -72,11 +74,14 @@ export class FilterDomain {
         return `${column} ${this.getOperator(operatorKey)} @${key}`
     }
 
-    private getOrder([key, val]: [string, Maybe<string>]) {
-        const order = (val ?? "ASC").toUpperCase()
-        if (!this.allowedColumns.includes(key) || !this.orders.includes(order))
+    private getOrder(item: string) {
+        const [column, order = ""] = item.split("_")
+        if (
+            !this.allowedColumns.includes(column) ||
+            !this.orders.includes(order)
+        )
             return ""
-        return `${key} ${order}`
+        return `${column} ${order}`.trim()
     }
 
     private getOperator(operator: string) {
