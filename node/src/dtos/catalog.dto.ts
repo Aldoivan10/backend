@@ -8,9 +8,9 @@ export class CatalogDTO {
     @Min(1)
     id!: number
 
-    @Expose({ name: "name" })
+    @Expose({ name: "nombre" })
     @Type(() => String)
     @IsNotEmpty()
     @IsString()
-    nombre!: string
+    name!: string
 }
