@@ -4,7 +4,7 @@ import { getPlaceholders } from "../utils/array.util"
 export default abstract class Repository<I extends Record<string, any>> {
     protected getByIDStm!: Statement<number, Maybe<Obj>>
     protected deleteStm!: Transaction<Repo.Delete>
-    protected logStm!: Statement<CatalogItem, unknown>
+    protected logStm!: Statement<Repo.Change, unknown>
     protected changeStm!: Statement<Repo.Change, unknown>
 
     protected abstract insertStm: Transaction<Repo.Insert<I>>
@@ -53,7 +53,7 @@ export default abstract class Repository<I extends Record<string, any>> {
 
     protected addLog(user: string) {
         const logID = this.nextID("Log")!
-        this.logStm.run({ id: logID, name: user })
+        this.logStm.run(logID, user)
         return logID
     }
 
