@@ -15,7 +15,7 @@ export abstract class Service<I extends Record<string, any>, O> {
             .filter(notFalsy)
     }
 
-    protected getByID(id: number) {
+    public getByID(id: number) {
         return this.mapper(this.repo.getByID(id))
     }
 
