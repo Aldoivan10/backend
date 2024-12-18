@@ -33,10 +33,11 @@ export default abstract class Repository<I extends Record<string, any>> {
         })
     }
 
-    public all(item: I, filter: string = "") {
-        const query = `SELECT ${this.columns} FROM ${this.table} ${filter}`
-        const stm = this.db.prepare<I, Obj>(query)
-        return stm.all(item)
+    public all(data: FilterData, filter: string = "") {
+        const query =
+            `SELECT ${this.columns} FROM ${this.table} ${filter}`.trim()
+        const stm = this.db.prepare<FilterData, Obj>(query)
+        return stm.all(data)
     }
 
     public getByID(id: number) {
