@@ -1,35 +1,34 @@
 import { Transform, Type } from "class-transformer"
 import { IsArray, IsNumber, IsObject, IsOptional, Min } from "class-validator"
 
+const transformFilterFn = ({ value }: DTO.TransformFilters) => {
+    const regex = /[a-z0-9]+(_(gt|gte|lt|lte|eq|like)$)?/i
+    return Object.entries(value).reduce((obj, [key, val]) => {
+        if (regex.test(key))
+            obj[key] = typeof val === "string" ? val : Number(val)
+        return obj
+    }, {} as Record<string, string | number>)
+}
+
+const transformOrderFn = ({ value }: DTO.TransformOrders) => {
+    const regex = /[a-z0-9]+(_(asc|desc)$)?/i
+    return value.reduce((arr, item) => {
+        if (regex.test(item)) arr.push(item)
+        return arr
+    }, [] as string[])
+}
+
 export class FilterDto {
     @IsOptional()
     @IsObject()
     @Type(() => Object)
-    @Transform(
-        ({ value }: { value: Record<string, string | number | boolean> }) =>
-            Object.fromEntries(
-                Object.entries(value).map(([key, val]) => [
-                    key,
-                    typeof val === "string" ? val : Number(val),
-                ])
-            ),
-        { toClassOnly: true }
-    )
+    @Transform(transformFilterFn)
     filters?: Record<string, string | number>
 
     @IsOptional()
     @IsArray()
     @Type(() => Array<string>)
-    @Transform(({ value }: { value: string[] }) =>
-        value.reduce((arr, item) => {
-            const regex = /[a-z0-9]+(_(ASC|DESC)$)?/i
-            if (regex.test(item)) {
-                const [column, order = ""] = item.split("_")
-                arr.push(`${column} ${order.toUpperCase()}`.trim())
-            }
-            return arr
-        }, [] as string[])
-    )
+    @Transform(transformOrderFn)
     orders?: string[]
 
     @IsOptional()
