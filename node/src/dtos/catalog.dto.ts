@@ -1,9 +1,16 @@
-import { Expose } from "class-transformer"
+import { Expose, Type } from "class-transformer"
+import { IsNotEmpty, IsNumber, IsString, Min } from "class-validator"
 
-export class BaseDTO {
+export class CatalogDTO {
     @Expose({ name: "id" })
+    @Type(() => Number)
+    @IsNumber()
+    @Min(1)
     id!: number
 
     @Expose({ name: "nombre" })
+    @Type(() => String)
+    @IsNotEmpty()
+    @IsString()
     name!: string
 }
