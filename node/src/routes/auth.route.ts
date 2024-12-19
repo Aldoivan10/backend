@@ -49,7 +49,7 @@ router.post(
 
             if (!user) throw AuthError.token()
             if (user.role !== "Administrador") throw AuthError.rol()
-            if (!svc.login(user.name, password)) throw AuthError.auth()
+            if (!svc.login(user, password)) throw AuthError.auth()
 
             const accessToken = await singToken(user, AT_TIME)
             const refreshToken = await singToken(user, RT_TIME)
