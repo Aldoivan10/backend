@@ -1,5 +1,5 @@
 import { ClassConstructor, plainToClass } from "class-transformer"
-import Repository from "../repositories/repository"
+import { Repository } from "../repositories/repository"
 import { arrConj } from "../utils/array.util"
 import { notFalsy } from "../utils/obj.util"
 
