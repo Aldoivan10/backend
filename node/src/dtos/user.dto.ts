@@ -1,5 +1,5 @@
 import { Exclude, Expose, Transform, Type } from "class-transformer"
-import { IsNotEmpty, IsString } from "class-validator"
+import { IsNotEmpty, IsString, Min } from "class-validator"
 
 const transformShortcuts = (shortcuts: DTO.Shortcut[], view: 0 | 1) => {
     return shortcuts
@@ -34,4 +34,39 @@ export class InitUser {
     @Type(() => Shortcut)
     @Transform(({ obj }) => transformShortcuts(JSON.parse(obj.atajos), 0))
     shortcuts!: Shortcut[]
+}
+
+export class User {
+    @Type(() => Number)
+    @Min(1)
+    id!: number
+
+    @Expose({ name: "nombre" })
+    @Type(() => String)
+    @IsNotEmpty()
+    @IsString()
+    name!: string
+
+    @Expose()
+    @Type(() => String)
+    @IsNotEmpty()
+    @IsString()
+    role!: string
+
+    @Expose()
+    @Type(() => Boolean)
+    @Transform((_) => false)
+    logged!: boolean
+
+    @Expose({ name: "contrasenia" })
+    password?: string
+
+    @Expose()
+    get payload() {
+        return {
+            name: this.name,
+            role: this.role,
+            logged: this.logged,
+        }
+    }
 }
