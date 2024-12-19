@@ -1,10 +1,9 @@
-import { Database, Statement, Transaction } from "better-sqlite3"
+import { Statement, Transaction } from "better-sqlite3"
 import db from "../models/db"
 import { getPlaceholders } from "../utils/array.util"
+import { DBRepo } from "./db.repo"
 
-export default abstract class Repository<I extends Record<string, any>> {
-    protected readonly db: Database = db
-
+export abstract class Repository<I extends Record<string, any>> extends DBRepo {
     protected getByIDStm!: Statement<number, Maybe<Obj>>
     protected deleteStm!: Transaction<Repo.Delete>
     protected logStm!: Statement<Repo.Change, unknown>
@@ -13,23 +12,26 @@ export default abstract class Repository<I extends Record<string, any>> {
     protected abstract insertStm: Transaction<Repo.Insert<I>>
     protected abstract updateStm: Transaction<Repo.Update<I>>
 
-    constructor(protected table: string, protected readonly columns: string) {
+    constructor(protected readonly columns: string, protected table?: string) {
+        super()
         this.logStm = db.prepare("INSERT INTO Log (id, usuario) VALUES (?, ?)")
         this.changeStm = db.prepare("INSERT INTO Log_Cambio VALUES (?, ?)")
-        this.getByIDStm = this.db.prepare(
-            `SELECT ${columns} FROM ${table} WHERE id = ?`
-        )
-        this.deleteStm = this.db.transaction((ids, log) => {
-            const placeholders = getPlaceholders(ids)
-            const stm = this.db.prepare<number[], Obj>(
-                `DELETE FROM ${this.table} WHERE id IN (${placeholders}) RETURNING *`
+        if (table) {
+            this.getByIDStm = this.db.prepare(
+                `SELECT ${columns} FROM ${table} WHERE id = ?`
             )
-            if (log) {
-                const logID = this.addLog(log.user)
-                this.changeStm.run(logID, log.desc)
-            }
-            return stm.all(...ids)
-        })
+            this.deleteStm = this.db.transaction((ids, log) => {
+                const placeholders = getPlaceholders(ids)
+                const stm = this.db.prepare<number[], Obj>(
+                    `DELETE FROM ${table} WHERE id IN (${placeholders}) RETURNING *`
+                )
+                if (log) {
+                    const logID = this.addLog(log.user)
+                    this.changeStm.run(logID, log.desc)
+                }
+                return stm.all(...ids)
+            })
+        }
     }
 
     public all(data: FilterData, filter: string = "") {
