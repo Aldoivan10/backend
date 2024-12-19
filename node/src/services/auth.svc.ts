@@ -18,12 +18,14 @@ export class AuthService {
         return user.payload
     }
 
-    public login(username: string, password?: Maybe<string>) {
-        const user = plainToClass(User, this.repo.auth(username))
-        return (
-            password &&
-            user.password &&
-            bcrypt.compareSync(password, user.password)
-        )
+    public login(payload: TokenPayload, password?: Maybe<string>) {
+        const user = plainToClass(User, this.repo.auth(payload.name))
+        if (!this.isPassword(password, user.password)) return false
+        payload.logged = true
+        return true
+    }
+
+    private isPassword(password?: Maybe<string>, hashed?: Maybe<string>) {
+        return password && hashed && bcrypt.compareSync(password, hashed)
     }
 }
