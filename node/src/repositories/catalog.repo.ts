@@ -6,7 +6,7 @@ export class CatalogRepository extends Repository<CatalogBody> {
     protected updateStm!: Transaction<Repo.Update<CatalogBody>>
 
     constructor() {
-        super("Codigo", "id, nombre")
+        super("id, nombre")
     }
 
     public setTable(table: string) {
