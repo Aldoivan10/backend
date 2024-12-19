@@ -1,17 +1,17 @@
 import { NextFunction, Request, Response, Router } from "express"
 import { AT_TIME, RT_TIME, TK_OPT } from "../config"
-import { tokenMW } from "../middleware/token.mw"
-import { validationMW } from "../middleware/validation.mw"
-import { AuthError } from "../model/error"
-import AuthRepo from "../repositories/auth.repo"
-import { singToken } from "../util/token.util"
+import { tokenMW } from "../middlewares/token.mw"
+import { validationMW } from "../middlewares/validation.mw"
+import { AuthError } from "../models/error"
+import { AuthService } from "../services/auth.svc"
+import { singToken } from "../utils/token.util"
 import { adminVal, loginVal } from "../validations/login.val"
 
 const router = Router()
-const repo = new AuthRepo()
+const svc = new AuthService()
 
 router.get("/users", (_, res) => {
-    res.json({ data: repo.users() })
+    res.json({ data: svc.availableUsers() })
 })
 
 router.post(
@@ -19,8 +19,8 @@ router.post(
     validationMW(loginVal),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const data: LoginBody = req.body
-            const user = repo.auth(data)
+            const { username } = req.body
+            const user = svc.authenticate(username)
 
             if (!user) throw AuthError.auth()
 
@@ -49,7 +49,7 @@ router.post(
 
             if (!user) throw AuthError.token()
             if (user.role !== "Administrador") throw AuthError.rol()
-            if (!repo.login(user, password)) throw AuthError.auth()
+            if (!svc.login(user.name, password)) throw AuthError.auth()
 
             const accessToken = await singToken(user, AT_TIME)
             const refreshToken = await singToken(user, RT_TIME)
