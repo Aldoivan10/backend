@@ -1,0 +1,34 @@
+### Obtener todos
+GET http://localhost:3000/user_type
+
+### Obtener por id
+GET http://localhost:3000/user_type/1
+
+### Agregar
+POST http://localhost:3000/user_type
+Content-Type: application/json
+
+{
+    "name": "Administrador",
+    "username": "Administrador"
+}
+
+
+### Eliminar
+DELETE http://localhost:3000/user_type/
+Content-Type: application/json
+
+{
+    "ids": [2],
+    "username": "Administrador"
+}
+
+
+### Actualizar nombre
+PATCH  http://localhost:3000/user_type/1
+Content-Type: application/json
+
+{
+    "name": "Entidad nuevo nombre",
+    "username": "Administrador"
+}

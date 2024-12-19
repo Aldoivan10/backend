@@ -1,0 +1,35 @@
+### Obtener todos
+GET http://localhost:3000/entity
+
+### Obtener por id
+GET http://localhost:3000/entity/1
+
+### Agregar
+POST http://localhost:3000/entity
+Content-Type: application/json
+
+{
+    "id_entity_type": 1,
+    "name": "Entidad con token",
+    "username": "root"
+}
+
+
+### Eliminar
+DELETE http://localhost:3000/entity/
+Content-Type: application/json
+
+{
+    "ids": [2],
+    "username": "Administrador"
+}
+
+
+### Actualizar nombre
+PATCH  http://localhost:3000/entity/1
+Content-Type: application/json
+
+{
+    "name": "Entidad nuevo nombre",
+    "username": "Administrador"
+}

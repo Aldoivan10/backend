@@ -1,0 +1,78 @@
+### Obtener todos
+GET http://localhost:3000/product
+
+### Obtener todos con filtro like
+GET http://localhost:3000/product/cab*
+
+### Obtener todos con filtro
+GET http://localhost:3000/product/cab%
+
+### Obtener por id
+GET http://localhost:3000/product/1
+
+### Agregar
+POST http://localhost:3000/product
+Content-Type: application/json
+
+{
+    "id_department": 1,
+    "id_supplier": 1,
+    "amount": 100,
+    "buy": 100,
+    "min": 5,
+    "refundable": true,
+    "codes": [
+        {
+            "id": 2,
+            "code": "Código 2"
+        }
+    ],
+    "units": [{
+        "id": 1,
+        "sale": 100,
+        "profit": 10
+    },
+    {
+        "id": 2,
+        "sale": 200
+    }],
+    "name": "Cabezal",
+    "username": "Administrador"
+}
+
+
+### Eliminar
+DELETE http://localhost:3000/product/
+Content-Type: application/json
+
+{
+    "ids": [4],
+    "username": "Administrador"
+}
+
+
+### Actualizar nombre
+PATCH  http://localhost:3000/product/2
+Content-Type: application/json
+
+{
+    "id_department": 1,
+    "id_supplier": 1,
+    "amount": 100,
+    "buy": 100,
+    "min": 5,
+    "refundable": true,
+    "codes": [
+        {
+            "id": 4,
+            "code": "Código 2"
+        }
+    ],
+    "units": [{
+        "id": 1,
+        "sale": 100,
+        "profit": 10
+    }],
+    "name": "Nuevo cable",
+    "username": "Administrador"
+}
