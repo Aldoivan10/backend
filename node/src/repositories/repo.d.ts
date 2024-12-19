@@ -8,4 +8,8 @@ declare namespace Repo {
     type Change = [number, string]
 
     type Delete = (ids: number[], log: Maybe<Log>) => Array<Maybe<Obj>>
+
+    type InitUser = { nombre: string; atajos: string }
+
+    type TokenUser = { id: number; name: string; role: string; logged: boolean }
 }
