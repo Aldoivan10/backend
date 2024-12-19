@@ -1,5 +1,5 @@
 import { Transaction } from "better-sqlite3"
-import Repository from "./repository"
+import { Repository } from "./repository"
 
 export class CatalogRepository extends Repository<CatalogBody> {
     protected insertStm!: Transaction<Repo.Insert<CatalogBody>>
