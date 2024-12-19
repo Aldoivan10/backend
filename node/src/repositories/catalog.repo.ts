@@ -1,4 +1,5 @@
 import { Transaction } from "better-sqlite3"
+import { getPlaceholders } from "../utils/array.util"
 import { Repository } from "./repository"
 
 export class CatalogRepository extends Repository<CatalogBody> {
@@ -32,6 +33,18 @@ export class CatalogRepository extends Repository<CatalogBody> {
                 this.changeStm.run(logID, log.desc)
             }
             return updateItemStm.get({ id, ...item })
+        })
+
+        this.deleteStm = this.db.transaction((ids, log) => {
+            const placeholders = getPlaceholders(ids)
+            const stm = this.db.prepare<number[], Obj>(
+                `DELETE FROM ${table} WHERE id IN (${placeholders}) RETURNING *`
+            )
+            if (log) {
+                const logID = this.addLog(log.user)
+                this.changeStm.run(logID, log.desc)
+            }
+            return stm.all(...ids)
         })
 
         this.table = table
