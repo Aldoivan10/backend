@@ -60,7 +60,7 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
         const desc = this.getChange({
             type: "upd",
             user: username,
-            target: this.targetMsgs[this.table],
+            target: this.deleteMsgs[this.table],
             items: names,
         })
         const items = super.delete(ids, { user: username, desc })
