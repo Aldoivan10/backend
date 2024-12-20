@@ -35,6 +35,10 @@ export class CatalogRepository extends Repository<CatalogBody> {
             return updateItemStm.get({ id, ...item })
         })
 
+        this.getByIDStm = this.db.prepare(
+            `SELECT ${this.columns} FROM ${table} WHERE id = ?`
+        )
+
         this.deleteStm = this.db.transaction((ids, log) => {
             const placeholders = getPlaceholders(ids)
             const stm = this.db.prepare<number[], Obj>(
