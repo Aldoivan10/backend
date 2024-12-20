@@ -4,6 +4,13 @@ import { Service } from "./service"
 
 export class CatalogService extends Service<CatalogBody, CatalogDTO> {
     protected repo: CatalogRepository
+    private tables: Record<string, string> = {
+        code: "Codigo",
+        unit: "Unidad",
+        entity_type: "Tipo_Entidad",
+        department: "Departamento",
+        user_type: "Tipo_Usuario",
+    }
     private targetMsgs: Record<string, string> = {
         code: "el código",
         unit: "la unidad",
@@ -25,8 +32,8 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
     }
 
     public setTable(table: string) {
-        this.repo.setTable(table)
-        this.table = table
+        this.table = this.tables[table]
+        this.repo.setTable(this.table)
         return this
     }
 
@@ -42,11 +49,13 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
     }
 
     public edit(id: number, body: CatalogBody, username: string) {
+        const old = this.getByID(id)
+        if (!old) return null
         const desc = this.getChange({
             type: "upd",
             user: username,
             target: this.targetMsgs[this.table],
-            items: [body.name],
+            items: [`de ${old.name} a ${body.name}`],
         })
         const item = super.update(id, body, { user: username, desc })
         return item
@@ -54,7 +63,7 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
 
     public remove(ids: number[], username: string) {
         const names = ids
-            .map(this.getByID)
+            .map(this.getByID.bind(this))
             .map((i) => i?.name)
             .filter(Boolean)
         const desc = this.getChange({
