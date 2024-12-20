@@ -20,19 +20,21 @@ export class CatalogRepository extends Repository<CatalogBody> {
         )
         this.insertStm = this.db.transaction((item, log) => {
             const id = this.nextID()!
-            if (log) {
+            const created = insertItemStm.get({ id, ...item })
+            if (log && created) {
                 const logID = this.addLog(log.user)
                 this.changeStm.run(logID, log.desc)
             }
-            return insertItemStm.get({ id, ...item })
+            return created
         })
 
         this.updateStm = this.db.transaction((id, item, log) => {
-            if (log) {
+            const updated = updateItemStm.get({ id, ...item })
+            if (log && updated) {
                 const logID = this.addLog(log.user)
                 this.changeStm.run(logID, log.desc)
             }
-            return updateItemStm.get({ id, ...item })
+            return updated
         })
 
         this.getByIDStm = this.db.prepare(
@@ -44,11 +46,12 @@ export class CatalogRepository extends Repository<CatalogBody> {
             const stm = this.db.prepare<number[], Obj>(
                 `DELETE FROM ${table} WHERE id IN (${placeholders}) RETURNING *`
             )
-            if (log) {
+            const deleteds = stm.all(...ids)
+            if (log && deleteds.length) {
                 const logID = this.addLog(log.user)
                 this.changeStm.run(logID, log.desc)
             }
-            return stm.all(...ids)
+            return deleteds
         })
 
         this.table = table

@@ -25,11 +25,12 @@ export abstract class Repository<I extends Record<string, any>> extends DBRepo {
                 const stm = this.db.prepare<number[], Obj>(
                     `DELETE FROM ${table} WHERE id IN (${placeholders}) RETURNING *`
                 )
-                if (log) {
+                const deleteds = stm.all(...ids)
+                if (log && deleteds.length) {
                     const logID = this.addLog(log.user)
                     this.changeStm.run(logID, log.desc)
                 }
-                return stm.all(...ids)
+                return deleteds
             })
         }
     }
