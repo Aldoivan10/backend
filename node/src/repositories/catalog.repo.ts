@@ -2,9 +2,9 @@ import { Transaction } from "better-sqlite3"
 import { getPlaceholders } from "../utils/array.util"
 import { Repository } from "./repository"
 
-export class CatalogRepository extends Repository<CatalogBody> {
-    protected insertStm!: Transaction<Repo.Insert<CatalogBody>>
-    protected updateStm!: Transaction<Repo.Update<CatalogBody>>
+export class CatalogRepository extends Repository<Body.Catalog> {
+    protected insertStm!: Transaction<Repo.Insert<Body.Catalog>>
+    protected updateStm!: Transaction<Repo.Update<Body.Catalog>>
 
     constructor() {
         super("id, nombre")
@@ -12,10 +12,10 @@ export class CatalogRepository extends Repository<CatalogBody> {
 
     public setTable(table: string) {
         if (this.table === table) return this
-        const insertItemStm = this.db.prepare<CatalogBody & ID, Obj>(
+        const insertItemStm = this.db.prepare<Body.Catalog & ID, Obj>(
             `INSERT INTO ${table} VALUES (@id, @name) RETURNING *`
         )
-        const updateItemStm = this.db.prepare<CatalogBody & ID, Obj>(
+        const updateItemStm = this.db.prepare<Body.Catalog & ID, Obj>(
             `UPDATE ${table} SET nombre=@name WHERE id=@id RETURNING *`
         )
         this.insertStm = this.db.transaction((item, log) => {
@@ -59,12 +59,12 @@ export class CatalogRepository extends Repository<CatalogBody> {
         return this
     }
 
-    public insert(item: CatalogBody, log: Repo.Log) {
+    public insert(item: Body.Catalog, log: Repo.Log) {
         if (this.insertStm) return this.insertStm(item, log)
         throw new Error("Method not implemented.")
     }
 
-    public update(id: number, item: CatalogBody, log: Repo.Log) {
+    public update(id: number, item: Body.Catalog, log: Repo.Log) {
         if (this.updateStm) return this.updateStm(id, item, log)
         throw new Error("Method not implemented.")
     }
