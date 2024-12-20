@@ -46,9 +46,13 @@ export abstract class Repository<I extends Record<string, any>> extends DBRepo {
         return this.getByIDStm.get(id)
     }
 
-    abstract insert(item: I, log: Repo.Log): Obj
+    public insert(item: I, log: Repo.Log) {
+        return this.insertStm(item, log).get()
+    }
 
-    abstract update(id: number, item: I, log: Repo.Log): Maybe<Obj>
+    public update(id: number, item: I, log: Repo.Log) {
+        return this.updateStm(id, item, log).get()
+    }
 
     public delete(ids: number[], log?: Repo.Log) {
         return this.deleteStm(ids, log)
