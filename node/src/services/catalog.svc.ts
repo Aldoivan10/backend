@@ -32,8 +32,8 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
     }
 
     public setTable(table: string) {
-        this.table = this.tables[table]
-        this.repo.setTable(this.table)
+        this.repo.setTable(this.tables[table])
+        this.table = table
         return this
     }
 
