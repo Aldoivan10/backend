@@ -1,45 +1,38 @@
-import { Statement } from "better-sqlite3"
-import { toBD } from "../util/obj.util"
-import Repository from "./repository"
+import { Transaction } from "better-sqlite3"
+import { Repository } from "./repository"
 
-export default class EntityRepository extends Repository<EntityBody, Entity> {
-    protected mapper: Record<string, string> = {
-        id: "id",
-        name: "nombre",
-        id_entity_type: "id_tipo_entidad",
-        rfc: "rfc",
-        address: "direccion",
-        domicile: "domicilio",
-        postal_code: "codigo_postal",
-        phone: "telefono",
-        email: "correo",
-    }
-    protected insertStm: Statement<Entity, Obj>
-    protected updateStm: Statement<Entity, Obj>
+export default class EntityRepository extends Repository<Body.Entity> {
+    protected insertStm: Transaction<Repo.Insert<Body.Entity>>
+    protected updateStm: Transaction<Repo.Update<Body.Entity>>
 
     constructor() {
-        super("Entidad")
-        this.init({ columns: Object.values(this.mapper) })
-        this.insertStm = this.db.prepare(
-            `INSERT INTO ${this.table} VALUES (@id, @id_entity_type, @rfc, @name, @address, @domicile, @postal_code, @phone, @email) RETURNING *`
+        super(
+            "id, nombre, tipo, rfc, dirección, domicilio, codigo_postal, telefono,correo",
+            "Entidad_Vista"
         )
-        this.updateStm = this.db.prepare(
-            `UPDATE ${this.table} SET id_tipo_entidad=@id_entity_type, rfc=@rfc, nombre=@name, direccion=@address, domicilio=@domicile, codigo_postal=@postal_code, telefono=@phone, correo=@email WHERE id=@id RETURNING *`
+        const insertItemStm = this.db.prepare<Body.Entity & ID, Obj>(
+            `INSERT INTO Entidad VALUES (@id, @id_entity_type, @rfc, @name, @address, @domicile, @postal_code, @phone, @email) RETURNING *`
         )
-    }
+        const updateItemStm = this.db.prepare<Body.Entity & ID, Obj>(
+            `UPDATE Entidad SET nombre=@name, id_tipo_entidad=@id_entity_type, rfc=@rfc, dirección=@address, domicilio=@domicile, codigo_postal=@postal_code, telefono=@phone,correo=@email WHERE id=@id RETURNING *`
+        )
+        this.insertStm = this.db.transaction((item, log) => {
+            const id = this.nextID()!
+            const created = insertItemStm.get({ id, ...item })
+            if (log && created) {
+                const logID = this.addLog(log.user)
+                this.changeStm.run(logID, log.desc)
+            }
+            return created
+        })
 
-    public insert(item: EntityBody) {
-        const id = this.nextID()!
-        const entity = toBD<Entity>({ ...item, id }, Object.keys(this.mapper))
-        return this.mapFunc(this.insertStm.get(entity))!
-    }
-
-    public update(id: number, item: EntityBody) {
-        const entity = toBD<Entity>({ ...item, id }, Object.keys(this.mapper))
-        return this.mapFunc(this.updateStm.get(entity))
-    }
-
-    public delete(args: Omit<DeleteArgs, "target">) {
-        return super.delete({ ...args, target: "las entidades" })
+        this.updateStm = this.db.transaction((id, item, log) => {
+            const updated = updateItemStm.get({ id, ...item })
+            if (log && updated) {
+                const logID = this.addLog(log.user)
+                this.changeStm.run(logID, log.desc)
+            }
+            return updated
+        })
     }
 }
