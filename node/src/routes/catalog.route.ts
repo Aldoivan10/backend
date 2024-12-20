@@ -1,75 +1,70 @@
 import { SqliteError } from "better-sqlite3"
+import { plainToClass } from "class-transformer"
 import { NextFunction, Request, Response, Router } from "express"
 import { checkSchema } from "express-validator"
-import { requireAdminMW, tokenMW } from "../middleware/token.mw"
-import { validationMW } from "../middleware/validation.mw"
-import { DBError } from "../model/error"
-import CatalogRepository from "../repositories/catalog.repo"
-import { getBase } from "../util/obj.util"
+import { FilterDomain } from "../domains/filter.domain"
+import { FilterDto } from "../dtos/filter.dto"
+import { requireAdminMW, tokenMW } from "../middlewares/token.mw"
+import { validationMW } from "../middlewares/validation.mw"
+import { DBError } from "../models/error"
+import { CatalogService } from "../services/catalog.svc"
 import catalogVal from "../validations/catalog.val"
-import * as GeneralVal from "../validations/general.val"
+import { idsVal } from "../validations/general.val"
 
 const catalogs: CatalogMap = {
     code: {
-        msgs: {
-            del: "Códigos eliminados",
-            add: "Código agregado",
-            upd: "Código actaualizado",
-        },
-        table: "Codigo",
+        del: "Códigos eliminados",
+        add: "Código agregado",
+        upd: "Código actaualizado",
     },
     unit: {
-        msgs: {
-            del: "Unidades eliminadas",
-            add: "Unidad agregada",
-            upd: "Unidad actualizada",
-        },
-        table: "Unidad",
+        del: "Unidades eliminadas",
+        add: "Unidad agregada",
+        upd: "Unidad actualizada",
     },
     entity_type: {
-        msgs: {
-            add: "Tipo agregado",
-            del: "Tipos eliminados",
-            upd: "Tipo actualizado",
-        },
-        table: "Tipo_Entidad",
+        add: "Tipo agregado",
+        del: "Tipos eliminados",
+        upd: "Tipo actualizado",
     },
     department: {
-        msgs: {
-            add: "Departamento agregado",
-            del: "Departamentos eliminados",
-            upd: "Departamento actualizado",
-        },
-        table: "Departamento",
+        add: "Departamento agregado",
+        del: "Departamentos eliminados",
+        upd: "Departamento actualizado",
     },
     user_type: {
-        msgs: {
-            add: "Tipo de usuario agregado",
-            del: "Tipos de usuario eliminados",
-            upd: "Tipo de usuario actualizado",
-        },
-        table: "Tipo_Usuario",
+        add: "Tipo de usuario agregado",
+        del: "Tipos de usuario eliminados",
+        upd: "Tipo de usuario actualizado",
     },
 }
 
 const router = Router()
-const repo = new CatalogRepository()
+const svc = new CatalogService()
 const root = `/:table(${Object.keys(catalogs).join("|")})`
+const columns = ["id", "nombre"]
 
-function getData(req: Request, res?: Response) {
-    const { filter, ids } = getBase(req)
-    const item: CatalogBody = req.body
-    const { id, table }: CatalogParams = req.params
-    const username = res?.locals.user?.name
-    const catalog = catalogs[table]
+function getFilter(req: Request) {
+    const { table } = req.params
+    const filterDTO = plainToClass(FilterDto, req.params, {
+        excludeExtraneousValues: true,
+    })
+    const filter = new FilterDomain(columns, filterDTO).build()
+    return { filter, table }
+}
+
+function getData(req: Request, res: Response) {
+    const { id, table } = req.params
+    const data = catalogs[table]
+    const username = res.locals.user?.name ?? ""
+    const body = req.body
+
     return {
-        ids,
-        item,
-        filter,
-        id: +id,
+        msgs: data,
+        item: body,
         username,
-        msgs: catalog.msgs,
-        table: catalog.table,
+        id: +id,
+        table,
     }
 }
 
@@ -83,8 +78,10 @@ async function check(req: Request, _: Response, next: NextFunction) {
 // Obtener todos
 router.get(root, (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { filter, table } = getData(req)
-        const items = repo.setTable(table).all(filter)
+        const { filter, table } = getFilter(req)
+        const items = svc
+            .setTable(table)
+            .all(filter.getData(), filter.getFilter())
         res.json({ data: items })
     } catch (err: any) {
         if (err instanceof SqliteError) next(DBError.query(err))
@@ -97,8 +94,8 @@ router.get(
     `${root}/:id(\\d+)`,
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id, table } = getData(req)
-            const item = repo.setTable(table).getByID(id)
+            const { id, table } = getData(req, res)
+            const item = svc.setTable(table).getByID(+id)
             res.json({ data: item })
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.query(err))
@@ -115,8 +112,8 @@ router.post(
     validationMW(check),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { table, item, msgs } = getData(req)
-            const created = repo.setTable(table).insert(item)
+            const { table, msgs, item, username } = getData(req, res)
+            const created = svc.setTable(table).add(item, username)
             res.status(201).send({
                 message: msgs.add,
                 data: created,
@@ -133,11 +130,11 @@ router.delete(
     root,
     tokenMW,
     requireAdminMW,
-    validationMW(GeneralVal.ids),
+    validationMW(idsVal),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { table, ids, msgs, username } = getData(req, res)
-            const items = repo.setTable(table).delete({ ids, username })
+            const { table, msgs, item, username } = getData(req, res)
+            const items = svc.setTable(table).remove(item.ids, username)
             res.send({
                 message: msgs.del,
                 data: items,
@@ -157,8 +154,8 @@ router.patch(
     validationMW(check),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { table, id, item, msgs } = getData(req)
-            const updated = repo.setTable(table).update(id, item)
+            const { table, item, msgs, username, id } = getData(req, res)
+            const updated = svc.setTable(table).edit(id, item, username)
             res.json({
                 message: updated ? msgs.upd : "No hubo modificaciones",
                 data: updated,
