@@ -1,36 +1,46 @@
 import { Statement, Transaction } from "better-sqlite3"
-import db from "../models/db"
-import { getPlaceholders } from "../utils/array.util"
+import { arrConj, getPlaceholders } from "../utils/array.util"
 import { DBRepo } from "./db.repo"
 
 export abstract class Repository<I extends Record<string, any>> extends DBRepo {
+    protected changeStm!: Statement<Repo.Change, unknown>
     protected getByIDStm!: Statement<number, Maybe<Obj>>
     protected deleteStm!: Transaction<Repo.Delete>
-    protected logStm!: Statement<Repo.Change, unknown>
-    protected changeStm!: Statement<Repo.Change, unknown>
+    protected logStm!: Statement<string, unknown>
 
     protected abstract insertStm: Transaction<Repo.Insert<I>>
     protected abstract updateStm: Transaction<Repo.Update<I>>
 
     constructor(protected readonly columns: string, protected table?: string) {
         super()
-        this.logStm = db.prepare("INSERT INTO Log (id, usuario) VALUES (?, ?)")
-        this.changeStm = db.prepare("INSERT INTO Log_Cambio VALUES (?, ?)")
+        this.logStm = this.db.prepare("INSERT INTO Log (usuario) VALUES (?)")
+        this.changeStm = this.db.prepare(
+            "INSERT INTO Log_Cambio VALUES (?, ?, ?)"
+        )
+
         if (table) {
             this.getByIDStm = this.db.prepare(
                 `SELECT ${columns} FROM ${table} WHERE id = ?`
             )
-            this.deleteStm = this.db.transaction((ids, log) => {
+            this.deleteStm = this.db.transaction((ids, user, desc) => {
                 const placeholders = getPlaceholders(ids)
                 const stm = this.db.prepare<number[], Obj>(
                     `DELETE FROM ${table} WHERE id IN (${placeholders}) RETURNING *`
                 )
+                const result = this.logStm.run(user)
                 const deleteds = stm.all(...ids)
-                if (log && deleteds.length) {
-                    const logID = this.addLog(log.user)
-                    this.changeStm.run(logID, log.desc)
-                }
-                return deleteds
+
+                if (!deleteds.length) return []
+
+                const logID = Number(result.lastInsertRowid)
+                const names = deleteds.map((item) => item.nombre)
+                this.changeStm.run(
+                    logID,
+                    "Eliminó",
+                    `${desc}: ${arrConj(names)}`
+                )
+
+                return stm.all(...ids)
             })
         }
     }
@@ -46,39 +56,15 @@ export abstract class Repository<I extends Record<string, any>> extends DBRepo {
         return this.getByIDStm.get(id)
     }
 
-    public insert(item: I, log: Repo.Log) {
-        return this.insertStm(item, log).get()
+    public insert(item: I, user: string) {
+        return this.insertStm(item, user).get()
     }
 
-    public update(id: number, item: I, log: Repo.Log) {
-        return this.updateStm(id, item, log).get()
+    public update(id: number, item: I, user: string) {
+        return this.updateStm(id, item, user).get()
     }
 
-    public delete(ids: number[], log?: Repo.Log) {
-        return this.deleteStm(ids, log)
-    }
-
-    protected addLog(user: string) {
-        const logID = this.nextID("Log")!
-        this.logStm.run(logID, user)
-        return logID
-    }
-
-    protected nextID(table?: string) {
-        const query = `
-        WITH miss_id AS
-        (
-            SELECT id FROM ${table ?? this.table}
-            UNION ALL 
-            SELECT 0
-        )
-        SELECT MIN(id) + 1 AS id
-        FROM miss_id
-        WHERE NOT EXISTS
-        (
-            SELECT * FROM ${table ?? this.table} 
-            WHERE ${table ?? this.table}.id = miss_id.id + 1
-        )`
-        return this.db.prepare<[], ID>(query).get()?.id
+    public delete(ids: number[], user: string, desc: string) {
+        return this.deleteStm(ids, user, desc)
     }
 }
