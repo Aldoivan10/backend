@@ -67,8 +67,8 @@ export class UserDTO {
     get payload() {
         return {
             name: this.name,
-            role: this.role,
             logged: this.logged,
+            admin: this.role.name === "Administrador",
         }
     }
 }
