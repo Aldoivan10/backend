@@ -48,7 +48,7 @@ router.post(
             const user = res.locals.user
 
             if (!user) throw AuthError.token()
-            if (user.role.name !== "Administrador") throw AuthError.rol()
+            if (!user.admin) throw AuthError.rol()
             if (!svc.login(user, password)) throw AuthError.auth()
 
             const accessToken = await singToken(user, AT_TIME)
