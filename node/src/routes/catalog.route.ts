@@ -79,9 +79,7 @@ async function check(req: Request, _: Response, next: NextFunction) {
 router.get(root, (req: Request, res: Response, next: NextFunction) => {
     try {
         const { filter, table } = getFilter(req)
-        const items = svc
-            .setTable(table)
-            .all(filter.getData(), filter.getFilter())
+        const items = svc.setTable(table).all(filter)
         res.json({ data: items })
     } catch (err: any) {
         if (err instanceof SqliteError) next(DBError.query(err))
