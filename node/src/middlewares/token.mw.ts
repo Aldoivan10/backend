@@ -12,7 +12,7 @@ export const tokenMW = async (
     try {
         const [accessToken, refreshToken] = getTokens(req)
         if (!accessToken || !refreshToken) throw AuthError.token()
-        let user: Maybe<UserToken> = undefined
+        let user: Maybe<TokenPayload> = undefined
         try {
             user = await getUser(accessToken)
         } catch (tokenError) {
@@ -36,9 +36,9 @@ export const requireAdminMW = async (
     next: NextFunction
 ) => {
     try {
-        const user: Maybe<UserToken> = res.locals.user
+        const user: Maybe<TokenPayload> = res.locals.user
         if (!user || !user.logged) throw AuthError.token()
-        if (user.role !== "Administrador") throw AuthError.rol()
+        if (user.admin) throw AuthError.rol()
         next()
     } catch (err) {
         next(err)
