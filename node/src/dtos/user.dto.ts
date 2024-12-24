@@ -20,46 +20,48 @@ export class InitUser {
     @Type(() => String)
     @IsNotEmpty()
     @IsString()
-    name!: string
+    declare name: string
 
     @Exclude()
-    private atajos!: DTO.Shortcut[]
+    declare atajos: DTO.Shortcut[]
 
     @Expose() // Incluimos views como un atributo constante en la salida
     @Type(() => Shortcut)
     @Transform(({ obj }) => transformShortcuts(JSON.parse(obj.atajos), 1))
-    views!: Shortcut[]
+    declare views: Shortcut[]
 
     @Expose() // Incluimos shortcuts como un atributo constante en la salida
     @Type(() => Shortcut)
     @Transform(({ obj }) => transformShortcuts(JSON.parse(obj.atajos), 0))
-    shortcuts!: Shortcut[]
+    declare shortcuts: Shortcut[]
 }
 
-export class User {
+export class UserDTO {
     @Type(() => Number)
+    @Expose()
     @Min(1)
-    id!: number
+    declare id: number
 
     @Expose({ name: "nombre" })
     @Type(() => String)
     @IsNotEmpty()
     @IsString()
-    name!: string
+    declare name: string
 
     @Expose()
-    @Type(() => String)
+    @Type(() => Object)
     @IsNotEmpty()
-    @IsString()
-    role!: string
+    @Transform(({ obj }) => ({ id: obj.id_rol, name: obj.rol }))
+    declare role: Record<string, any>
 
-    @Expose()
+    @Expose({ groups: ["admin"] })
     @Type(() => Boolean)
     @Transform((_) => false)
-    logged!: boolean
+    declare logged: boolean
 
-    @Expose({ name: "contrasenia" })
-    password?: string
+    @Expose({ groups: ["admin"] })
+    @Transform(({ obj }) => obj.contrasenia, { toClassOnly: true })
+    declare password?: string
 
     @Expose()
     get payload() {
