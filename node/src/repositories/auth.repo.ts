@@ -11,7 +11,7 @@ export class AuthRepo extends DBRepo {
             "SELECT nombre, atajos FROM Usuarios_Vista"
         )
         this.authStm = this.db.prepare(
-            "SELECT id, nombre, contrasenia, role FROM Usuario_Vista WHERE nombre = ?"
+            "SELECT id, nombre, contrasenia, rol FROM Usuario_Vista WHERE nombre = ?"
         )
     }
 
