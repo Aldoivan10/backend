@@ -11,19 +11,12 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
         department: "Departamento",
         user_type: "Tipo_Usuario",
     }
-    private targetMsgs: Record<string, string> = {
-        code: "el código",
-        unit: "la unidad",
-        entity_type: "el tipo de entidad",
-        department: "el departamento",
-        user_type: "el tipo de usuario",
-    }
     private deleteMsgs: Record<string, string> = {
-        code: "los códigos",
-        unit: "las unidades",
-        entity_type: "los tipos de entidad",
-        department: "los departamentos",
-        user_type: "los tipos de usuario",
+        code: "Los códigos",
+        unit: "Las unidades",
+        entity_type: "Los tipos de entidad",
+        department: "Los departamentos",
+        user_type: "Los tipos de usuario",
     }
 
     constructor(protected table: string = "Codigo") {
@@ -38,41 +31,14 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
     }
 
     public add(body: CatalogBody, username: string) {
-        const desc = this.getChange({
-            type: "add",
-            user: username,
-            target: this.targetMsgs[this.table],
-            items: [body.name],
-        })
-        const item = super.insert(body, { user: username, desc })
-        return item
+        return super.insert(body, username)
     }
 
     public edit(id: number, body: CatalogBody, username: string) {
-        const old = this.getByID(id)
-        if (!old) return null
-        const desc = this.getChange({
-            type: "upd",
-            user: username,
-            target: this.targetMsgs[this.table],
-            items: [`de ${old.name} a ${body.name}`],
-        })
-        const item = super.update(id, body, { user: username, desc })
-        return item
+        return super.update(id, body, username)
     }
 
     public remove(ids: number[], username: string) {
-        const names = ids
-            .map(this.getByID.bind(this))
-            .map((i) => i?.name)
-            .filter(Boolean)
-        const desc = this.getChange({
-            type: "upd",
-            user: username,
-            target: this.deleteMsgs[this.table],
-            items: names,
-        })
-        const items = super.delete(ids, { user: username, desc })
-        return items
+        return super.delete(ids, username, this.deleteMsgs[this.table])
     }
 }
