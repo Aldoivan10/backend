@@ -1,5 +1,5 @@
 import { Transaction } from "better-sqlite3"
-import { getPlaceholders } from "../utils/array.util"
+import { arrConj, getPlaceholders } from "../utils/array.util"
 import { Repository } from "./repository"
 
 export class CatalogRepository extends Repository<Body.Catalog> {
@@ -12,46 +12,41 @@ export class CatalogRepository extends Repository<Body.Catalog> {
 
     public setTable(table: string) {
         if (this.table === table) return this
-        const insertItemStm = this.db.prepare<Body.Catalog & ID, Obj>(
-            `INSERT INTO ${table} VALUES (@id, @name) RETURNING *`
+        const insertItemStm = this.db.prepare<Body.Catalog, Obj>(
+            `INSERT INTO ${table}(nombre) VALUES (@name) RETURNING *`
         )
         const updateItemStm = this.db.prepare<Body.Catalog & ID, Obj>(
             `UPDATE ${table} SET nombre=@name WHERE id=@id RETURNING *`
         )
-        this.insertStm = this.db.transaction((item, log) => {
-            const id = this.nextID()!
-            const created = insertItemStm.get({ id, ...item })
-            if (log && created) {
-                const logID = this.addLog(log.user)
-                this.changeStm.run(logID, log.desc)
-            }
-            return created
+        this.insertStm = this.db.transaction((item, user) => {
+            this.logStm.run(user)
+            return insertItemStm.get(item)
         })
 
-        this.updateStm = this.db.transaction((id, item, log) => {
-            const updated = updateItemStm.get({ id, ...item })
-            if (log && updated) {
-                const logID = this.addLog(log.user)
-                this.changeStm.run(logID, log.desc)
-            }
-            return updated
+        this.updateStm = this.db.transaction((id, item, user) => {
+            this.logStm.run(user)
+            return updateItemStm.get({ id, ...item })
         })
 
         this.getByIDStm = this.db.prepare(
             `SELECT ${this.columns} FROM ${table} WHERE id = ?`
         )
 
-        this.deleteStm = this.db.transaction((ids, log) => {
+        this.deleteStm = this.db.transaction((ids, user, desc) => {
             const placeholders = getPlaceholders(ids)
             const stm = this.db.prepare<number[], Obj>(
                 `DELETE FROM ${table} WHERE id IN (${placeholders}) RETURNING *`
             )
             const deleteds = stm.all(...ids)
-            if (log && deleteds.length) {
-                const logID = this.addLog(log.user)
-                this.changeStm.run(logID, log.desc)
-            }
-            return deleteds
+
+            if (!deleteds.length) return []
+
+            const result = this.logStm.run(user)
+            const logID = Number(result.lastInsertRowid)
+            const names = deleteds.map((item) => item.nombre)
+            this.changeStm.run(logID, "Eliminó", `${desc}: ${arrConj(names)}`)
+
+            return stm.all(...ids)
         })
 
         this.table = table
@@ -59,17 +54,17 @@ export class CatalogRepository extends Repository<Body.Catalog> {
         return this
     }
 
-    public insert(item: Body.Catalog, log: Repo.Log) {
-        if (this.insertStm) return this.insertStm(item, log)
+    public insert(item: Body.Catalog, user: string) {
+        if (this.insertStm) return this.insertStm(item, user)
         throw new Error("Method not implemented.")
     }
 
-    public update(id: number, item: Body.Catalog, log: Repo.Log) {
-        if (this.updateStm) return this.updateStm(id, item, log)
+    public update(id: number, item: Body.Catalog, user: string) {
+        if (this.updateStm) return this.updateStm(id, item, user)
         throw new Error("Method not implemented.")
     }
 
-    public delete(ids: number[], log: Repo.Log) {
-        return super.delete(ids, log)
+    public delete(ids: number[], user: string, desc: string) {
+        return super.delete(ids, user, desc)
     }
 }
