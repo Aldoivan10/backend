@@ -38,7 +38,7 @@ export const requireAdminMW = async (
     try {
         const user: Maybe<TokenPayload> = res.locals.user
         if (!user || !user.logged) throw AuthError.token()
-        if (user.admin) throw AuthError.rol()
+        if (!user.admin) throw AuthError.rol()
         next()
     } catch (err) {
         next(err)
