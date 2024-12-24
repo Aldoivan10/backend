@@ -2,7 +2,7 @@ import { CatalogDTO } from "../dtos/catalog.dto"
 import { CatalogRepository } from "../repositories/catalog.repo"
 import { Service } from "./service"
 
-export class CatalogService extends Service<CatalogBody, CatalogDTO> {
+export class CatalogService extends Service<Body.Catalog, CatalogDTO> {
     protected repo: CatalogRepository
     private tables: Record<string, string> = {
         code: "Codigo",
@@ -30,11 +30,11 @@ export class CatalogService extends Service<CatalogBody, CatalogDTO> {
         return this
     }
 
-    public add(body: CatalogBody, username: string) {
+    public add(body: Body.Catalog, username: string) {
         return super.insert(body, username)
     }
 
-    public edit(id: number, body: CatalogBody, username: string) {
+    public edit(id: number, body: Body.Catalog, username: string) {
         return super.update(id, body, username)
     }
 
