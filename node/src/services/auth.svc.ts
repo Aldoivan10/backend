@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import { plainToClass } from "class-transformer"
-import { InitUser, User } from "../dtos/user.dto"
+import { InitUser, UserDTO } from "../dtos/user.dto"
 import { AuthRepo } from "../repositories/auth.repo"
 
 export class AuthService {
@@ -14,12 +14,12 @@ export class AuthService {
     }
 
     public authenticate(username: string) {
-        const user = plainToClass(User, this.repo.auth(username))
+        const user = plainToClass(UserDTO, this.repo.auth(username))
         return user.payload
     }
 
     public login(payload: TokenPayload, password?: Maybe<string>) {
-        const user = plainToClass(User, this.repo.auth(payload.name))
+        const user = plainToClass(UserDTO, this.repo.auth(payload.name))
         if (!this.isPassword(password, user.password)) return false
         payload.logged = true
         return true
