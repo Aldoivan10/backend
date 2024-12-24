@@ -1,4 +1,5 @@
 import { ClassConstructor, plainToClass } from "class-transformer"
+import { FilterDomain } from "../domains/filter.domain"
 import { Repository } from "../repositories/repository"
 import { notFalsy } from "../utils/obj.util"
 
@@ -7,9 +8,9 @@ export abstract class Service<I extends Record<string, any>, O> {
 
     constructor(protected readonly dto: ClassConstructor<O>) {}
 
-    public all(data: FilterData, filter: string = "") {
+    public all(filter: FilterDomain) {
         return this.repo
-            .all(data, filter)
+            .all(filter.getData(), filter.getFilter())
             .map(this.mapper.bind(this))
             .filter(notFalsy)
     }
