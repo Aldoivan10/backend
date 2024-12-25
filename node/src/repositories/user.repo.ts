@@ -10,13 +10,13 @@ export default class UserRepo extends Repository<Body.User> {
 
     constructor() {
         super("id, nombre, contrasenia, id_rol, rol", "Usuario_Vista")
-        const insertSCStm = this.db.prepare<[string, number, number], unknown>(
+        const insertSCStm = this.db.prepare<[string, number, number]>(
             "UPDATE Usuario_Atajo SET atajo=? WHERE id_usuario=? AND id_atajo=? RETURNING *"
         )
         const insertStm = this.db.prepare<Body.User>(
             "INSERT INTO Usuario(id_tipo_usuario, nombre, contrasenia) VALUES (@id_user_type, @name, @password)"
         )
-        const updateStm = this.db.prepare<Body.User & ID>(
+        const updateStm = this.db.prepare<Body.User & ID, ID>(
             "UPDATE Usuario SET id_tipo_usuario=@id_user_type, nombre=@name, contrasenia=@password WHERE id=@id RETURNING id"
         )
         this.insertStm = this.db.transaction((input, user) => {
