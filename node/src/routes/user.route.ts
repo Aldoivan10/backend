@@ -1,22 +1,22 @@
 import { SqliteError } from "better-sqlite3"
 import { NextFunction, Request, Response, Router } from "express"
-import { requireAdminMW, tokenMW } from "../middleware/token.mw"
-import { validationMW } from "../middleware/validation.mw"
-import { DBError } from "../model/error"
-import UserRepo from "../repositories/user.repo"
-import { getBase } from "../util/obj.util"
-import * as GeneralVal from "../validations/general.val"
+import { requireAdminMW, tokenMW } from "../middlewares/token.mw"
+import { validationMW } from "../middlewares/validation.mw"
+import { DBError } from "../models/error"
+import { UserService } from "../services/user.svc"
+import { getFilter } from "../utils/route.util"
+import { idsVal } from "../validations/general.val"
 import { shortcutVal } from "../validations/shortcut.val"
 import { userVal } from "../validations/user.val"
 
 const router = Router()
-const repo = new UserRepo()
+const svc = new UserService()
 
 // Obtener todos
 router.get("/", (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { filter } = getBase(req)
-        const data = repo.all(filter)
+        const filter = getFilter(req, ["nombre", "role"])
+        const data = svc.all(filter)
         res.json({ data })
     } catch (err) {
         if (err instanceof SqliteError) next(DBError.query(err))
@@ -27,8 +27,8 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => {
 // Obtener por ID
 router.get("/:id(\\d+)", (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = getBase(req)
-        const user = repo.getByID(id)
+        const id = +req.params.id
+        const user = svc.getByID(id)
         res.json({ data: user })
     } catch (err) {
         if (err instanceof SqliteError) next(DBError.query(err))
@@ -43,14 +43,14 @@ router.patch(
     validationMW(shortcutVal),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const user = res.locals.user
+            const user = res.locals.user!
             const { shortcuts }: ShortcutsBody = req.body
-            const changes = repo.shortcuts(user!.id, shortcuts)
+            /* const changes = svc.shortcuts(user.id, shortcuts)
             res.status(201).json({
                 message: changes
                     ? "Se actualizaron los atajos"
                     : "No hubo cambios",
-            })
+            }) */
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.insert(err))
             else next(err)
@@ -66,8 +66,9 @@ router.post(
     validationMW(userVal),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const user: UserBody = req.body
-            const data = repo.insert(user)
+            const body: Body.User = req.body
+            const user = res.locals.user!
+            const data = svc.add(body, user.name)
             res.status(201).json({
                 message: "Usuario creado",
                 data,
@@ -84,14 +85,12 @@ router.delete(
     "/",
     tokenMW,
     requireAdminMW,
-    validationMW(GeneralVal.ids),
+    validationMW(idsVal),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { ids, user } = getBase(req, res)
-            const data = repo.delete({
-                ids,
-                username: user?.name,
-            })
+            const { ids } = req.body
+            const user = res.locals.user!
+            const data = svc.remove(ids, user?.name)
             res.send({
                 message: "Usuarios eliminados",
                 data,
@@ -111,9 +110,11 @@ router.patch(
     validationMW(userVal),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = getBase(req)
-            const user: UserBody = req.body
-            const data = repo.update(id, user)
+            const id = +req.params.id
+            const body: Body.User = req.body
+            const user = res.locals.user!
+            const data = svc.edit(id, body, user.name)
+
             res.status(201).json({
                 message: data
                     ? "Usuario actualizado"
