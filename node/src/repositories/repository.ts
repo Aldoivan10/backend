@@ -57,11 +57,11 @@ export abstract class Repository<I extends Record<string, any>> extends DBRepo {
     }
 
     public insert(item: I, user: string) {
-        return this.insertStm(item, user).get()
+        return this.insertStm(item, user)
     }
 
     public update(id: number, item: I, user: string) {
-        return this.updateStm(id, item, user).get()
+        return this.updateStm(id, item, user)
     }
 
     public delete(ids: number[], user: string, desc: string) {
