@@ -17,7 +17,7 @@ export default class UserRepo extends Repository<Body.User> {
             "INSERT INTO Usuario(id_tipo_usuario, nombre, contrasenia) VALUES (@id_user_type, @name, @password)"
         )
         const updateStm = this.db.prepare<Body.User & ID>(
-            "UPDATE Usuario SET id_tipo_usuario=@id_user_type, nombre=@name, contrasenia=@password WHERE id=@id"
+            "UPDATE Usuario SET id_tipo_usuario=@id_user_type, nombre=@name, contrasenia=@password WHERE id=@id RETURNING id"
         )
         this.insertStm = this.db.transaction((input, user) => {
             this.logStm.run(user)
@@ -28,8 +28,8 @@ export default class UserRepo extends Repository<Body.User> {
         })
         this.updateStm = this.db.transaction((id, input, user) => {
             this.logStm.run(user)
-            updateStm.run({ id, ...input })
-            return this.getByID(id)
+            const updated = updateStm.get({ id, ...input })
+            return updated ? this.getByID(id) : null
         })
         this.shortcutsStm = this.db.transaction((id_user, shortcuts) =>
             shortcuts
