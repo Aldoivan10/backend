@@ -15,6 +15,7 @@ import {
     trim,
     union,
 } from "valibot"
+import { nameAttr } from "../utils/val.uti"
 
 export const EntitySchema = required(
     object({
@@ -31,12 +32,7 @@ export const EntitySchema = required(
             ),
             null
         ),
-        name: pipe(
-            string("El nombre debe ser una cadena"),
-            trim(),
-            nonEmpty("E nombre no debe estar vacío"),
-            maxLength(128, "El nombre no debe exceder 128 carácteres")
-        ),
+        name: nameAttr(128),
         address: nullish(
             pipe(
                 string("La dirección debe ser una cadena"),
