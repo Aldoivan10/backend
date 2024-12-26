@@ -1,26 +1,34 @@
-import { Schema } from "express-validator"
+import {
+    intersect,
+    nonEmpty,
+    object,
+    pipe,
+    required,
+    string,
+    trim,
+} from "valibot"
 
-export const loginVal: Schema = {
-    username: {
-        isString: {
-            errorMessage: "El nombre deben ser carácteres",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "El nombre es obligatorio",
-        },
-    },
-}
+export const LoginSchema = required(
+    object({
+        username: pipe(
+            string("El nombre debe ser una cadena"),
+            trim(),
+            nonEmpty("El nombre no debe estar vacío")
+        ),
+    }),
+    "El usuario es obligatorio"
+)
 
-export const adminVal: Schema = {
-    ...loginVal,
-    password: {
-        isString: {
-            errorMessage: "La contraseña es obligatoria",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "La contraseña no puede ser un campo vacío",
-        },
-    },
-}
+export const AdminSchema = intersect([
+    LoginSchema,
+    required(
+        object({
+            password: pipe(
+                string("La contraseña es obligatoria"),
+                trim(),
+                nonEmpty("La contraseña no debe estar vacía")
+            ),
+        }),
+        "La contraseña es obligatoria"
+    ),
+])
