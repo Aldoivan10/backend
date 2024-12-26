@@ -1,89 +1,117 @@
-import { Schema } from "express-validator"
-import { nameAttr } from "../util/val.uti"
+import {
+    digits,
+    email,
+    length,
+    maxLength,
+    minValue,
+    nonEmpty,
+    nullish,
+    number,
+    object,
+    pipe,
+    required,
+    string,
+    transform,
+    trim,
+    union,
+} from "valibot"
 
-export const entityVal: Schema = {
-    id_entity_type: {
-        isInt: {
-            options: { gt: 0 },
-            errorMessage: "El ID de la entidad debe ser un positivo mayor a 0",
-        },
-    },
-    rfc: {
-        optional: true,
-        isString: {
-            errorMessage: "El RFC debe ser una cadena",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "El RFC no puede ser un campo vacío",
-        },
-        isLength: {
-            options: { min: 13, max: 13 },
-            errorMessage: "El RFC debe ser exactamente 13 carácteres",
-        },
-    },
-    name: nameAttr(128),
-    address: {
-        optional: true,
-        isString: {
-            errorMessage: "La dirección debe ser una cadena",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "La dirección no puede ser un campo vacío",
-        },
-        isLength: {
-            options: { max: 128 },
-            errorMessage: "La dirección no puede exceder 128 carácteres",
-        },
-    },
-    domicile: {
-        optional: true,
-        isString: {
-            errorMessage: "El domicilio debe ser una cadena",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "El domicilio no puede ser un campo vacío",
-        },
-        isLength: {
-            options: { max: 128 },
-            errorMessage: "El domicilio no puede exceder 128 carácteres",
-        },
-    },
-    postal_code: {
-        optional: true,
-        isString: {
-            errorMessage: "El código postal deben ser una cadena",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "El código postal no puede ser un campo vacío",
-        },
-        isLength: {
-            options: { min: 5, max: 5 },
-            errorMessage: "El código postal debe ser exactamente 5 carácteres",
-        },
-    },
-    phone: {
-        optional: true,
-        isString: {
-            errorMessage: "El número de teléfono deben ser una cadena",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "El número de teléfono no puede ser un campo vacío",
-        },
-        isLength: {
-            options: { min: 10, max: 10 },
-            errorMessage:
-                "El número de teléfono debe ser exactamente 10 carácteres",
-        },
-    },
-    email: {
-        optional: true,
-        isEmail: {
-            errorMessage: "El correo electrónico debe ser un correo válido",
-        },
-    },
-}
+export const EntitySchema = required(
+    object({
+        id_entity_type: pipe(
+            number("El tipo de indentidad debe ser un número"),
+            minValue(1, "El tipo de entidad debe ser mayor a 0")
+        ),
+        rfc: nullish(
+            pipe(
+                string("El RFC debe ser una cadena"),
+                trim(),
+                nonEmpty("El RFC no debe estar vacío"),
+                length(13, "El RFC debe ser de exáctamente 13 crácteres")
+            ),
+            null
+        ),
+        name: pipe(
+            string("El nombre debe ser una cadena"),
+            trim(),
+            nonEmpty("E nombre no debe estar vacío"),
+            maxLength(128, "El nombre no debe exceder 128 carácteres")
+        ),
+        address: nullish(
+            pipe(
+                string("La dirección debe ser una cadena"),
+                trim(),
+                nonEmpty("La dirección no debe estar vacío"),
+                maxLength(128, "La dirección no debe exceder 128 carácteres")
+            ),
+            null
+        ),
+        domicile: nullish(
+            pipe(
+                string("El domicilio debe ser una cadena"),
+                trim(),
+                nonEmpty("El domicilio no debe estar vacío"),
+                maxLength(128, "El domicilio no debe exceder 128 carácteres")
+            ),
+            null
+        ),
+        postal_code: nullish(
+            union([
+                pipe(
+                    string("El código postal debe ser una cadena"),
+                    trim(),
+                    nonEmpty("El código postal no debe estar vacío"),
+                    digits("El código postal debe ser un número de 5 dígitos"),
+                    length(
+                        5,
+                        "El código postal debe ser de exactamente 5 dígitos"
+                    )
+                ),
+                pipe(
+                    number("El código postal debe ser un número de 5 dígitos"),
+                    transform((n) => n.toString()),
+                    trim(),
+                    nonEmpty("El código postal no debe estar vacío"),
+                    digits("El código postal debe ser un número de 5 dígitos"),
+                    length(
+                        5,
+                        "El código postal debe ser de exactamente 5 dígitos"
+                    )
+                ),
+            ]),
+            null
+        ),
+        phone: nullish(
+            union([
+                pipe(
+                    string("El teléfono debe ser una cadena"),
+                    trim(),
+                    nonEmpty("El teléfono no debe estar vacío"),
+                    digits("El teléfono debe ser un número de 10 dígitos"),
+                    length(10, "El teléfono debe ser de exactamente 10 dígitos")
+                ),
+                pipe(
+                    number("El teléfono debe ser un número de 10 dígitos"),
+                    transform((n) => n.toString()),
+                    trim(),
+                    nonEmpty("El teléfono no debe estar vacío"),
+                    digits("El teléfono debe ser un número de 10 dígitos"),
+                    length(10, "El teléfono debe ser de exactamente 10 dígitos")
+                ),
+            ]),
+            null
+        ),
+        email: nullish(
+            pipe(
+                string("El correo debe ser una cadena"),
+                trim(),
+                nonEmpty("El correo no debe estar vacío"),
+                email("El correo no es válido"),
+                maxLength(64, "El correo no debe exceder 64 carácteres")
+            ),
+            null
+        ),
+    }),
+    ["id_entity_type", "name"],
+    "El nombre y el tipo de entidad son obligatorios"
+)
