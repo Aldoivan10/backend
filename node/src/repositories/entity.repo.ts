@@ -7,32 +7,27 @@ export default class EntityRepository extends Repository<Body.Entity> {
 
     constructor() {
         super(
-            "id, nombre, tipo, rfc, dirección, domicilio, codigo_postal, telefono,correo",
+            "id, nombre, id_tipo, tipo, rfc, direccion, domicilio, codigo_postal, telefono,correo",
             "Entidad_Vista"
         )
-        const insertItemStm = this.db.prepare<Body.Entity & ID, Obj>(
-            `INSERT INTO Entidad VALUES (@id, @id_entity_type, @rfc, @name, @address, @domicile, @postal_code, @phone, @email) RETURNING *`
+        const insertStm = this.db.prepare<Body.Entity>(
+            `INSERT INTO Entidad VALUES (null, @id_entity_type, @rfc, @name, @address, @domicile, @postal_code, @phone, @email)`
         )
-        const updateItemStm = this.db.prepare<Body.Entity & ID, Obj>(
-            `UPDATE Entidad SET nombre=@name, id_tipo_entidad=@id_entity_type, rfc=@rfc, dirección=@address, domicilio=@domicile, codigo_postal=@postal_code, telefono=@phone,correo=@email WHERE id=@id RETURNING *`
+        const updateStm = this.db.prepare<Body.Entity & ID, ID>(
+            `UPDATE Entidad SET nombre=@name, id_tipo_entidad=@id_entity_type, rfc=@rfc, direccion=@address, domicilio=@domicile, codigo_postal=@postal_code, telefono=@phone,correo=@email WHERE id=@id RETURNING id`
         )
-        this.insertStm = this.db.transaction((item, log) => {
-            const id = this.nextID()!
-            const created = insertItemStm.get({ id, ...item })
-            if (log && created) {
-                const logID = this.addLog(log.user)
-                this.changeStm.run(logID, log.desc)
-            }
-            return created
+        this.insertStm = this.db.transaction((item, user) => {
+            this.logStm.run(user)
+
+            const result = insertStm.run(item)
+            const id = Number(result.lastInsertRowid)
+            return this.getByID(id)
         })
 
-        this.updateStm = this.db.transaction((id, item, log) => {
-            const updated = updateItemStm.get({ id, ...item })
-            if (log && updated) {
-                const logID = this.addLog(log.user)
-                this.changeStm.run(logID, log.desc)
-            }
-            return updated
+        this.updateStm = this.db.transaction((id, item, user) => {
+            this.logStm.run(user)
+            const updated = updateStm.get({ id, ...item })
+            return updated ? this.getByID(id) : null
         })
     }
 }
