@@ -52,7 +52,7 @@ function getFilter(req: Request) {
     return { filter, table }
 }
 
-function getData(req: Request, res: Response) {
+function getData(req: Request) {
     const { id, table } = req.params
     const data = catalogs[table]
     const username = req.user!.name
@@ -89,7 +89,7 @@ router.get(
     `${root}/:id(\\d+)`,
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id, table } = getData(req, res)
+            const { id, table } = getData(req)
             const item = svc.setTable(table).getByID(+id)
             res.json({ data: item })
         } catch (err: any) {
@@ -107,7 +107,7 @@ router.post(
     validationMW(getSchema),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { table, msgs, item, username } = getData(req, res)
+            const { table, msgs, item, username } = getData(req)
             const created = svc.setTable(table).add(item, username)
             res.status(201).send({
                 message: msgs.add,
@@ -128,7 +128,7 @@ router.patch(
     validationMW(IdsSchema),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { table, item, msgs, username, id } = getData(req, res)
+            const { table, item, msgs, username, id } = getData(req)
             const updated = svc.setTable(table).edit(id, item, username)
             res.json({
                 message: updated ? msgs.upd : "No hubo modificaciones",
@@ -149,7 +149,7 @@ router.delete(
     validationMW(IdsSchema),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { table, msgs, item, username } = getData(req, res)
+            const { table, msgs, item, username } = getData(req)
             const items = svc.setTable(table).remove(item.ids, username)
             res.send({
                 message: msgs.del,
