@@ -1,25 +1,54 @@
-import { Schema } from "express-validator"
-import { nameAttr } from "../util/val.uti"
+import {
+    intersect,
+    maxLength,
+    minLength,
+    minValue,
+    nonEmpty,
+    nullish,
+    number,
+    object,
+    pipe,
+    required,
+    string,
+    transform,
+    trim,
+} from "valibot"
+import { NameSchema } from "./general.val"
 
-export const userVal: Schema = {
-    name: nameAttr(64),
-    password: {
-        optional: true,
-        isString: {
-            errorMessage: "La contraseña debe ser una cadena",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "La contraseña no puede ser un campo vacío",
-        },
-        isLength: {
-            options: { min: 3, max: 10 },
-            errorMessage: "La contraseña debe ser de 3 a 8 carácteres",
-        },
-    },
-    id_user_type: {
-        isInt: {
-            errorMessage: "El ID del usuario debe ser un número entero",
-        },
-    },
-}
+export const UserSchema = pipe(
+    intersect([
+        NameSchema(64),
+        required(
+            object({
+                password: nullish(
+                    pipe(
+                        string("La contraseña debe ser una cadena"),
+                        trim(),
+                        nonEmpty("La contraseña no debe estar vacía"),
+                        minLength(
+                            3,
+                            "La contraseña debe de ser de al menos 3 carácteres"
+                        ),
+                        maxLength(
+                            10,
+                            "La contraseña no debe exceder 10 carácteres"
+                        )
+                    ),
+                    null
+                ),
+                id_user_type: pipe(
+                    number("El ID de tipo de usuario debe ser un número"),
+                    minValue(
+                        1,
+                        "El ID de tipo de usuario debe ser un número positivo"
+                    )
+                ),
+            }),
+            "El tipo de usuario es obligatorio"
+        ),
+    ]),
+    transform((input) => {
+        if (input.id_user_type !== 1) input.password = null
+        return input
+    })
+)
