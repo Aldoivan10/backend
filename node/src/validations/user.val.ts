@@ -1,4 +1,5 @@
 import {
+    forward,
     intersect,
     maxLength,
     minLength,
@@ -44,12 +45,17 @@ export const UserSchema = pipe(
                     )
                 ),
             }),
+            ["id_user_type"],
             "El tipo de usuario es obligatorio"
         ),
     ]),
-    partialCheck(
-        [["id_user_type"], ["password"]],
-        (input) => input.id_user_type === 1 && Boolean(input.password),
-        "Este tipo de usuario requiere contraseña"
+    forward(
+        partialCheck(
+            [["id_user_type"], ["password"]],
+            (input) =>
+                input.id_user_type !== 1 ? true : Boolean(input.password),
+            "Este tipo de usuario requiere contraseña"
+        ),
+        ["password"]
     )
 )
