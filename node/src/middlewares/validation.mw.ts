@@ -1,15 +1,20 @@
 import { NextFunction, Request, Response } from "express"
-import { checkSchema, Schema, validationResult } from "express-validator"
+import { BaseSchema, InferIssue, parse, ValiError } from "valibot"
 import { ValidError } from "../models/error"
 
-export const validationMW = (arg: Schema | Function): any[] => {
-    return [
-        arg instanceof Function ? arg : checkSchema(arg),
-        (req: Request, _: Response, next: NextFunction) => {
-            const errors = validationResult(req)
-            if (!errors.isEmpty())
-                throw ValidError.fromExpress(errors.array() as any)
+export const validationMW = <S extends BaseSchema<any, any, InferIssue<any>>>(
+    schema: S | ((req: Request) => S)
+) => {
+    return (req: Request, _: Response, next: NextFunction) => {
+        try {
+            const validator =
+                typeof schema === "function" ? schema(req) : schema
+            const body = parse(validator, req.body)
+            req.body = body
             next()
-        },
-    ]
+        } catch (error) {
+            if (error instanceof ValiError) next(ValidError.fromValibot(error))
+            else next(error)
+        }
+    }
 }
