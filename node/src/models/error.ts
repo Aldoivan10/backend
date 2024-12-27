@@ -5,6 +5,7 @@ import {
     JWTExpired,
     JWTInvalid,
 } from "jose/errors"
+import { BaseSchema, InferIssue, ValiError } from "valibot"
 
 export class APIError extends Error {
     id = `ERR${new Date().getTime()}`
@@ -61,6 +62,18 @@ export class ValidError extends APIError {
             field: err.path,
             location: err.location,
             type: err.type,
+        }))
+        return new ValidError({ details })
+    }
+
+    static fromValibot<S extends BaseSchema<any, any, InferIssue<any>>>(
+        error: ValiError<S>
+    ) {
+        const details = error.issues.map((issue) => ({
+            msg: issue.message,
+            field: issue.path.map((path: Record<string, any>) => path.key),
+            location: "body",
+            type: issue.type,
         }))
         return new ValidError({ details })
     }
