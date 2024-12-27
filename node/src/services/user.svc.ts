@@ -14,6 +14,7 @@ export class UserService extends Service<Body.User, UserDTO> {
 
     public add(body: Body.User, username: string) {
         if (body.id_user_type == 1) body.password = this.hashPass(body.password)
+        else body.password = null
         return super.insert(body, username)
     }
 
