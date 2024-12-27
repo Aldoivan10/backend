@@ -40,7 +40,7 @@ export abstract class Repository<I extends Record<string, any>> extends DBRepo {
                     `${desc}: ${arrConj(names)}`
                 )
 
-                return stm.all(...ids)
+                return deleteds
             })
         }
     }
