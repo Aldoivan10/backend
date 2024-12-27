@@ -5,7 +5,7 @@ export default class UserRepo extends Repository<Body.User> {
     protected insertStm: Transaction<Repo.Insert<Body.User>>
     protected updateStm: Transaction<Repo.Update<Body.User>>
     private shortcutsStm: Transaction<
-        (id: number, shortcuts: ShortcutBody[]) => boolean
+        (id: number, shortcuts: Body.Shortcut) => boolean
     >
 
     constructor() {
@@ -40,7 +40,7 @@ export default class UserRepo extends Repository<Body.User> {
         )
     }
 
-    public updShortcuts(id: number, shortcuts: ShortcutBody[]) {
+    public updShortcuts(id: number, shortcuts: Body.Shortcut) {
         return this.shortcutsStm(id, shortcuts)
     }
 }
