@@ -1,21 +1,30 @@
 import { SqliteError } from "better-sqlite3"
 import { NextFunction, Request, Response, Router } from "express"
-import { requireAdminMW, tokenMW } from "../middleware/token.mw"
-import { validationMW } from "../middleware/validation.mw"
-import { DBError } from "../model/error"
-import EntityRepository from "../repositories/entity.repo"
-import { getBase } from "../util/obj.util"
-import { entityVal } from "../validations/entity.val"
-import * as GeneralVal from "../validations/general.val"
+import { requireAdminMW, tokenMW } from "../middlewares/token.mw"
+import { validationMW } from "../middlewares/validation.mw"
+import { DBError } from "../models/error"
+import { EntityService } from "../services/entity.svc"
+import { getFilter } from "../utils/route.util"
+import { EntitySchema } from "../validations/entity.val"
 
 const router = Router()
-const repo = new EntityRepository()
+const svc = new EntityService()
+const columns = [
+    "nombre",
+    "tipo",
+    "rfc",
+    "dirección",
+    "domicilio",
+    "codigo_postal",
+    "telefono",
+    "correo",
+]
 
 // Obtener todos
 router.get("/", (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { filter } = getBase(req)
-        const entitys = repo.all(filter)
+        const filter = getFilter(req, columns)
+        const entitys = svc.all(filter)
         res.json({ data: entitys })
     } catch (err) {
         if (err instanceof SqliteError) next(DBError.query(err))
@@ -26,8 +35,8 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => {
 // Obtener por ID
 router.get("/:id(\\d+)", (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = getBase(req)
-        const entity = repo.getByID(id)
+        const id = +req.params.id
+        const entity = svc.getByID(id)
         res.json({ data: entity })
     } catch (err) {
         if (err instanceof SqliteError) next(DBError.query(err))
@@ -40,11 +49,15 @@ router.post(
     "/",
     tokenMW,
     requireAdminMW,
-    validationMW(entityVal),
-    (req: Request, res: Response, next: NextFunction) => {
+    validationMW(EntitySchema),
+    (
+        req: Express.BodyRequest<typeof EntitySchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
-            const params: EntityBody = req.body
-            const entity = repo.insert(params)
+            const user = req.user!
+            const entity = svc.add(req.body, user.name)
             res.status(201).json({
                 message: "Entidad creada",
                 data: entity,
@@ -56,38 +69,21 @@ router.post(
     }
 )
 
-// Eliminar
-router.delete(
-    "/",
-    tokenMW,
-    requireAdminMW,
-    validationMW(GeneralVal.ids),
-    (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { ids, user } = getBase(req)
-            const entitys = repo.delete({
-                ids,
-                username: user?.name,
-            })
-            res.send({ message: "Entidades eliminadas", data: entitys })
-        } catch (err) {
-            if (err instanceof SqliteError) next(DBError.delete(err))
-            else next(err)
-        }
-    }
-)
-
 // Actualizar
 router.patch(
     "/:id(\\d+)",
     tokenMW,
     requireAdminMW,
-    validationMW(entityVal),
-    (req: Request, res: Response, next: NextFunction) => {
+    validationMW(EntitySchema),
+    (
+        req: Express.BodyRequest<typeof EntitySchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
-            const { id } = getBase(req)
-            const params: EntityBody = req.body
-            const entity = repo.update(id, params)
+            const id = +req.params.id!
+            const user = req.user!
+            const entity = svc.edit(id, req.body, user.name)
 
             res.send({
                 message: entity
@@ -97,6 +93,25 @@ router.patch(
             })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.update(err))
+            else next(err)
+        }
+    }
+)
+
+// Eliminar
+router.delete(
+    "/",
+    tokenMW,
+    requireAdminMW,
+    validationMW(EntitySchema),
+    (req: Express.DeleteRequest, res: Response, next: NextFunction) => {
+        try {
+            const { ids } = req.body
+            const user = req.user!
+            const entitys = svc.remove(ids, user.name)
+            res.send({ message: "Entidades eliminadas", data: entitys })
+        } catch (err) {
+            if (err instanceof SqliteError) next(DBError.delete(err))
             else next(err)
         }
     }
