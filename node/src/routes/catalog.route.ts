@@ -125,7 +125,7 @@ router.patch(
     `${root}/:id(\\d+)`,
     tokenMW,
     requireAdminMW,
-    validationMW(IdsSchema),
+    validationMW(getSchema),
     (req: Request, res: Response, next: NextFunction) => {
         try {
             const { table, item, msgs, username, id } = getData(req)
