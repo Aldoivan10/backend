@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response, Router } from "express"
+import { NextFunction, Response, Router } from "express"
 import { AT_TIME, RT_TIME, TK_OPT } from "../config"
 import { tokenMW } from "../middlewares/token.mw"
 import { validationMW } from "../middlewares/validation.mw"
 import { AuthError } from "../models/error"
 import { AuthService } from "../services/auth.svc"
 import { singToken } from "../utils/token.util"
-import { adminVal, loginVal } from "../validations/login.val"
+import { AdminSchema, LoginSchema } from "../validations/login.val"
 
 const router = Router()
 const svc = new AuthService()
@@ -16,8 +16,12 @@ router.get("/users", (_, res) => {
 
 router.post(
     "/login",
-    validationMW(loginVal),
-    async (req: Request, res: Response, next: NextFunction) => {
+    validationMW(LoginSchema),
+    async (
+        req: Express.BodyRequest<typeof LoginSchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
             const { username } = req.body
             const user = svc.authenticate(username)
@@ -40,12 +44,16 @@ router.post(
 
 router.post(
     "/login/admin",
-    validationMW(adminVal),
+    validationMW(AdminSchema),
     tokenMW,
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (
+        req: Express.BodyRequest<typeof AdminSchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
-            const { password }: LoginBody = req.body
-            const user = res.locals.user
+            const { password } = req.body
+            const user = req.user
 
             if (!user) throw AuthError.token()
             if (!user.admin) throw AuthError.rol()
@@ -65,10 +73,14 @@ router.post(
 
 router.post(
     "/logout",
-    validationMW(loginVal),
-    (req: Request, res: Response, next: NextFunction) => {
+    validationMW(LoginSchema),
+    (
+        req: Express.BodyRequest<typeof LoginSchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
-            const { username }: LoginBody = req.body
+            const { username } = req.body
             res.clearCookie(`${username}_at`)
                 .clearCookie(`${username}_rt`)
                 .json({ message: "Sesión cerrada" })
