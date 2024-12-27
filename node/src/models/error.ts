@@ -71,7 +71,10 @@ export class ValidError extends APIError {
     ) {
         const details = error.issues.map((issue) => ({
             msg: issue.message,
-            field: issue.path.map((path: Record<string, any>) => path.key),
+            field:
+                issue.path
+                    ?.map((path: Record<string, any>) => path.key)
+                    ?.join(".") ?? null,
             location: "body",
             type: issue.type,
         }))
