@@ -32,6 +32,10 @@ export class UserService extends Service<Body.User, UserDTO> {
         return super.delete(ids, username, "Los usuarios")
     }
 
+    public shortcuts(id: number, shortcuts: Body.Shortcut) {
+        return this.repo.updShortcuts(id, shortcuts)
+    }
+
     private getPass(pass: Maybe<string>, hashed: Maybe<string>) {
         return this.samePass(pass, hashed) ? hashed : this.hashPass(pass)
     }
