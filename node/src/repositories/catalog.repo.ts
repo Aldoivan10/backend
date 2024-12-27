@@ -46,7 +46,7 @@ export class CatalogRepository extends Repository<Body.Catalog> {
             const names = deleteds.map((item) => item.nombre)
             this.changeStm.run(logID, "Eliminó", `${desc}: ${arrConj(names)}`)
 
-            return stm.all(...ids)
+            return deleteds
         })
 
         this.table = table
