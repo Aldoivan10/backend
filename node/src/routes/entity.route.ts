@@ -6,6 +6,7 @@ import { DBError } from "../models/error"
 import { EntityService } from "../services/entity.svc"
 import { getFilter } from "../utils/route.util"
 import { EntitySchema } from "../validations/entity.val"
+import { IdsSchema } from "../validations/general.val"
 
 const router = Router()
 const svc = new EntityService()
@@ -103,7 +104,7 @@ router.delete(
     "/",
     tokenMW,
     requireAdminMW,
-    validationMW(EntitySchema),
+    validationMW(IdsSchema),
     (req: Express.DeleteRequest, res: Response, next: NextFunction) => {
         try {
             const { ids } = req.body
