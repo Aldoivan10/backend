@@ -68,7 +68,11 @@ router.post(
     tokenMW,
     requireAdminMW,
     validationMW(UserSchema),
-    (req: Request, res: Response, next: NextFunction) => {
+    (
+        req: Express.BodyRequest<typeof UserSchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
             const user = req.user!
             const data = svc.add(req.body, user.name)
