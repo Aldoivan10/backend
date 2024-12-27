@@ -5,9 +5,9 @@ import { validationMW } from "../middlewares/validation.mw"
 import { DBError } from "../models/error"
 import { UserService } from "../services/user.svc"
 import { getFilter } from "../utils/route.util"
-import { idsVal } from "../validations/general.val"
-import { shortcutVal } from "../validations/shortcut.val"
-import { userVal } from "../validations/user.val"
+import { IdsSchema } from "../validations/general.val"
+import { ShortcutSchema } from "../validations/shortcut.val"
+import { UserSchema } from "../validations/user.val"
 
 const router = Router()
 const svc = new UserService()
@@ -40,17 +40,21 @@ router.get("/:id(\\d+)", (req: Request, res: Response, next: NextFunction) => {
 router.patch(
     "/shortcuts",
     tokenMW,
-    validationMW(shortcutVal),
-    (req: Request, res: Response, next: NextFunction) => {
+    validationMW(ShortcutSchema),
+    (
+        req: Express.BodyRequest<typeof ShortcutSchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
-            const user = res.locals.user!
+            const user = req.user!
             const { shortcuts }: ShortcutsBody = req.body
-            /* const changes = svc.shortcuts(user.id, shortcuts)
+            const changes = svc.shortcuts(user.id, shortcuts)
             res.status(201).json({
                 message: changes
                     ? "Se actualizaron los atajos"
                     : "No hubo cambios",
-            }) */
+            })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.insert(err))
             else next(err)
@@ -63,12 +67,11 @@ router.post(
     "/",
     tokenMW,
     requireAdminMW,
-    validationMW(userVal),
+    validationMW(UserSchema),
     (req: Request, res: Response, next: NextFunction) => {
         try {
-            const body: Body.User = req.body
-            const user = res.locals.user!
-            const data = svc.add(body, user.name)
+            const user = req.user!
+            const data = svc.add(req.body, user.name)
             res.status(201).json({
                 message: "Usuario creado",
                 data,
@@ -80,40 +83,21 @@ router.post(
     }
 )
 
-// Eliminar
-router.delete(
-    "/",
-    tokenMW,
-    requireAdminMW,
-    validationMW(idsVal),
-    (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { ids } = req.body
-            const user = res.locals.user!
-            const data = svc.remove(ids, user?.name)
-            res.send({
-                message: "Usuarios eliminados",
-                data,
-            })
-        } catch (err) {
-            if (err instanceof SqliteError) next(DBError.delete(err))
-            else next(err)
-        }
-    }
-)
-
 // Actualizar
 router.patch(
     "/:id(\\d+)",
     tokenMW,
     requireAdminMW,
-    validationMW(userVal),
-    (req: Request, res: Response, next: NextFunction) => {
+    validationMW(UserSchema),
+    (
+        req: Express.BodyRequest<typeof UserSchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
-            const id = +req.params.id
-            const body: Body.User = req.body
-            const user = res.locals.user!
-            const data = svc.edit(id, body, user.name)
+            const id = +req.params.id!
+            const user = req.user!
+            const data = svc.edit(id, req.body, user.name)
 
             res.status(201).json({
                 message: data
@@ -123,6 +107,28 @@ router.patch(
             })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.update(err))
+            else next(err)
+        }
+    }
+)
+
+// Eliminar
+router.delete(
+    "/",
+    tokenMW,
+    requireAdminMW,
+    validationMW(IdsSchema),
+    (req: Express.DeleteRequest, res: Response, next: NextFunction) => {
+        try {
+            const { ids } = req.body
+            const user = req.user!
+            const data = svc.remove(ids, user.name)
+            res.send({
+                message: "Usuarios eliminados",
+                data,
+            })
+        } catch (err) {
+            if (err instanceof SqliteError) next(DBError.delete(err))
             else next(err)
         }
     }
