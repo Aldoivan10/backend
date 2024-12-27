@@ -14,7 +14,7 @@ export class UserService extends Service<Body.User, UserDTO> {
 
     public add(body: Body.User, username: string) {
         body.password =
-            body.id_user_type === 1 ? this.hashPass(body.password) : undefined
+            body.id_user_type === 1 ? this.hashPass(body.password) : null
         return super.insert(body, username)
     }
 
@@ -25,7 +25,7 @@ export class UserService extends Service<Body.User, UserDTO> {
             if (this.samePass(body.password, old.password))
                 body.password = old.password
             else body.password = this.hashPass(body.password)
-        } else body.password = undefined
+        } else body.password = null
         const updated = super.update(id, body, username)
         return updated ? this.getByID(id) : null
     }
@@ -35,7 +35,7 @@ export class UserService extends Service<Body.User, UserDTO> {
     }
 
     private hashPass(pass: Maybe<string>) {
-        return pass ? bcrypt.hashSync(pass, +PASS_SALT) : undefined
+        return pass ? bcrypt.hashSync(pass, +PASS_SALT) : null
     }
 
     private samePass(pass: Maybe<string>, hashed: Maybe<string>) {
