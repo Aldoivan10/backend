@@ -1,15 +1,14 @@
 import { SqliteError } from "better-sqlite3"
 import { plainToClass } from "class-transformer"
 import { NextFunction, Request, Response, Router } from "express"
-import { checkSchema } from "express-validator"
 import { FilterDomain } from "../domains/filter.domain"
 import { FilterDto } from "../dtos/filter.dto"
 import { requireAdminMW, tokenMW } from "../middlewares/token.mw"
 import { validationMW } from "../middlewares/validation.mw"
 import { DBError } from "../models/error"
 import { CatalogService } from "../services/catalog.svc"
-import catalogVal from "../validations/catalog.val"
-import { idsVal } from "../validations/general.val"
+import { CatalogSchemas } from "../validations/catalog.val"
+import { IdsSchema } from "../validations/general.val"
 
 const catalogs: CatalogMap = {
     code: {
@@ -56,7 +55,7 @@ function getFilter(req: Request) {
 function getData(req: Request, res: Response) {
     const { id, table } = req.params
     const data = catalogs[table]
-    const username = res.locals.user?.name ?? ""
+    const username = req.user!.name
     const body = req.body
 
     return {
@@ -68,11 +67,9 @@ function getData(req: Request, res: Response) {
     }
 }
 
-async function check(req: Request, _: Response, next: NextFunction) {
+function getSchema(req: Request) {
     const { table } = req.params
-    const schema = catalogVal[table]
-    await checkSchema(schema).run(req)
-    next()
+    return CatalogSchemas[table]
 }
 
 // Obtener todos
@@ -107,7 +104,7 @@ router.post(
     root,
     tokenMW,
     requireAdminMW,
-    validationMW(check),
+    validationMW(getSchema),
     (req: Request, res: Response, next: NextFunction) => {
         try {
             const { table, msgs, item, username } = getData(req, res)
@@ -123,33 +120,12 @@ router.post(
     }
 )
 
-// Eliminar
-router.delete(
-    root,
-    tokenMW,
-    requireAdminMW,
-    validationMW(idsVal),
-    (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { table, msgs, item, username } = getData(req, res)
-            const items = svc.setTable(table).remove(item.ids, username)
-            res.send({
-                message: msgs.del,
-                data: items,
-            })
-        } catch (err: any) {
-            if (err instanceof SqliteError) next(DBError.delete(err))
-            else next(err)
-        }
-    }
-)
-
 // Actualizar nombre
 router.patch(
     `${root}/:id(\\d+)`,
     tokenMW,
     requireAdminMW,
-    validationMW(check),
+    validationMW(IdsSchema),
     (req: Request, res: Response, next: NextFunction) => {
         try {
             const { table, item, msgs, username, id } = getData(req, res)
@@ -160,6 +136,27 @@ router.patch(
             })
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.update(err))
+            else next(err)
+        }
+    }
+)
+
+// Eliminar
+router.delete(
+    root,
+    tokenMW,
+    requireAdminMW,
+    validationMW(IdsSchema),
+    (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { table, msgs, item, username } = getData(req, res)
+            const items = svc.setTable(table).remove(item.ids, username)
+            res.send({
+                message: msgs.del,
+                data: items,
+            })
+        } catch (err: any) {
+            if (err instanceof SqliteError) next(DBError.delete(err))
             else next(err)
         }
     }
