@@ -55,7 +55,7 @@ function getFilter(req: Request) {
 function getData(req: Request) {
     const { id, table } = req.params
     const data = catalogs[table]
-    const username = req.user!.name
+    const username = req.user?.name || "Desconocido"
     const body = req.body
 
     return {
