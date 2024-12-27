@@ -13,25 +13,27 @@ export class UserService extends Service<Body.User, UserDTO> {
     }
 
     public add(body: Body.User, username: string) {
-        body.password =
-            body.id_user_type === 1 ? this.hashPass(body.password) : null
+        if (body.id_user_type == 1) body.password = this.hashPass(body.password)
         return super.insert(body, username)
     }
 
     public edit(id: number, body: Body.User, username: string) {
         const old = this.getByID(id, ["admin"])
         if (!old) return null
-        if (body.id_user_type === 1) {
-            if (this.samePass(body.password, old.password))
-                body.password = old.password
-            else body.password = this.hashPass(body.password)
-        } else body.password = null
-        const updated = super.update(id, body, username)
-        return updated ? this.getByID(id) : null
+        body.password =
+            body.id_user_type === 1
+                ? this.getPass(body.password, old.password)
+                : null
+
+        return super.update(id, body, username) ? this.getByID(id) : null
     }
 
     public remove(ids: number[], username: string) {
         return super.delete(ids, username, "Los usuarios")
+    }
+
+    private getPass(pass: Maybe<string>, hashed: Maybe<string>) {
+        return this.samePass(pass, hashed) ? hashed : this.hashPass(pass)
     }
 
     private hashPass(pass: Maybe<string>) {
