@@ -21,10 +21,9 @@ export const tokenMW = async (
                 const newToken = await singToken(user, AT_TIME)
                 res.cookie(`${user!.name}_at`, newToken, TK_OPT)
             } else throw tokenError
-        } finally {
-            req.user = user
-            next()
         }
+        req.user = user
+        next()
     } catch (err) {
         next(err)
     }
