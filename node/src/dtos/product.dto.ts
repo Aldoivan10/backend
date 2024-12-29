@@ -29,10 +29,25 @@ export class ProductDTO {
     declare department: Record<string, any>
 
     @Expose({ name: "codigos" })
-    @Transform(({ value }) => JSON.parse(value))
+    @Transform(({ value }) => {
+        const arr: Array<Obj> = JSON.parse(value)
+        return arr.map((obj) => ({
+            id: obj.id,
+            name: obj.nombre,
+            code: obj.codigo,
+        }))
+    })
     declare codes: Array<{ id: number; code: string }>
 
     @Expose({ name: "unidades" })
-    @Transform(({ value }) => JSON.parse(value))
+    @Transform(({ value }) => {
+        const arr: Array<Obj> = JSON.parse(value)
+        return arr.map((obj) => ({
+            id: obj.id,
+            name: obj.nombre,
+            profit: obj.ganancia,
+            sale: obj.venta,
+        }))
+    })
     declare units: Array<{ id: number; profit: number; gain: number }>
 }
