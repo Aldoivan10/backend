@@ -3,7 +3,21 @@ import { FilterDomain } from "../domains/filter.domain"
 import { Repository } from "../repositories/repository"
 import { notFalsy } from "../utils/obj.util"
 
-export abstract class Service<I extends Record<string, any>, O> {
+export interface IService<I extends Obj, O> {
+    all(filter: FilterDomain, groups?: string[]): O[]
+
+    getByID(id: number, groups?: string[]): Maybe<O>
+
+    getByFilter(filter: FilterDomain, groups?: string[]): Maybe<O>
+
+    add(body: I, username: string, groups?: string[]): O
+
+    edit(id: number, body: I, username: string, groups?: string[]): Maybe<O>
+
+    remove(ids: number[], username: string, groups?: string[]): O[]
+}
+
+export abstract class Service<I extends Obj, O> implements IService<I, O> {
     protected abstract repo: Repository<I>
 
     constructor(protected readonly dto: ClassConstructor<O>) {}
@@ -17,6 +31,13 @@ export abstract class Service<I extends Record<string, any>, O> {
 
     public getByID(id: number, groups?: string[]) {
         return this.mapper(this.repo.getByID(id), groups)
+    }
+
+    public getByFilter(filter: FilterDomain, groups?: string[]) {
+        return this.mapper(
+            this.repo.getByFilter(filter.getData(), filter.getFilter()),
+            groups
+        )
     }
 
     protected insert(item: I, user: string, groups?: string[]): O {
