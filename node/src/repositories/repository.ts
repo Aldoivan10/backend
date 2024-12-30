@@ -2,7 +2,24 @@ import { Statement, Transaction } from "better-sqlite3"
 import { arrConj, getPlaceholders } from "../utils/array.util"
 import { DBRepo } from "./db.repo"
 
-export abstract class Repository<I extends Record<string, any>> extends DBRepo {
+export interface IRepo<I extends Obj> {
+    all(data: FilterData, filter: string): Obj[]
+
+    getByID(id: number): Maybe<Obj>
+
+    getByFilter(data: FilterData, filter: string): Maybe<Obj>
+
+    insert(item: I, user: string): Obj
+
+    update(id: number, item: I, user: string): Obj
+
+    delete(ids: number[], user: string, desc: string): Obj[]
+}
+
+export abstract class Repository<I extends Obj>
+    extends DBRepo
+    implements IRepo<I>
+{
     protected changeStm!: Statement<Repo.Change, unknown>
     protected getByIDStm!: Statement<number, Maybe<Obj>>
     protected deleteStm!: Transaction<Repo.Delete>
@@ -50,6 +67,13 @@ export abstract class Repository<I extends Record<string, any>> extends DBRepo {
             `SELECT ${this.columns} FROM ${this.table} ${filter}`.trim()
         const stm = this.db.prepare<FilterData, Obj>(query)
         return stm.all(data)
+    }
+
+    getByFilter(data: FilterData, filter: string) {
+        const query =
+            `SELECT ${this.columns} FROM ${this.table} ${filter}`.trim()
+        const stm = this.db.prepare<FilterData, Obj>(query)
+        return stm.get(data)
     }
 
     public getByID(id: number) {
