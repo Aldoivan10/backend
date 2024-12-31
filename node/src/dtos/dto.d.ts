@@ -1,9 +1,9 @@
 declare namespace DTO {
     type TransformFilters = {
-        value: Record<string, string | number | boolean>
+        value?: string
     }
 
-    type TransformOrders = { value: string[] }
+    type TransformOrders = { value?: string }
 
     type Shortcut = { accion: string; atajo: string; vista: number }
 }
