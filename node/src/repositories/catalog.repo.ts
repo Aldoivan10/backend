@@ -1,5 +1,7 @@
 import { Transaction } from "better-sqlite3"
-import { injectable } from "inversify"
+import { inject, injectable } from "inversify"
+import { Types } from "../containers/types"
+import { APIDataBase } from "../models/db"
 import { arrConj, getPlaceholders } from "../utils/array.util"
 import { Repository } from "./repository"
 
@@ -8,8 +10,8 @@ export class CatalogRepository extends Repository<Body.Catalog> {
     protected insertStm!: Transaction<Repo.Insert<Body.Catalog>>
     protected updateStm!: Transaction<Repo.Update<Body.Catalog>>
 
-    constructor() {
-        super("id, nombre")
+    constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
+        super(db, "id, nombre")
     }
 
     public setTable(table: string) {

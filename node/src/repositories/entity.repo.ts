@@ -1,12 +1,17 @@
 import { Transaction } from "better-sqlite3"
+import { inject, injectable } from "inversify"
+import { Types } from "../containers/types"
+import { APIDataBase } from "../models/db"
 import { Repository } from "./repository"
 
-export default class EntityRepository extends Repository<Body.Entity> {
+@injectable()
+export class EntityRepository extends Repository<Body.Entity> {
     protected insertStm: Transaction<Repo.Insert<Body.Entity>>
     protected updateStm: Transaction<Repo.Update<Body.Entity>>
 
-    constructor() {
+    constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
         super(
+            db,
             "id, nombre, id_tipo, tipo, rfc, direccion, domicilio, codigo_postal, telefono,correo",
             "Entidad_Vista"
         )

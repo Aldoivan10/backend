@@ -1,6 +1,6 @@
 import { Statement, Transaction } from "better-sqlite3"
+import { APIDataBase } from "../models/db"
 import { arrConj, getPlaceholders } from "../utils/array.util"
-import { DBRepo } from "./db.repo"
 
 export interface IRepo<I extends Obj> {
     all(data: FilterData, filter: string): Obj[]
@@ -16,10 +16,7 @@ export interface IRepo<I extends Obj> {
     delete(ids: number[], user: string, desc: string): Obj[]
 }
 
-export abstract class Repository<I extends Obj>
-    extends DBRepo
-    implements IRepo<I>
-{
+export abstract class Repository<I extends Obj> implements IRepo<I> {
     protected changeStm!: Statement<Repo.Change, unknown>
     protected getByIDStm!: Statement<number, Maybe<Obj>>
     protected deleteStm!: Transaction<Repo.Delete>
@@ -28,8 +25,12 @@ export abstract class Repository<I extends Obj>
     protected abstract insertStm: Transaction<Repo.Insert<I>>
     protected abstract updateStm: Transaction<Repo.Update<I>>
 
-    constructor(protected readonly columns: string, protected table?: string) {
-        super()
+    constructor(
+        protected readonly db: APIDataBase,
+        protected readonly columns: string,
+        protected table?: string
+    ) {
+        console.log(Boolean(this.db), this.table)
         this.logStm = this.db.prepare("INSERT INTO Log (usuario) VALUES (?)")
         this.changeStm = this.db.prepare(
             "INSERT INTO Log_Cambio VALUES (?, ?, ?)"

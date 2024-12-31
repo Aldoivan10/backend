@@ -1,7 +1,6 @@
-import { Transaction } from "better-sqlite3"
-import Repository from "./repository"
+import {} from "./repository"
 
-export default class KitRepo extends Repository<KitBody, Kit> {
+/* export class KitRepo extends Repository<KitBody, Kit> {
     protected insertStm: Transaction<(kit: KitBody) => Kit>
     protected updateStm: Transaction<(kit: KitBody, id: number) => Maybe<Kit>>
 
@@ -73,4 +72,4 @@ export default class KitRepo extends Repository<KitBody, Kit> {
     public delete(args: Omit<DeleteArgs, "target">) {
         return super.delete({ ...args, target: "los kits" })
     }
-}
+} */

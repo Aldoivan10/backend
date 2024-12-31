@@ -1,12 +1,14 @@
 import { Statement } from "better-sqlite3"
-import { DBRepo } from "./db.repo"
+import { inject, injectable } from "inversify"
+import { Types } from "../containers/types"
+import { APIDataBase } from "../models/db"
 
-export class AuthRepo extends DBRepo {
+@injectable()
+export class AuthRepo {
     protected usersStm!: Statement<unknown[], Repo.InitUser>
     protected authStm!: Statement<string, Repo.TokenUser>
 
-    constructor() {
-        super()
+    constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
         this.usersStm = this.db.prepare(
             "SELECT nombre, atajos FROM Usuarios_Vista"
         )
