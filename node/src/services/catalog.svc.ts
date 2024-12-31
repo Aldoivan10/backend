@@ -1,9 +1,11 @@
+import { inject, injectable } from "inversify"
+import { Types } from "../containers/types"
 import { CatalogDTO } from "../dtos/catalog.dto"
 import { CatalogRepository } from "../repositories/catalog.repo"
 import { Service } from "./service"
 
+@injectable()
 export class CatalogService extends Service<Body.Catalog, CatalogDTO> {
-    protected repo: CatalogRepository
     private tables: Record<string, string> = {
         code: "Codigo",
         unit: "Unidad",
@@ -19,9 +21,12 @@ export class CatalogService extends Service<Body.Catalog, CatalogDTO> {
         user_type: "Los tipos de usuario",
     }
 
-    constructor(protected table: string = "Codigo") {
+    constructor(
+        @inject(Types.CatalogRepository)
+        protected readonly repo: CatalogRepository,
+        protected table: string = "Codigo"
+    ) {
         super(CatalogDTO)
-        this.repo = new CatalogRepository()
     }
 
     public setTable(table: string) {

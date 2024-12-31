@@ -3,12 +3,12 @@ import { FilterDomain } from "../domains/filter.domain"
 import { Repository } from "../repositories/repository"
 import { notFalsy } from "../utils/obj.util"
 
-export interface IService<I extends Obj, O> {
+export interface IService<I extends Obj, O extends Obj> {
     all(filter: FilterDomain, groups?: string[]): O[]
 
-    getByID(id: number, groups?: string[]): Maybe<O>
+    get(filter: FilterDomain, groups?: string[]): Maybe<O>
 
-    getByFilter(filter: FilterDomain, groups?: string[]): Maybe<O>
+    getByID(id: number, groups?: string[]): Maybe<O>
 
     add(body: I, username: string, groups?: string[]): O
 
@@ -17,8 +17,10 @@ export interface IService<I extends Obj, O> {
     remove(ids: number[], username: string, groups?: string[]): O[]
 }
 
-export abstract class Service<I extends Obj, O> implements IService<I, O> {
-    protected abstract repo: Repository<I>
+export abstract class Service<I extends Obj, O extends Obj>
+    implements IService<I, O>
+{
+    protected abstract readonly repo: Repository<I>
 
     constructor(protected readonly dto: ClassConstructor<O>) {}
 
@@ -29,15 +31,15 @@ export abstract class Service<I extends Obj, O> implements IService<I, O> {
             .filter(notFalsy)
     }
 
-    public getByID(id: number, groups?: string[]) {
-        return this.mapper(this.repo.getByID(id), groups)
-    }
-
-    public getByFilter(filter: FilterDomain, groups?: string[]) {
+    public get(filter: FilterDomain, groups?: string[]) {
         return this.mapper(
             this.repo.getByFilter(filter.getData(), filter.getFilter()),
             groups
         )
+    }
+
+    public getByID(id: number, groups?: string[]) {
+        return this.mapper(this.repo.getByID(id), groups)
     }
 
     protected insert(item: I, user: string, groups?: string[]): O {

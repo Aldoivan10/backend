@@ -1,14 +1,18 @@
 import bcrypt from "bcrypt"
 import { ClassTransformOptions, plainToClass } from "class-transformer"
+import { inject, injectable } from "inversify"
+import { Types } from "../containers/types"
 import { InitUser, UserDTO } from "../dtos/user.dto"
-import { AuthRepo } from "../repositories/auth.repo"
+import { AuthRepository } from "../repositories/auth.repo"
 
+@injectable()
 export class AuthService {
-    private repo = new AuthRepo()
     private classOptions: ClassTransformOptions = {
         groups: ["admin"],
         excludeExtraneousValues: true,
     }
+    @inject(Types.AuthRepository)
+    protected declare readonly repo: AuthRepository
 
     public availableUsers() {
         const users = this.repo

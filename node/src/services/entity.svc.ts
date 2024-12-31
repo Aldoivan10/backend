@@ -1,13 +1,16 @@
+import { inject, injectable } from "inversify"
+import { Types } from "../containers/types"
 import { EntityDTO } from "../dtos/entity.dto"
-import EntityRepository from "../repositories/entity.repo"
+import { EntityRepository } from "../repositories/entity.repo"
 import { Service } from "./service"
 
+@injectable()
 export class EntityService extends Service<Body.Entity, EntityDTO> {
-    protected repo: EntityRepository
-
-    constructor() {
+    constructor(
+        @inject(Types.EntityRepository)
+        protected readonly repo: EntityRepository
+    ) {
         super(EntityDTO)
-        this.repo = new EntityRepository()
     }
 
     public add(body: Body.Entity, username: string) {

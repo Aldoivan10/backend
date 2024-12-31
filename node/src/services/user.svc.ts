@@ -1,15 +1,17 @@
 import bcrypt from "bcrypt"
+import { inject, injectable } from "inversify"
 import { PASS_SALT } from "../config"
+import { Types } from "../containers/types"
 import { UserDTO } from "../dtos/user.dto"
 import UserRepo from "../repositories/user.repo"
 import { Service } from "./service"
 
+@injectable()
 export class UserService extends Service<Body.User, UserDTO> {
-    protected repo: UserRepo
-
-    constructor() {
+    constructor(
+        @inject(Types.UserRepository) protected readonly repo: UserRepo
+    ) {
         super(UserDTO)
-        this.repo = new UserRepo()
     }
 
     public add(body: Body.User, username: string) {
