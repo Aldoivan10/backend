@@ -34,7 +34,7 @@ export class FilterDomain {
                 "WHERE " +
                 Object.keys(filters)
                     .map(this.getClause.bind(this))
-                    .map(Boolean)
+                    .filter(Boolean)
                     .join(" AND ")
             this.data = filters
         }
@@ -52,7 +52,7 @@ export class FilterDomain {
         if (orders && orders.length)
             this.order =
                 "ORDER BY " +
-                orders.map(this.getOrder.bind(this)).map(Boolean).join()
+                orders.map(this.getOrder.bind(this)).filter(Boolean).join()
     }
 
     public build() {
