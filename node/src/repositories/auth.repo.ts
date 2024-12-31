@@ -4,7 +4,7 @@ import { Types } from "../containers/types"
 import { APIDataBase } from "../models/db"
 
 @injectable()
-export class AuthRepo {
+export class AuthRepository {
     protected usersStm!: Statement<unknown[], Repo.InitUser>
     protected authStm!: Statement<string, Repo.TokenUser>
 
