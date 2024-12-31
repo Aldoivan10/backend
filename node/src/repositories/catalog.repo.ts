@@ -1,7 +1,9 @@
 import { Transaction } from "better-sqlite3"
+import { injectable } from "inversify"
 import { arrConj, getPlaceholders } from "../utils/array.util"
 import { Repository } from "./repository"
 
+@injectable()
 export class CatalogRepository extends Repository<Body.Catalog> {
     protected insertStm!: Transaction<Repo.Insert<Body.Catalog>>
     protected updateStm!: Transaction<Repo.Update<Body.Catalog>>
