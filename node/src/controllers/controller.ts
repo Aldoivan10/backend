@@ -28,6 +28,7 @@ export abstract class Controller<
 > implements IController<S>
 {
     protected abstract readonly svc: IService<I, O>
+    protected declare abstract readonly messages: Ctrl.Messages
 
     constructor(protected readonly columns: string[]) {}
 
@@ -72,10 +73,10 @@ export abstract class Controller<
     ): void {
         try {
             const user = req.user!
-            const entity = this.svc.add(req.body, user.name)
+            const item = this.svc.add(req.body, user.name)
             res.status(201).json({
-                message: "Entidad creada",
-                data: entity,
+                message: this.messages.create,
+                data: item,
             })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.insert(err))
@@ -91,13 +92,11 @@ export abstract class Controller<
         try {
             const id = +req.params.id!
             const user = req.user!
-            const entity = this.svc.edit(id, req.body, user.name)
+            const item = this.svc.edit(id, req.body, user.name)
 
             res.send({
-                message: entity
-                    ? "Entidad actualizada"
-                    : "No hubo modificaciones",
-                data: entity,
+                message: item ? this.messages.update : "No hubo modificaciones",
+                data: item,
             })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.update(err))
@@ -113,8 +112,8 @@ export abstract class Controller<
         try {
             const { ids } = req.body
             const user = req.user!
-            const entitys = this.svc.remove(ids, user.name)
-            res.send({ message: "Entidades eliminadas", data: entitys })
+            const items = this.svc.remove(ids, user.name)
+            res.send({ message: this.messages.delete, data: items })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.delete(err))
             else next(err)

@@ -14,7 +14,7 @@ export class CatalogController extends Controller<
     Body.Catalog,
     CatalogDTO
 > {
-    protected readonly catalogs: CatalogMap = {
+    protected readonly messages: CatalogMap = {
         code: {
             del: "Códigos eliminados",
             add: "Código agregado",
@@ -49,7 +49,7 @@ export class CatalogController extends Controller<
     }
 
     public getRoute() {
-        return `/:table(${Object.keys(this.catalogs).join("|")})`
+        return `/:table(${Object.keys(this.messages).join("|")})`
     }
 
     public findAll(req: Request, res: Response, next: NextFunction): void {
@@ -131,7 +131,7 @@ export class CatalogController extends Controller<
 
     protected getData(req: Request) {
         const { id, table } = req.params
-        const data = this.catalogs[table]
+        const data = this.messages[table]
         const username = req.user?.name || "Desconocido"
         const body = req.body
 
