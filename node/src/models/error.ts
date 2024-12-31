@@ -200,7 +200,7 @@ export class DBError extends APIError {
 
     static query(err: SQLError, status = 500): APIError {
         return new DBError({
-            message: "Error al ejecutar obtener los datos",
+            message: "Error al obtener los datos",
             code: err.code,
             details: [
                 {
