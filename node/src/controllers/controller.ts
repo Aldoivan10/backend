@@ -35,7 +35,6 @@ export abstract class Controller<
     findAll(req: Request, res: Response, next: NextFunction): void {
         try {
             const filter = this.getFilter(req, this.columns)
-            console.log(filter.getFilter())
             const entitys = this.svc.all(filter)
             res.json({ data: entitys })
         } catch (err) {
