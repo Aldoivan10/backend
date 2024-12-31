@@ -30,7 +30,6 @@ export abstract class Repository<I extends Obj> implements IRepo<I> {
         protected readonly columns: string,
         protected table?: string
     ) {
-        console.log(Boolean(this.db), this.table)
         this.logStm = this.db.prepare("INSERT INTO Log (usuario) VALUES (?)")
         this.changeStm = this.db.prepare(
             "INSERT INTO Log_Cambio VALUES (?, ?, ?)"
