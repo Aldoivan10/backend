@@ -28,7 +28,12 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
         body = this.sanitize(body)
         const changes = this.getChanges(body, old)
         if (!changes) return null
-        const obj = this.repo.updateAndLog(id, body, username, changes)
+        const obj = this.repo.updateAndLog(
+            id,
+            body,
+            username,
+            `El producto ${old.name}: ${changes}`
+        )
         return this.mapper(obj)
     }
 
@@ -50,8 +55,7 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
 
         const changes: string[] = []
 
-        if (body.name !== old.name)
-            changes.push(`nombre de ${old.name} a ${body.name}`)
+        if (body.name !== old.name) changes.push(`nombre a ${body.name}`)
         if (body.amount !== old.amount)
             changes.push(`cantidad de ${old.amount} a ${body.amount}`)
         if (body.min !== old.min)
@@ -130,7 +134,7 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
     }
 
     protected getSupplierName(id: number) {
-        const supplier = this.catalogRepo.setTable("Proveedor").getByID(id)
+        const supplier = this.catalogRepo.setTable("Entidad").getByID(id)
         return supplier?.nombre ?? "Desconocido"
     }
 
