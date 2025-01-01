@@ -4,6 +4,7 @@ import { Types } from "../containers/types"
 import { ProductController } from "../controllers/product.ctrl"
 import { requireAdminMW, tokenMW } from "../middlewares/token.mw"
 import { validationMW } from "../middlewares/validation.mw"
+import { IdsSchema } from "../validations/general.val"
 import { ProductSchema } from "../validations/product.val"
 
 const controller = container.get<ProductController>(Types.ProductController)
@@ -30,7 +31,7 @@ router.delete(
     "/",
     tokenMW,
     requireAdminMW,
-    validationMW(ProductSchema),
+    validationMW(IdsSchema),
     controller.delete.bind(controller)
 )
 
