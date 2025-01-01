@@ -3,6 +3,7 @@ import {
     check,
     InferOutput,
     intersect,
+    minLength,
     minValue,
     number,
     object,
@@ -34,7 +35,8 @@ export const KitSchema = intersect([
                             )
                         ),
                     })
-                )
+                ),
+                minLength(1, "Debe haber al menos un código")
             ),
         }),
         "Los productos son obligatorios"
