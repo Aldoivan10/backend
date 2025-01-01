@@ -36,7 +36,7 @@ export const KitSchema = intersect([
                         ),
                     })
                 ),
-                minLength(1, "Debe haber al menos un código")
+                minLength(1, "Debe haber al menos un producto")
             ),
         }),
         "Los productos son obligatorios"
