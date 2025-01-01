@@ -1,4 +1,3 @@
-import { FieldValidationError } from "express-validator"
 import {
     JOSEError,
     JWSSignatureVerificationFailed,
@@ -9,7 +8,7 @@ import { BaseSchema, InferIssue, ValiError } from "valibot"
 
 export class APIError extends Error {
     id = `ERR${new Date().getTime()}`
-    details: ErrorDetail[] = []
+    details: AppError.Detail[] = []
     status: number
     code: string
 
@@ -18,7 +17,7 @@ export class APIError extends Error {
         details,
         status = 500,
         code = "ERR_GENERIC",
-    }: APIErrorArgs) {
+    }: AppError.Data) {
         super(message)
         this.name = this.constructor.name
         this.details = details
@@ -32,7 +31,7 @@ export class ValidError extends APIError {
         details,
         code = "ERR_VALIDATION",
         status = 422,
-    }: ValidationErrorArgs) {
+    }: AppError.Validation) {
         super({
             details,
             status,
@@ -56,16 +55,6 @@ export class ValidError extends APIError {
         })
     }
 
-    static fromExpress(errors: FieldValidationError[]): APIError {
-        const details = errors.map((err) => ({
-            msg: err.msg,
-            field: err.path,
-            location: err.location,
-            type: err.type,
-        }))
-        return new ValidError({ details })
-    }
-
     static fromValibot<S extends BaseSchema<any, any, InferIssue<any>>>(
         error: ValiError<S>
     ) {
@@ -87,7 +76,7 @@ export class AuthError extends APIError {
         status = 401,
         code = "ERR_AUTH",
         details,
-    }: Omit<APIErrorArgs, "message">) {
+    }: Omit<AppError.Data, "message">) {
         super({
             code,
             status,
@@ -189,7 +178,7 @@ export class DBError extends APIError {
     static open({
         details,
         status = 500,
-    }: Omit<APIErrorArgs, "message" | "code">): APIError {
+    }: Omit<AppError.Data, "message" | "code">): APIError {
         return new DBError({
             message: "Error al abrir la base de datos",
             code: "ERR_OPEN",
@@ -198,7 +187,7 @@ export class DBError extends APIError {
         })
     }
 
-    static query(err: SQLError, status = 500): APIError {
+    static query(err: AppError.SQL, status = 500): APIError {
         return new DBError({
             message: "Error al obtener los datos",
             code: err.code,
@@ -214,7 +203,7 @@ export class DBError extends APIError {
         })
     }
 
-    static insert(err: SQLError, status = 500) {
+    static insert(err: AppError.SQL, status = 500) {
         return new DBError({
             message: "Error al crear item",
             code: err.code,
@@ -230,7 +219,7 @@ export class DBError extends APIError {
         })
     }
 
-    static update(err: SQLError, status = 500) {
+    static update(err: AppError.SQL, status = 500) {
         return new DBError({
             message: "Error al actualizar datos",
             code: err.code,
@@ -246,7 +235,7 @@ export class DBError extends APIError {
         })
     }
 
-    static delete(err: SQLError, status = 500) {
+    static delete(err: AppError.SQL, status = 500) {
         return new DBError({
             message: "Error al eliminar items",
             code: err.code,
@@ -262,7 +251,7 @@ export class DBError extends APIError {
         })
     }
 
-    static getField(err: SQLError) {
+    static getField(err: AppError.SQL) {
         const arr = err.code.split("_")
         return arr[arr.length - 1]
     }
