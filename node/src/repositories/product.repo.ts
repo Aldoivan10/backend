@@ -23,7 +23,7 @@ export default class ProductRepository extends Repository<Body.Product> {
             "INSERT INTO Producto VALUES (null, @id_department, @id_supplier, @name, @amount, @buy, @min, @refundable)"
         )
         const updateProductStm = this.db.prepare<Body.Product & ID>(
-            "UPDATE Producto SET nombre=@name,cantidad=@amount,min=@min,reembolsable=@refundable WHERE id=@id"
+            "UPDATE Producto SET nombre=@name,cantidad=@amount,min=@min,reembolsable=@refundable WHERE id=@id RETURNING id"
         )
         const insertCodeStm = this.db.prepare<Body.Code & { id_p: number }>(
             `INSERT INTO Producto_Codigo VALUES (@id_p, @id, @code)`
