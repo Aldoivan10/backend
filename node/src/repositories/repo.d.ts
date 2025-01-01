@@ -49,4 +49,15 @@ declare namespace Body {
         codes: Code[]
         units: Unit[]
     }
+
+    type KitProduct = {
+        id: number
+        unit: number
+        amount: number
+    }
+
+    type Kit = {
+        name: string
+        products: KitProduct[]
+    }
 }
