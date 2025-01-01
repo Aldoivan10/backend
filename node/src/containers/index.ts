@@ -3,27 +3,32 @@ import { AuthController } from "../controllers/auth.ctrl"
 import { CatalogController } from "../controllers/catalog.ctrl"
 import { Controller } from "../controllers/controller"
 import { EntityController } from "../controllers/entity.ctrl"
+import { KitController } from "../controllers/kit.ctrl"
 import { ProductController } from "../controllers/product.ctrl"
 import { UserController } from "../controllers/user.ctrl"
 import { CatalogDTO } from "../dtos/catalog.dto"
 import { EntityDTO } from "../dtos/entity.dto"
+import { KitDTO } from "../dtos/kit.dto"
 import { ProductDTO } from "../dtos/product.dto"
 import { UserDTO } from "../dtos/user.dto"
 import { APIDataBase } from "../models/db"
 import { AuthRepository } from "../repositories/auth.repo"
 import { CatalogRepository } from "../repositories/catalog.repo"
 import { EntityRepository } from "../repositories/entity.repo"
+import { KitRepository } from "../repositories/kit.repo"
 import ProductRepository from "../repositories/product.repo"
 import { IRepo } from "../repositories/repository"
 import UserRepository from "../repositories/user.repo"
 import { AuthService } from "../services/auth.svc"
 import { CatalogService } from "../services/catalog.svc"
 import { EntityService } from "../services/entity.svc"
+import { KitService } from "../services/kit.svc"
 import { ProductService } from "../services/product.svc"
 import { IService } from "../services/service"
 import { UserService } from "../services/user.svc"
 import { CatalogType } from "../validations/catalog.val"
 import { EntitySchema } from "../validations/entity.val"
+import { KitSchema } from "../validations/kit.val"
 import { ProductSchema } from "../validations/product.val"
 import { UserSchema } from "../validations/user.val"
 import { Types } from "./types"
@@ -40,6 +45,7 @@ container
 container
     .bind<IRepo<Body.Product>>(Types.ProductRepository)
     .to(ProductRepository)
+container.bind<IRepo<Body.Kit>>(Types.KitRepository).to(KitRepository)
 container.bind<IRepo<Body.User>>(Types.UserRepository).to(UserRepository)
 container.bind<IRepo<Body.Entity>>(Types.EntityRepository).to(EntityRepository)
 container.bind<AuthRepository>(Types.AuthRepository).to(AuthRepository)
@@ -56,6 +62,7 @@ container
     .bind<IService<Body.Entity, EntityDTO>>(Types.EntityService)
     .to(EntityService)
 container.bind<AuthService>(Types.AuthService).to(AuthService)
+container.bind<IService<Body.Kit, KitDTO>>(Types.KitService).to(KitService)
 
 // Registrar controladores
 container
@@ -78,4 +85,7 @@ container
         Types.EntityController
     )
     .to(EntityController)
+container
+    .bind<Controller<typeof KitSchema, Body.Kit, KitDTO>>(Types.KitController)
+    .to(KitController)
 container.bind<AuthController>(Types.AuthController).to(AuthController)

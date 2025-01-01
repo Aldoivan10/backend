@@ -21,4 +21,8 @@ export const Types = {
     ProductService: Symbol.for("ProductService"),
     ProductRepository: Symbol.for("ProductRepository"),
     ProductController: Symbol.for("ProductController"),
+
+    KitService: Symbol.for("KitService"),
+    KitRepository: Symbol.for("KitRepository"),
+    KitController: Symbol.for("KitController"),
 }
