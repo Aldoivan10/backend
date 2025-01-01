@@ -1,7 +1,7 @@
 import { Expose, Transform, Type } from "class-transformer"
 import { IsArray, IsNumber, IsOptional, IsString, Min } from "class-validator"
 
-const transformFilterFn = ({ value }: DTO.TransformFilters) => {
+const transformFilterFn = ({ value }: DTO.Transform) => {
     if (!value) return undefined
     const regex = /[a-z0-9]+(_(gt|gte|lt|lte|eq|like)$)?/i
     const obj = JSON.parse(value)
@@ -15,7 +15,7 @@ const transformFilterFn = ({ value }: DTO.TransformFilters) => {
     )
 }
 
-const transformOrderFn = ({ value }: DTO.TransformOrders) => {
+const transformOrderFn = ({ value }: DTO.Transform) => {
     if (!value) return undefined
     const regex = /[a-z0-9]+(_(asc|desc)$)?/i
     const arr: string[] = JSON.parse(value)

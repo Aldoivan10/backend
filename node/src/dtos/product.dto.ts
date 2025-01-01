@@ -37,7 +37,7 @@ export class ProductDTO {
             code: obj.codigo,
         }))
     })
-    declare codes: Array<{ id: number; code: string }>
+    declare codes: Array<DTO.code>
 
     @Expose({ name: "unidades" })
     @Transform(({ value }) => {
@@ -49,5 +49,5 @@ export class ProductDTO {
             sale: obj.venta,
         }))
     })
-    declare units: Array<{ id: number; profit: number; gain: number }>
+    declare units: Array<DTO.unit>
 }

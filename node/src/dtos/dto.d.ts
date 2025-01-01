@@ -1,9 +1,9 @@
 declare namespace DTO {
-    type TransformFilters = {
-        value?: string
-    }
-
-    type TransformOrders = { value?: string }
+    type Transform = { value?: string }
 
     type Shortcut = { accion: string; atajo: string; vista: number }
+
+    type code = { id: number; name: string; code: string }
+
+    type unit = { id: number; name: string; profit: number; sale: number }
 }
