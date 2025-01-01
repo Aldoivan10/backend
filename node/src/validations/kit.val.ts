@@ -1,53 +1,44 @@
-import { Schema } from "express-validator"
+import {
+    array,
+    check,
+    InferOutput,
+    intersect,
+    minValue,
+    number,
+    object,
+    pipe,
+    required,
+} from "valibot"
+import { NameSchema } from "./general.val"
 
-export const KitVal: Schema = {
-    name: {
-        isString: {
-            errorMessage: "El nombre deben ser carácteres",
-        },
-        trim: true,
-        notEmpty: {
-            errorMessage: "El nombre es obligatorio",
-        },
-    },
-    products: {
-        isArray: {
-            options: {
-                min: 1,
-            },
-            errorMessage:
-                "Los productos deben ser un arreglo de al menos 1 elemento",
-        },
-        custom: {
-            options: (arr: KitProduct[]) => {
-                const aux: Record<number, number> = {}
-                for (const { id, unit } of arr) {
-                    if (aux[id] === unit)
-                        throw new Error(
-                            "No se puede repetir la unidad de un mismo producto"
-                        )
-                    aux[id] = unit
-                }
-                return true
-            },
-        },
-    },
-    "products.*.id": {
-        isInt: {
-            options: { gt: 0 },
-            errorMessage: "El ID del producto debe ser un número positivo",
-        },
-    },
-    "products.*.unit": {
-        isInt: {
-            options: { gt: 0 },
-            errorMessage: "El ID de la unidad debe ser un número positivo",
-        },
-    },
-    "products.*.amount": {
-        isInt: {
-            options: { gt: 0 },
-            errorMessage: "La cantidad debe ser un número positivo mayor a 0",
-        },
-    },
-}
+export const KitSchema = intersect([
+    NameSchema(64),
+    required(
+        object({
+            products: pipe(
+                array(
+                    object({
+                        id: pipe(
+                            number("El ID del producto debe ser un número"),
+                            minValue(1, "El ID del producto debe ser mayor a 0")
+                        ),
+                        unit: pipe(
+                            number("El ID de la unidad debe ser un número"),
+                            minValue(1, "El ID de la unidad debe ser mayor a 0")
+                        ),
+                        amount: pipe(
+                            number("La cantidad debe ser un número"),
+                            check(
+                                (value) => value > 0,
+                                "La cantidad debe ser mayor a 0"
+                            )
+                        ),
+                    })
+                )
+            ),
+        }),
+        "Los productos son obligatorios"
+    ),
+])
+
+export type KitBody = InferOutput<typeof KitSchema>
