@@ -1,8 +1,9 @@
 import cookieParser from "cookie-parser"
 import express, { json } from "express"
+import "reflect-metadata"
 import { HOST, PORT } from "./config"
-import { errorMW } from "./middleware/error.mw"
-import { logMW } from "./middleware/log.mw"
+import { errorMW } from "./middlewares/error.mw"
+import { logMW } from "./middlewares/log.mw"
 import auth from "./routes/auth.route"
 import catalogRoute from "./routes/catalog.route"
 import entityRoute from "./routes/entity.route"
@@ -31,10 +32,10 @@ app.get("/", (_, res) => {
 // Ruta para la autenticación de usuarios
 app.use(auth)
 // Rutas
+app.use("/kit", kitRoute)
 app.use("/product", productRoute)
 app.use("/entity", entityRoute)
 app.use("/user", userRoute)
-app.use("/kit", kitRoute)
 app.use(catalogRoute)
 // Manejador de errores
 app.use(errorMW)
