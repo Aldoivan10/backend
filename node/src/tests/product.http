@@ -52,27 +52,31 @@ Content-Type: application/json
 
 
 ### Actualizar nombre
-PATCH  http://localhost:3000/product/2
+PATCH  http://localhost:3000/product/1
 Content-Type: application/json
 
 {
-    "id_department": 1,
-    "id_supplier": 1,
-    "amount": 100,
-    "buy": 100,
-    "min": 5,
-    "refundable": true,
+    "id_department": 2,
+    "id_supplier": 3,
+    "amount": 150,
+    "buy": 170,
+    "min": 10,
+    "refundable": false,
     "codes": [
         {
-            "id": 4,
+            "id": 6,
             "code": "Código 2"
+        },
+        {
+            "id": 7,
+            "code": "Código 3"
         }
     ],
     "units": [{
         "id": 1,
-        "sale": 100,
-        "profit": 10
+        "sale": 50,
+        "profit": 50
     }],
-    "name": "Nuevo cable",
+    "name": "Producto editado",
     "username": "Administrador"
 }

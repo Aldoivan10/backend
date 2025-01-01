@@ -9,7 +9,7 @@ POST http://localhost:3000/kit
 Content-Type: application/json
 
 {
-    "name": "Kit 3",
+    "name": "Kit nuevo",
     "products": [
         {
             "id": 1,

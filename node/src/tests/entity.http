@@ -10,7 +10,7 @@ Content-Type: application/json
 
 {
     "id_entity_type": 1,
-    "name": "Entidad con token",
+    "name": "Entidad nueva",
     "username": "Administrador"
 }
 
@@ -26,10 +26,11 @@ Content-Type: application/json
 
 
 ### Actualizar nombre
-PATCH  http://localhost:3000/entity/1
+PATCH  http://localhost:3000/entity/3
 Content-Type: application/json
 
 {
+    "id_entity_type": 2,
     "name": "Entidad nuevo nombre",
     "username": "Administrador"
 }

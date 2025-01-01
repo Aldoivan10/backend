@@ -10,7 +10,7 @@ Content-Type: application/json
 
 {
     "id_user_type": 2,
-    "name": "aldo 2",
+    "name": "aldo 3",
     "password": "123",
     "username": "Administrador"
 }
@@ -21,17 +21,18 @@ DELETE http://localhost:3000/user
 Content-Type: application/json
 
 {
-    "ids": [2,3],
+    "ids": [3],
     "username": "Administrador"
 }
 
 
 ### Actualizar 
-PATCH  http://localhost:3000/user/1
+PATCH  http://localhost:3000/user/2
 Content-Type: application/json
 
 {
     "id_user_type": 1,
-    "name": "root",
-    "password": "Contrasenia"
+    "name": "Aldo",
+    "password": "123",
+    "username": "Administrador"
 }
