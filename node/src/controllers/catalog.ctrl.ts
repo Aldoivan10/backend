@@ -14,7 +14,7 @@ export class CatalogController extends Controller<
     Body.Catalog,
     CatalogDTO
 > {
-    protected readonly messages: CatalogMap = {
+    protected readonly messages: Catalog.Map = {
         code: {
             del: "Códigos eliminados",
             add: "Código agregado",
