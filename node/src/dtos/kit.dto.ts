@@ -1,4 +1,5 @@
 import { Expose, Transform } from "class-transformer"
+import { ProductDTO } from "./product.dto"
 
 const transformProducts = ({ value }: DTO.TransformProduct) => {
     const products: DTO.KitProducts = JSON.parse(value)
@@ -37,5 +38,15 @@ export class KitDTO {
 
     @Expose({ name: "productos" })
     @Transform(transformProducts)
-    declare products: Record<string, any>
+    declare products: Array<
+        Omit<ProductDTO, "units"> & {
+            units: {
+                id: number
+                name: string
+                profit: number
+                sale: number
+                amount: number
+            }[]
+        }
+    >
 }
