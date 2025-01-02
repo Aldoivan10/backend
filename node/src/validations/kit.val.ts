@@ -1,6 +1,7 @@
 import {
     array,
     check,
+    checkItems,
     InferOutput,
     intersect,
     minLength,
@@ -36,7 +37,13 @@ export const KitSchema = intersect([
                         ),
                     })
                 ),
-                minLength(1, "Debe haber al menos un producto")
+                minLength(1, "Debe haber al menos un producto"),
+                checkItems((item, index, array) => {
+                    const items = array.filter(
+                        (i) => i.id === item.id && i.unit === item.unit
+                    )
+                    return items.length === 1
+                }, "No se puede repetir la unidad en un mismo producto")
             ),
         }),
         "Los productos son obligatorios"
