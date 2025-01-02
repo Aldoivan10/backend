@@ -26,7 +26,13 @@ export class KitService extends Service<Body.Kit, KitDTO> {
         if (!old) return null
         const changes = this.getChanges(body, old)
         if (!changes) return null
-        return super.update(id, body, username)
+        const obj = this.repo.updateAndLog(
+            id,
+            body,
+            username,
+            `El kit ${old.name}: ${changes}`
+        )
+        return this.mapper(obj)
     }
 
     remove(ids: number[], username: string): KitDTO[] {
