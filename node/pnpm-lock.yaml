@@ -29,6 +29,9 @@ importers:
       express:
         specifier: 4.21.1
         version: 4.21.1
+      express-sql-api:
+        specifier: 'link:'
+        version: 'link:'
       inversify:
         specifier: ^6.2.1
         version: 6.2.1(reflect-metadata@0.2.2)

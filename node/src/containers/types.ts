@@ -25,4 +25,8 @@ export const Types = {
     KitService: Symbol.for("KitService"),
     KitRepository: Symbol.for("KitRepository"),
     KitController: Symbol.for("KitController"),
+
+    BudgetService: Symbol.for("BudgetService"),
+    BudgetRepository: Symbol.for("BudgetRepository"),
+    BudgetController: Symbol.for("BudgetController"),
 }

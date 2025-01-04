@@ -60,4 +60,15 @@ declare namespace Body {
         name: string
         products: KitProduct[]
     }
+
+    type BudgetItem = {
+        id_product: number
+        id_unit: number
+        amount: number
+    }
+
+    type Budget = {
+        id_entity: number
+        items: BudgetItem[]
+    }
 }
