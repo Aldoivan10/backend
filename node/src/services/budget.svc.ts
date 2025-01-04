@@ -1,9 +1,10 @@
-import { inject } from "inversify"
+import { inject, injectable } from "inversify"
 import { Types } from "../containers/types"
 import { BudgetDTO } from "../dtos/budget.dto"
 import { BudgetRepository } from "../repositories/budget.repo"
 import { Service } from "./service"
 
+@injectable()
 export class BudgetService extends Service<Body.Budget, BudgetDTO> {
     constructor(
         @inject(Types.BudgetRepository)
