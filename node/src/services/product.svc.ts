@@ -80,7 +80,7 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
 
     protected getCodesChanges(
         newCodes: Body.Code[],
-        oldCodes: Array<DTO.code>
+        oldCodes: Array<DTO.Code>
     ) {
         const changes: string[] = []
         for (const code of newCodes) {
@@ -105,7 +105,7 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
 
     protected getUnitsChanges(
         newUnits: Body.Unit[],
-        oldUnits: Array<DTO.unit>
+        oldUnits: Array<DTO.Unit>
     ) {
         const changes: string[] = []
         for (const unit of newUnits) {
