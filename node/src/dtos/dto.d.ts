@@ -23,7 +23,17 @@ declare namespace DTO {
 
     type Shortcut = { accion: string; atajo: string; vista: number }
 
-    type code = { id: number; name: string; code: string }
+    type Item = { id: number; name: string }
 
-    type unit = { id: number; name: string; profit: number; sale: number }
+    type Code = Item & { code: string }
+
+    type Unit = Item & { profit: number; sale: number }
+
+    type ProductBudget = {
+        id_producto: number
+        producto: string
+        id_unidad: number
+        unidad: string
+        cantidad: number
+    }
 }
