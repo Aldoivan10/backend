@@ -1,8 +1,8 @@
 import { Transaction } from "better-sqlite3"
-import { Repository } from "./repository"
 import { inject, injectable } from "inversify"
 import { Types } from "../containers/types"
 import { APIDataBase } from "../models/db"
+import { Repository } from "./repository"
 
 @injectable()
 export class BudgetRepository extends Repository<Body.Budget> {
@@ -26,10 +26,14 @@ export class BudgetRepository extends Repository<Body.Budget> {
             const budgetID = insertLogStm.get({ id_log: logID, ...input })
             const items = input.items.map((item) => ({ ...budgetID, ...item }))
             for (const item of items) insertProductStm.run(item)
-            return this.getByID(logID)
+            return this.getByID(budgetID!.id)
         })
         this.updateStm = this.db.transaction((_, __, ___) => {
             return {}
         })
+    }
+
+    public update(_: number, __: Body.Budget, ___: string): Obj {
+        throw new Error("Method not implemented")
     }
 }
