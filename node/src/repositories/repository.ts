@@ -1,6 +1,6 @@
 import { Statement, Transaction } from "better-sqlite3"
 import { APIDataBase } from "../models/db"
-import { arrConj, getPlaceholders } from "../utils/array.util"
+import { getPlaceholders } from "../utils/array.util"
 
 export interface IRepo<I extends Obj> {
     all(data: FilterData, filter: string): Obj[]
@@ -50,12 +50,8 @@ export abstract class Repository<I extends Obj> implements IRepo<I> {
 
                 const result = this.logStm.run(user)
                 const logID = Number(result.lastInsertRowid)
-                const names = deleteds.map((item) => item.nombre)
-                this.changeStm.run(
-                    logID,
-                    "Eliminó",
-                    `${desc}: ${arrConj(names)}`
-                )
+
+                this.changeStm.run(logID, "Eliminó", desc)
 
                 return deleteds
             })

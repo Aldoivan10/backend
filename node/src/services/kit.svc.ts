@@ -4,6 +4,7 @@ import { KitDTO } from "../dtos/kit.dto"
 import { CatalogRepository } from "../repositories/catalog.repo"
 import { KitRepository } from "../repositories/kit.repo"
 import { arrConj } from "../utils/array.util"
+import { notFalsy } from "../utils/obj.util"
 import { Service } from "./service"
 
 @injectable()
@@ -36,7 +37,11 @@ export class KitService extends Service<Body.Kit, KitDTO> {
     }
 
     remove(ids: number[], username: string): KitDTO[] {
-        return super.delete(ids, username, "Los kits")
+        const names = ids
+            .map((id) => this.getByID(id))
+            .filter(notFalsy)
+            .map((item) => item.name)
+        return super.delete(ids, username, `Los kits: ${arrConj(names)}`)
     }
 
     protected getChanges(body: Body.Kit, old: KitDTO) {

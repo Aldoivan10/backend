@@ -2,6 +2,8 @@ import { inject, injectable } from "inversify"
 import { Types } from "../containers/types"
 import { BudgetDTO } from "../dtos/budget.dto"
 import { BudgetRepository } from "../repositories/budget.repo"
+import { arrConj } from "../utils/array.util"
+import { notFalsy } from "../utils/obj.util"
 import { Service } from "./service"
 
 @injectable()
@@ -23,6 +25,16 @@ export class BudgetService extends Service<Body.Budget, BudgetDTO> {
     }
 
     remove(ids: number[], username: string): BudgetDTO[] {
-        return super.delete(ids, username, "Los presupuestos")
+        const budgets = ids
+            .map((id) => this.getByID(id))
+            .filter(notFalsy)
+            .map((item) => `${item.date} - ${item.entity}`)
+        return super.delete(
+            ids,
+            username,
+            `Los presupuestos: ${arrConj(budgets)}`
+        )
     }
+
+    removeBetween(init: string, end: string) {}
 }

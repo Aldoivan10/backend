@@ -2,6 +2,8 @@ import { inject, injectable } from "inversify"
 import { Types } from "../containers/types"
 import { CatalogDTO } from "../dtos/catalog.dto"
 import { CatalogRepository } from "../repositories/catalog.repo"
+import { arrConj } from "../utils/array.util"
+import { notFalsy } from "../utils/obj.util"
 import { Service } from "./service"
 
 @injectable()
@@ -44,6 +46,14 @@ export class CatalogService extends Service<Body.Catalog, CatalogDTO> {
     }
 
     public remove(ids: number[], username: string) {
-        return super.delete(ids, username, this.deleteMsgs[this.table])
+        const names = ids
+            .map((id) => this.getByID(id))
+            .filter(notFalsy)
+            .map((item) => item.name)
+        return super.delete(
+            ids,
+            username,
+            `${this.deleteMsgs[this.table]}: ${arrConj(names)}`
+        )
     }
 }

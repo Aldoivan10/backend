@@ -4,6 +4,8 @@ import { PASS_SALT } from "../config"
 import { Types } from "../containers/types"
 import { UserDTO } from "../dtos/user.dto"
 import UserRepo from "../repositories/user.repo"
+import { arrConj } from "../utils/array.util"
+import { notFalsy } from "../utils/obj.util"
 import { Service } from "./service"
 
 @injectable()
@@ -32,7 +34,11 @@ export class UserService extends Service<Body.User, UserDTO> {
     }
 
     public remove(ids: number[], username: string) {
-        return super.delete(ids, username, "Los usuarios")
+        const names = ids
+            .map((id) => this.getByID(id))
+            .filter(notFalsy)
+            .map((item) => item.name)
+        return super.delete(ids, username, `Los usuarios: ${arrConj(names)}`)
     }
 
     public shortcuts(id: number, shortcuts: Body.Shortcut) {

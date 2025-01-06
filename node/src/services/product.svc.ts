@@ -4,6 +4,7 @@ import { ProductDTO } from "../dtos/product.dto"
 import { CatalogRepository } from "../repositories/catalog.repo"
 import ProductRepository from "../repositories/product.repo"
 import { arrConj } from "../utils/array.util"
+import { notFalsy } from "../utils/obj.util"
 import { Service } from "./service"
 
 @injectable()
@@ -38,7 +39,11 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
     }
 
     public remove(ids: number[], username: string): ProductDTO[] {
-        return super.delete(ids, username, "Los productos")
+        const names = ids
+            .map((id) => this.getByID(id))
+            .filter(notFalsy)
+            .map((item) => item.name)
+        return super.delete(ids, username, `Los productos: ${arrConj(names)}`)
     }
 
     protected sanitize(body: Body.Product) {
