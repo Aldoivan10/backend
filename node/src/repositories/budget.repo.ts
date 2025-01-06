@@ -1,4 +1,4 @@
-import { Transaction } from "better-sqlite3"
+import { Statement, Transaction } from "better-sqlite3"
 import { inject, injectable } from "inversify"
 import { Types } from "../containers/types"
 import { APIDataBase } from "../models/db"
@@ -8,6 +8,7 @@ import { Repository } from "./repository"
 export class BudgetRepository extends Repository<Body.Budget> {
     protected insertStm: Transaction<Repo.Insert<Body.Budget>>
     protected updateStm: Transaction<Repo.Update<Body.Budget>>
+    protected getIdsBetween: Statement<Repo.Dates, ID>
 
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
         super(
@@ -24,6 +25,9 @@ export class BudgetRepository extends Repository<Body.Budget> {
         const insertProductStm = this.db.prepare<Body.BudgetItem>(
             "INSERT INTO Presupuesto VALUES (@id, @id_product, @id_unit, @amount)"
         )
+        this.getIdsBetween = this.db.prepare(
+            `SELECT id FROM ${this.table} WHERE fecha BETWEEN @init AND @end`
+        )
         this.insertStm = this.db.transaction((input, usuario) => {
             const result = this.logStm.run(usuario)
             const logID = Number(result.lastInsertRowid)
@@ -37,5 +41,10 @@ export class BudgetRepository extends Repository<Body.Budget> {
 
     public update(_: number, __: Body.Budget, ___: string): Obj {
         throw new Error("Method not implemented")
+    }
+
+    public deleteBetween(dates: Repo.Dates, user: string, desc: string) {
+        const ids = this.getIdsBetween.all(dates).map((item) => item.id)
+        return super.delete(ids, user, desc)
     }
 }

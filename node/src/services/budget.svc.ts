@@ -36,5 +36,14 @@ export class BudgetService extends Service<Body.Budget, BudgetDTO> {
         )
     }
 
-    removeBetween(init: string, end: string) {}
+    removeBetween(dates: Dates, username: string) {
+        const range = dates.end
+            ? `entre ${dates.init} - ${dates.end}`
+            : `del día ${dates.init}`
+        return this.repo.deleteBetween(
+            { init: dates.init, end: dates.end ?? dates.init },
+            username,
+            `Los presupuestos ${range}`
+        )
+    }
 }

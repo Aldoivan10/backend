@@ -28,4 +28,15 @@ export class SaleService extends Service<Body.Sale, SaleDTO> {
             .map((item) => `${item.date} - ${item.user}`)
         return super.delete(ids, username, `Las ventas: ${arrConj(sales)}`)
     }
+
+    removeBetween(dates: Dates, username: string) {
+        const range = dates.end
+            ? `entre ${dates.init} - ${dates.end}`
+            : `del día ${dates.init}`
+        return this.repo.deleteBetween(
+            { init: dates.init, end: dates.end ?? dates.init },
+            username,
+            `Las ventas ${range}`
+        )
+    }
 }

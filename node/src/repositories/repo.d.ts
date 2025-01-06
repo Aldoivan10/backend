@@ -9,6 +9,8 @@ declare namespace Repo {
 
     type Delete = (ids: number[], user: string, desc: string) => Array<Obj>
 
+    type Dates = { init: string; end: string }
+
     type InitUser = { nombre: string; atajos: string }
 
     type TokenUser = { id: number; name: string; role: string; logged: boolean }

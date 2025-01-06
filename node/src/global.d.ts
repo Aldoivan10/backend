@@ -53,6 +53,8 @@ declare global {
 
     type Obj = Record<string, any>
 
+    type Dates = { init: string; end?: string }
+
     type TokenPayload = {
         id: number
         name: string
