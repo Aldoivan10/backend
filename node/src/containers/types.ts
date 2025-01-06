@@ -29,4 +29,12 @@ export const Types = {
     BudgetService: Symbol.for("BudgetService"),
     BudgetRepository: Symbol.for("BudgetRepository"),
     BudgetController: Symbol.for("BudgetController"),
+
+    SaleService: Symbol.for("SaleService"),
+    SaleRepository: Symbol.for("SaleRepository"),
+    SaleController: Symbol.for("SaleController"),
+
+    ParserService: Symbol.for("ParseService"),
+    ParserRepository: Symbol.for("ParserRepository"),
+    ParserController: Symbol.for("ParserController"),
 }

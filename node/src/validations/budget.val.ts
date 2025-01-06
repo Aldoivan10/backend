@@ -8,7 +8,9 @@ import {
     object,
     pipe,
     required,
+    transform,
 } from "valibot"
+import { formatDecimals } from "../utils/number.util"
 
 export const BudgetSchema = intersect([
     required(
@@ -29,7 +31,8 @@ export const BudgetSchema = intersect([
                             check(
                                 (input) => input > 0,
                                 "La cantidad debe ser mayor de 0"
-                            )
+                            ),
+                            transform(formatDecimals)
                         ),
                     })
                 ),

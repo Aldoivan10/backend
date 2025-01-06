@@ -36,4 +36,12 @@ declare namespace DTO {
         unidad: string
         cantidad: number
     }
+
+    type ProductSale = {
+        producto: string
+        unidad: string
+        cantidad: number
+        precio: number
+        nuevo_precio: number | null
+    }
 }

@@ -1,0 +1,39 @@
+### Obtener todos
+GET http://localhost:3000/budget
+
+### Obtener
+GET http://localhost:3000/budget/single?filters={"nombre_like":"%prove%"}
+
+### Obtener por id
+GET http://localhost:3000/budget/2
+
+### Agregar
+POST http://localhost:3000/budget
+Content-Type: application/json
+
+{
+    "id_entity": 1,
+    "items": [{ "id_product": 1, "id_unit": 2, "amount": 10 }],
+    "username": "Administrador"
+}
+
+
+### Eliminar
+DELETE http://localhost:3000/budget/
+Content-Type: application/json
+
+{
+    "ids": [1],
+    "username": "Administrador"
+}
+
+
+### Actualizar nombre
+PATCH  http://localhost:3000/budget/2
+Content-Type: application/json
+
+{
+    "id_entity": 1,
+    "items": [{ "id_product": 10, "id_unit": 1, "amount": 10 }],
+    "username": "Administrador"
+}

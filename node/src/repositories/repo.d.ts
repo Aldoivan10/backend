@@ -3,6 +3,8 @@ declare namespace Repo {
 
     type Update<I> = (id: number, input: I, user: string) => Obj
 
+    type UpdAndLog<I> = (id: number, input: I, user: string, log: string) => Obj
+
     type Change = [number, "Creó" | "Modificó" | "Eliminó", string]
 
     type Delete = (ids: number[], user: string, desc: string) => Array<Obj>
@@ -70,5 +72,27 @@ declare namespace Body {
     type Budget = {
         id_entity: number
         items: BudgetItem[]
+    }
+
+    type Parser = {
+        id_unit: number
+        id_sub_unit: number
+        multiplier: number
+    }
+
+    type ProductSale = {
+        product: string
+        unit: string
+        amount: number
+        sale: number
+        new_sale: number | null
+    }
+
+    type Sale = {
+        total: number
+        discount: number | null
+        new_total: number | null
+        entity: string
+        items: ProductSale[]
     }
 }

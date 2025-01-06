@@ -1,0 +1,27 @@
+#### Obtener todos
+GET http://localhost:3000/parser
+
+#### Obtener por id
+GET http://localhost:3000/parser/2
+
+### Insertar
+POST http://localhost:3000/parser
+Content-Type: application/json
+
+{
+    "id_unit": 1,
+    "id_sub_unit" : 2,
+    "multiplier": 0.5,
+    "username": "Administrador"
+}
+
+### Actualizar
+PATCH  http://localhost:3000/parser/1
+Content-Type: application/json
+
+{
+    "id_unit": 1,
+    "id_sub_unit" : 2,
+    "multiplier": 0.01,
+    "username": "Administrador"
+}

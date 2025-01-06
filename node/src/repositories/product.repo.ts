@@ -8,14 +8,24 @@ import { Repository } from "./repository"
 export default class ProductRepository extends Repository<Body.Product> {
     protected insertStm: Transaction<Repo.Insert<Body.Product>>
     protected updateStm: Transaction<Repo.Update<Body.Product>>
-    protected logUpdateStm: Transaction<
-        (id: number, input: Body.Product, user: string, changes: string) => Obj
-    >
+    protected logUpdateStm: Transaction<Repo.UpdAndLog<Body.Product>>
 
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
         super(
             db,
-            "id, id_departamento, departamento, id_proveedor, proveedor, codigos, unidades, nombre, cantidad, min, reembolsable",
+            [
+                "id",
+                "id_departamento",
+                "departamento",
+                "id_proveedor",
+                "proveedor",
+                "codigos",
+                "unidades",
+                "nombre",
+                "cantidad",
+                "min",
+                "reembolsable",
+            ],
             "Producto_Vista"
         )
 

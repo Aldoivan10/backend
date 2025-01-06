@@ -27,7 +27,7 @@ export abstract class Repository<I extends Obj> implements IRepo<I> {
 
     constructor(
         protected readonly db: APIDataBase,
-        protected readonly columns: string,
+        protected readonly columns: string[],
         protected table?: string
     ) {
         this.logStm = this.db.prepare("INSERT INTO Log (usuario) VALUES (?)")
@@ -37,7 +37,7 @@ export abstract class Repository<I extends Obj> implements IRepo<I> {
 
         if (table) {
             this.getByIDStm = this.db.prepare(
-                `SELECT ${columns} FROM ${table} WHERE id = ?`
+                `SELECT ${columns.join()} FROM ${table} WHERE id = ?`
             )
             this.deleteStm = this.db.transaction((ids, user, desc) => {
                 const placeholders = getPlaceholders(ids)

@@ -1,4 +1,4 @@
-import { container } from "."
+import { Container } from "inversify"
 import { BudgetController } from "../controllers/budget.ctrl"
 import { Controller } from "../controllers/controller"
 import { BudgetDTO } from "../dtos/budget.dto"
@@ -9,12 +9,16 @@ import { IService } from "../services/service"
 import { BudgetSchema } from "../validations/budget.val"
 import { Types } from "./types"
 
-container.bind<IRepo<Body.Budget>>(Types.BudgetRepository).to(BudgetRepository)
-container
-    .bind<IService<Body.Budget, BudgetDTO>>(Types.KitService)
-    .to(BudgetService)
-container
-    .bind<Controller<typeof BudgetSchema, Body.Budget, BudgetDTO>>(
-        Types.BudgetController
-    )
-    .to(BudgetController)
+export function BudgetContainer(container: Container) {
+    container
+        .bind<IRepo<Body.Budget>>(Types.BudgetRepository)
+        .to(BudgetRepository)
+    container
+        .bind<IService<Body.Budget, BudgetDTO>>(Types.BudgetService)
+        .to(BudgetService)
+    container
+        .bind<Controller<typeof BudgetSchema, Body.Budget, BudgetDTO>>(
+            Types.BudgetController
+        )
+        .to(BudgetController)
+}

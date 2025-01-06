@@ -8,12 +8,10 @@ import { Repository } from "./repository"
 export class KitRepository extends Repository<Body.Kit> {
     protected insertStm: Transaction<Repo.Insert<Body.Kit>>
     protected updateStm: Transaction<Repo.Update<Body.Kit>>
-    protected logUpdateStm: Transaction<
-        (id: number, input: Body.Kit, user: string, changes: string) => Obj
-    >
+    protected logUpdateStm: Transaction<Repo.UpdAndLog<Body.Kit>>
 
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
-        super(db, "id, nombre, productos", "Kit_Vista")
+        super(db, ["id", "nombre", "productos"], "Kit_Vista")
         const insertStm = this.db.prepare<Body.Kit>(
             "INSERT INTO Kit VALUES (null, @name)"
         )

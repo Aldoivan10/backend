@@ -12,7 +12,18 @@ export class EntityRepository extends Repository<Body.Entity> {
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
         super(
             db,
-            "id, nombre, id_tipo, tipo, rfc, direccion, domicilio, codigo_postal, telefono,correo",
+            [
+                "id",
+                "nombre",
+                "id_tipo",
+                "tipo",
+                "rfc",
+                "direccion",
+                "domicilio",
+                "codigo_postal",
+                "telefono",
+                "correo",
+            ],
             "Entidad_Vista"
         )
         const insertStm = this.db.prepare<Body.Entity>(

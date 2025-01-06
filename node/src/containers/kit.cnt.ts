@@ -1,4 +1,4 @@
-import { container } from "."
+import { Container } from "inversify"
 import { Controller } from "../controllers/controller"
 import { KitController } from "../controllers/kit.ctrl"
 import { KitDTO } from "../dtos/kit.dto"
@@ -9,8 +9,12 @@ import { IService } from "../services/service"
 import { KitSchema } from "../validations/kit.val"
 import { Types } from "./types"
 
-container.bind<IRepo<Body.Kit>>(Types.KitRepository).to(KitRepository)
-container.bind<IService<Body.Kit, KitDTO>>(Types.KitService).to(KitService)
-container
-    .bind<Controller<typeof KitSchema, Body.Kit, KitDTO>>(Types.KitController)
-    .to(KitController)
+export function KitContainer(container: Container) {
+    container.bind<IRepo<Body.Kit>>(Types.KitRepository).to(KitRepository)
+    container.bind<IService<Body.Kit, KitDTO>>(Types.KitService).to(KitService)
+    container
+        .bind<Controller<typeof KitSchema, Body.Kit, KitDTO>>(
+            Types.KitController
+        )
+        .to(KitController)
+}

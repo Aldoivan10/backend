@@ -10,7 +10,11 @@ export class BudgetRepository extends Repository<Body.Budget> {
     protected updateStm: Transaction<Repo.Update<Body.Budget>>
 
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
-        super(db, "id, fecha, usuario, entidad, productos", "Presupuesto_Vista")
+        super(
+            db,
+            ["id", "fecha", "usuario", "entidad", "productos"],
+            "Presupuesto_Vista"
+        )
         const insertLogStm = this.db.prepare<
             Body.Budget & { id_log: number },
             ID
@@ -28,9 +32,7 @@ export class BudgetRepository extends Repository<Body.Budget> {
             for (const item of items) insertProductStm.run(item)
             return this.getByID(budgetID!.id)
         })
-        this.updateStm = this.db.transaction((_, __, ___) => {
-            return {}
-        })
+        this.updateStm = this.db.transaction((_, __, ___) => {})
     }
 
     public update(_: number, __: Body.Budget, ___: string): Obj {

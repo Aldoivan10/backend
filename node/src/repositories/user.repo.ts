@@ -13,7 +13,11 @@ export default class UserRepository extends Repository<Body.User> {
     >
 
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
-        super(db, "id, nombre, contrasenia, id_rol, rol", "Usuario_Vista")
+        super(
+            db,
+            ["id", "nombre", "contrasenia", "id_rol", "rol"],
+            "Usuario_Vista"
+        )
         const insertSCStm = this.db.prepare<[string, number, number]>(
             "UPDATE Usuario_Atajo SET atajo=? WHERE id_usuario=? AND id_atajo=? RETURNING *"
         )

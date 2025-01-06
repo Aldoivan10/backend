@@ -11,7 +11,7 @@ export class CatalogRepository extends Repository<Body.Catalog> {
     protected updateStm!: Transaction<Repo.Update<Body.Catalog>>
 
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
-        super(db, "id, nombre")
+        super(db, ["id", "nombre"])
     }
 
     public setTable(table: string) {
