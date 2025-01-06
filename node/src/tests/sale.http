@@ -27,14 +27,3 @@ Content-Type: application/json
     "ids": [1],
     "username": "Administrador"
 }
-
-
-### Actualizar
-PATCH  http://localhost:3000/sale/2
-Content-Type: application/json
-
-{
-    "id_entity": 1,
-    "items": [{ "id_product": 10, "id_unit": 1, "amount": 10 }],
-    "username": "Administrador"
-}
