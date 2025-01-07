@@ -17,6 +17,7 @@ export class SaleRepository extends Repository<Body.Sale> {
                 "id",
                 "usuario",
                 "fecha",
+                "hora",
                 "entidad",
                 "total",
                 "descuento",

@@ -13,7 +13,7 @@ export class BudgetRepository extends Repository<Body.Budget> {
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
         super(
             db,
-            ["id", "fecha", "usuario", "entidad", "productos"],
+            ["id", "fecha", "hora", "usuario", "entidad", "productos"],
             "Presupuesto_Vista"
         )
         const insertLogStm = this.db.prepare<
