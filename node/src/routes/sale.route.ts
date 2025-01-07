@@ -4,7 +4,7 @@ import { Types } from "../containers/types"
 import { SaleControlller } from "../controllers/sale.ctrl"
 import { requireAdminMW, tokenMW } from "../middlewares/token.mw"
 import { validationMW } from "../middlewares/validation.mw"
-import { IdsSchema } from "../validations/general.val"
+import { DateRangeSchema, IdsSchema } from "../validations/general.val"
 import { SaleSchema } from "../validations/sale.val"
 
 const router = Router()
@@ -26,6 +26,13 @@ router.delete(
     requireAdminMW,
     validationMW(IdsSchema),
     controller.delete.bind(controller)
+)
+router.delete(
+    "/range",
+    tokenMW,
+    requireAdminMW,
+    validationMW(DateRangeSchema),
+    controller.rangeDelete.bind(controller)
 )
 
 export default router

@@ -1,14 +1,19 @@
 import {
     array,
+    check,
+    isoDateTime,
     maxLength,
+    maxValue,
     minLength,
     minValue,
     nonEmpty,
+    nullish,
     number,
     object,
     pipe,
     required,
     string,
+    transform,
     trim,
 } from "valibot"
 
@@ -38,3 +43,44 @@ export const NameSchema = (max: number) => {
         "El nombre es obligatorio"
     )
 }
+
+export const DateRangeSchema = pipe(
+    required(
+        object({
+            init: pipe(
+                string(
+                    "La fecha de inicio debe ser una cadena con el formato yyyy-mm-dd"
+                ),
+                isoDateTime(
+                    "La fecha no esta en el formato solicitado (yyyy-mm-dd)"
+                ),
+                transform((date) => new Date(date)),
+                maxValue(new Date(), "La fecha máxima es el día actual")
+            ),
+            end: nullish(
+                pipe(
+                    string(
+                        "La fecha final debe ser una cadena con el formato yyyy-mm-dd"
+                    ),
+                    isoDateTime(
+                        "La fecha no esta en el formato solicitado (yyyy-mm-dd)"
+                    ),
+                    transform((date) => new Date(date)),
+                    maxValue(new Date(), "La fecha máxima es el día actual")
+                ),
+                null
+            ),
+        }),
+        "La fecha de inicio es requerida"
+    ),
+    check((dates) => {
+        const { init, end } = dates
+        return end ? init < end : true
+    }, "La fecha de inicio debe ser anterior a la fecha final"),
+    transform((dates) => {
+        const { init, end } = dates
+        const [strInit] = init.toISOString().split("T")
+        const [strEnd] = end ? end.toISOString().split("T") : [null]
+        return { init: strInit, end: strEnd }
+    })
+)

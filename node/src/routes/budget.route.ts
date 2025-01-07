@@ -5,7 +5,7 @@ import { BudgetController } from "../controllers/budget.ctrl"
 import { requireAdminMW, tokenMW } from "../middlewares/token.mw"
 import { validationMW } from "../middlewares/validation.mw"
 import { BudgetSchema } from "../validations/budget.val"
-import { IdsSchema } from "../validations/general.val"
+import { DateRangeSchema, IdsSchema } from "../validations/general.val"
 
 const router = Router()
 const controller = container.get<BudgetController>(Types.BudgetController)
@@ -26,6 +26,13 @@ router.delete(
     requireAdminMW,
     validationMW(IdsSchema),
     controller.delete.bind(controller)
+)
+router.delete(
+    "/range",
+    tokenMW,
+    requireAdminMW,
+    validationMW(DateRangeSchema),
+    controller.rangeDelete.bind(controller)
 )
 
 export default router
