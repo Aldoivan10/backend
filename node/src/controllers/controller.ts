@@ -36,7 +36,7 @@ export abstract class Controller<
         try {
             const filter = this.getFilter(req, this.columns)
             const entitys = this.svc.all(filter)
-            res.json({ data: entitys })
+            res.json(entitys)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
@@ -47,7 +47,7 @@ export abstract class Controller<
         try {
             const filter = this.getFilter(req, this.columns)
             const entity = this.svc.get(filter)
-            res.json({ data: entity })
+            res.json(entity)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
@@ -58,7 +58,7 @@ export abstract class Controller<
         try {
             const id = +req.params.id
             const entity = this.svc.getByID(id)
-            res.json({ data: entity })
+            res.json(entity)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
