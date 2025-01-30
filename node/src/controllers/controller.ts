@@ -35,8 +35,8 @@ export abstract class Controller<
     findAll(req: Request, res: Response, next: NextFunction): void {
         try {
             const filter = this.getFilter(req, this.columns)
-            const entitys = this.svc.all(filter)
-            res.json(entitys)
+            const items = this.svc.all(filter)
+            res.json(items)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
@@ -46,8 +46,8 @@ export abstract class Controller<
     find(req: Request, res: Response, next: NextFunction): void {
         try {
             const filter = this.getFilter(req, this.columns)
-            const entity = this.svc.get(filter)
-            res.json(entity)
+            const item = this.svc.get(filter)
+            res.json(item)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
@@ -57,8 +57,8 @@ export abstract class Controller<
     findByID(req: Request, res: Response, next: NextFunction): void {
         try {
             const id = +req.params.id
-            const entity = this.svc.getByID(id)
-            res.json(entity)
+            const item = this.svc.getByID(id)
+            res.json(item)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)

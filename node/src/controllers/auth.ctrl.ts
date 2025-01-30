@@ -11,7 +11,7 @@ export class AuthController {
     constructor(@inject(Types.AuthService) private readonly svc: AuthService) {}
 
     public users(_: Request, res: Response) {
-        res.json({ data: this.svc.availableUsers() })
+        res.json(this.svc.availableUsers())
     }
 
     public async login(req: Request, res: Response, next: NextFunction) {

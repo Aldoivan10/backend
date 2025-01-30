@@ -57,7 +57,7 @@ export class CatalogController extends Controller<
             const filter = this.getFilter(req, this.columns)
             const table = req.params.table
             const items = this.svc.setTable(table).all(filter)
-            res.json({ data: items })
+            res.json(items)
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
@@ -69,7 +69,7 @@ export class CatalogController extends Controller<
             const filter = this.getFilter(req, this.columns)
             const table = req.params.table
             const item = this.svc.setTable(table).get(filter)
-            res.json({ data: item })
+            res.json(item)
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
@@ -80,7 +80,7 @@ export class CatalogController extends Controller<
         try {
             const { id, table } = this.getData(req)
             const item = this.svc.setTable(table).getByID(+id)
-            res.json({ data: item })
+            res.json(item)
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
