@@ -21,7 +21,7 @@ export class UserController extends Controller<
     }
 
     constructor(
-        @inject(Types.ProductService) protected readonly svc: UserService
+        @inject(Types.UserService) protected readonly svc: UserService
     ) {
         super(["nombre", "role"])
     }
