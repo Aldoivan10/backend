@@ -14,6 +14,8 @@ export interface IRepo<I extends Obj> {
     update(id: number, item: I, user: string): Obj
 
     delete(ids: number[], user: string, desc: string): Obj[]
+
+    total(data: FilterData, filter: string): Obj
 }
 
 export abstract class Repository<I extends Obj> implements IRepo<I> {
@@ -58,6 +60,13 @@ export abstract class Repository<I extends Obj> implements IRepo<I> {
         }
     }
 
+    public total(data: FilterData, filter: string): Obj {
+        const query =
+            `SELECT COUNT(1) total FROM ${this.table} ${filter}`.trim()
+        const stm = this.db.prepare<FilterData, Obj>(query)
+        return stm.get(data)!;
+    }
+
     public all(data: FilterData, filter: string = "") {
         const query =
             `SELECT ${this.columns} FROM ${this.table} ${filter}`.trim()
@@ -65,7 +74,7 @@ export abstract class Repository<I extends Obj> implements IRepo<I> {
         return stm.all(data)
     }
 
-    getByFilter(data: FilterData, filter: string) {
+    public getByFilter(data: FilterData, filter: string) {
         const query =
             `SELECT ${this.columns} FROM ${this.table} ${filter}`.trim()
         const stm = this.db.prepare<FilterData, Obj>(query)
