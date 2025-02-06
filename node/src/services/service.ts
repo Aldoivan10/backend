@@ -15,6 +15,8 @@ export interface IService<I extends Obj, O extends Obj> {
     edit(id: number, body: I, username: string, groups?: string[]): Maybe<O>
 
     remove(ids: number[], username: string, groups?: string[]): O[]
+
+    total(filter: FilterDomain): number 
 }
 
 export abstract class Service<I extends Obj, O extends Obj>
@@ -23,6 +25,11 @@ export abstract class Service<I extends Obj, O extends Obj>
     protected abstract readonly repo: Repository<I>
 
     constructor(protected readonly dto: ClassConstructor<O>) {}
+    
+    public total(filter: FilterDomain): number {
+        const obj = this.repo.total(filter.getData(), filter.getFilter())
+        return obj.total
+    }
 
     public all(filter: FilterDomain, groups?: string[]) {
         return this.repo

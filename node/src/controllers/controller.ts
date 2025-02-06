@@ -19,6 +19,8 @@ export interface IController<S extends BaseSchema<any, any, BaseIssue<any>>> {
     update(req: Express.BodyRequest<S>, res: Response, next: NextFunction): void
 
     delete(req: Express.DeleteRequest, res: Response, next: NextFunction): void
+
+    total(req: Request, res: Response, next: NextFunction): void
 }
 
 export abstract class Controller<
@@ -32,7 +34,7 @@ export abstract class Controller<
 
     constructor(protected readonly columns: string[]) {}
 
-    findAll(req: Request, res: Response, next: NextFunction): void {
+    public findAll(req: Request, res: Response, next: NextFunction): void {
         try {
             const filter = this.getFilter(req, this.columns)
             const items = this.svc.all(filter)
@@ -43,7 +45,7 @@ export abstract class Controller<
         }
     }
 
-    find(req: Request, res: Response, next: NextFunction): void {
+    public find(req: Request, res: Response, next: NextFunction): void {
         try {
             const filter = this.getFilter(req, this.columns)
             const item = this.svc.get(filter)
@@ -54,7 +56,7 @@ export abstract class Controller<
         }
     }
 
-    findByID(req: Request, res: Response, next: NextFunction): void {
+    public findByID(req: Request, res: Response, next: NextFunction): void {
         try {
             const id = +req.params.id
             const item = this.svc.getByID(id)
@@ -65,7 +67,7 @@ export abstract class Controller<
         }
     }
 
-    create(
+    public create(
         req: Express.BodyRequest<S>,
         res: Response,
         next: NextFunction
@@ -83,7 +85,7 @@ export abstract class Controller<
         }
     }
 
-    update(
+    public update(
         req: Express.BodyRequest<S>,
         res: Response,
         next: NextFunction
@@ -103,7 +105,7 @@ export abstract class Controller<
         }
     }
 
-    delete(
+    public delete(
         req: Express.DeleteRequest,
         res: Response,
         next: NextFunction
@@ -115,6 +117,17 @@ export abstract class Controller<
             res.send({ message: this.messages.delete, data: items })
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.delete(err))
+            else next(err)
+        }
+    }
+
+    public total(req: Request, res: Response, next: NextFunction): void {
+        try {
+            const filter = this.getFilter(req, this.columns)
+            const total = this.svc.total(filter)
+            res.json(total)
+        } catch (err) {
+            if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
         }
     }
