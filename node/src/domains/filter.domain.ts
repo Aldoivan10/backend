@@ -56,7 +56,7 @@ export class FilterDomain {
     }
 
     public build() {
-        const arr = [this.where, this.order, this.offset, this.limit]
+        const arr = [this.where, this.order, this.limit, this.offset]
         this.filter = arr.filter(Boolean).join(" ")
         return this
     }
