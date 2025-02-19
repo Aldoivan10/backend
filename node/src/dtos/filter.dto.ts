@@ -18,7 +18,7 @@ const transformFilterFn = ({ value }: DTO.Transform) => {
 const transformOrderFn = ({ value }: DTO.Transform) => {
     if (!value) return undefined
     const regex = /[a-z0-9]+(_(asc|desc)$)?/i
-    const arr: string[] = JSON.parse(value)
+    const arr: string[] = value.split(",")
     return arr.filter((item) => regex.test(item))
 }
 

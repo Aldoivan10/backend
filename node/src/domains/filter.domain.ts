@@ -22,6 +22,7 @@ export class FilterDomain {
         private readonly allowedColumns: string[],
         filters?: FilterDto
     ) {
+        console.log(filters)
         this.setFilters(filters?.filters)
         this.setOffset(filters?.offset)
         this.setOrder(filters?.orders)
@@ -58,6 +59,7 @@ export class FilterDomain {
     public build() {
         const arr = [this.where, this.order, this.limit, this.offset]
         this.filter = arr.filter(Boolean).join(" ")
+        console.log("filter: ", this.filter)
         return this
     }
 
@@ -76,10 +78,10 @@ export class FilterDomain {
     }
 
     private getOrder(item: string) {
-        const [column, order = ""] = item.split("_")
+        const [column, order = "ASC"] = item.split("_")
         if (
             !this.allowedColumns.includes(column) ||
-            !this.orders.includes(order)
+            !this.orders.includes(order.toUpperCase())
         )
             return ""
         return `${column} ${order}`.trim()
