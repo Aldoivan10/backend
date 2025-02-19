@@ -4,15 +4,8 @@ import { IsArray, IsNumber, IsOptional, IsString, Min } from "class-validator"
 const transformFilterFn = ({ value }: DTO.Transform) => {
     if (!value) return undefined
     const regex = /[a-z0-9]+(_(gt|gte|lt|lte|eq|like)$)?/i
-    const obj = JSON.parse(value)
-    return Object.fromEntries(
-        Object.entries(obj)
-            .filter(([key]) => regex.test(key))
-            .map(([key, val]) => [
-                key,
-                typeof val === "string" ? val : Number(val),
-            ])
-    )
+    const entries = value.split(",").map(str => str.split("=").map(s => s.trim())).filter(([key]) => regex.test(key))
+    return Object.fromEntries(entries)
 }
 
 const transformOrderFn = ({ value }: DTO.Transform) => {

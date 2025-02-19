@@ -22,7 +22,6 @@ export class FilterDomain {
         private readonly allowedColumns: string[],
         filters?: FilterDto
     ) {
-        console.log(filters)
         this.setFilters(filters?.filters)
         this.setOffset(filters?.offset)
         this.setOrder(filters?.orders)
@@ -59,7 +58,6 @@ export class FilterDomain {
     public build() {
         const arr = [this.where, this.order, this.limit, this.offset]
         this.filter = arr.filter(Boolean).join(" ")
-        console.log("filter: ", this.filter)
         return this
     }
 
