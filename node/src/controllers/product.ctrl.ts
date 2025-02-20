@@ -26,6 +26,7 @@ export class ProductController extends Controller<
             "nombre",
             "cantidad",
             "min",
+            "compra",
             "reembolsable",
         ])
     }

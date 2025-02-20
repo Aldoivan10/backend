@@ -24,6 +24,7 @@ export default class ProductRepository extends Repository<Body.Product> {
                 "nombre",
                 "cantidad",
                 "min",
+                "compra",
                 "reembolsable",
             ],
             "Producto_Vista"

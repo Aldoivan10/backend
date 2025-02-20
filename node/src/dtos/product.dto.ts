@@ -10,6 +10,9 @@ export class ProductDTO {
     @Expose({ name: "cantidad" })
     declare amount: number
 
+    @Expose({ name: "compra" })
+    declare buy: number
+
     @Expose()
     declare min: number
 
