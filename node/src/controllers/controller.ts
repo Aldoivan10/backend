@@ -27,12 +27,11 @@ export abstract class Controller<
     S extends BaseSchema<any, any, BaseIssue<any>>,
     I extends Obj,
     O extends Obj
-> implements IController<S>
-{
+> implements IController<S> {
     protected abstract readonly svc: IService<I, O>
     protected declare abstract readonly messages: Ctrl.Messages
 
-    constructor(protected readonly columns: string[]) {}
+    constructor(protected readonly columns: string[]) { }
 
     public findAll(req: Request, res: Response, next: NextFunction): void {
         try {

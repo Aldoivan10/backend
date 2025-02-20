@@ -63,7 +63,7 @@ export abstract class Repository<I extends Obj> implements IRepo<I> {
     public total(data: FilterData, filter: string) {
         const query =
             `SELECT COUNT(1) total FROM ${this.table} ${filter}`.trim()
-        const stm = this.db.prepare<FilterData, { total:  number }>(query)
+        const stm = this.db.prepare<FilterData, { total: number }>(query)
         return stm.get(data)!;
     }
 
