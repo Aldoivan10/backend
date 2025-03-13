@@ -42,10 +42,14 @@ export class FilterDomain {
 
     public setOffset(offset?: number) {
         if (offset) this.offset = `OFFSET ${offset}`
+        else this.offset = undefined
+        return this
     }
 
     public setLimit(limit?: number) {
         if (limit) this.limit = `LIMIT ${limit}`
+        else this.limit = undefined
+        return this
     }
 
     public setOrder(orders?: string[]) {
