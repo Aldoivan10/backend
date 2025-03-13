@@ -4,7 +4,7 @@ import { Repository } from "../repositories/repository"
 import { notFalsy } from "../utils/obj.util"
 
 export interface IService<I extends Obj, O extends Obj> {
-    all(filter: FilterDomain, groups?: string[]): O[]
+    all(filter: FilterDomain, groups?: string[]): { items: O[], total: number }
 
     get(filter: FilterDomain, groups?: string[]): Maybe<O>
 
@@ -16,26 +16,27 @@ export interface IService<I extends Obj, O extends Obj> {
 
     remove(ids: number[], username: string, groups?: string[]): O[]
 
-    total(filter: FilterDomain): number 
+    total(filter: FilterDomain): number
 }
 
 export abstract class Service<I extends Obj, O extends Obj>
-    implements IService<I, O>
-{
+    implements IService<I, O> {
     protected abstract readonly repo: Repository<I>
 
-    constructor(protected readonly dto: ClassConstructor<O>) {}
-    
+    constructor(protected readonly dto: ClassConstructor<O>) { }
+
     public total(filter: FilterDomain): number {
         const obj = this.repo.total(filter.getData(), filter.getFilter())
         return obj.total
     }
 
     public all(filter: FilterDomain, groups?: string[]) {
-        return this.repo
+        const items = this.repo
             .all(filter.getData(), filter.getFilter())
             .map((item) => this.mapper(item, groups))
             .filter(notFalsy)
+        const total = this.total(filter.setLimit().setOffset())
+        return { items, total }
     }
 
     public get(filter: FilterDomain, groups?: string[]) {
