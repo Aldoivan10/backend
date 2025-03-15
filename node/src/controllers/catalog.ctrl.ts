@@ -89,12 +89,9 @@ export class CatalogController extends Controller<
 
     public create(req: Request, res: Response, next: NextFunction): void {
         try {
-            const { table, msgs, item, username } = this.getData(req)
+            const { table, item, username } = this.getData(req)
             const created = this.svc.setTable(table).add(item, username)
-            res.status(201).send({
-                message: msgs.add,
-                data: created,
-            })
+            res.status(201).send(created)
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.insert(err))
             else next(err)
@@ -103,12 +100,10 @@ export class CatalogController extends Controller<
 
     public update(req: Request, res: Response, next: NextFunction): void {
         try {
-            const { table, item, msgs, username, id } = this.getData(req)
+            const { table, item, username, id } = this.getData(req)
             const updated = this.svc.setTable(table).edit(id, item, username)
-            res.json({
-                message: updated ? msgs.upd : "No hubo modificaciones",
-                data: updated,
-            })
+            if (!updated) res.status(304)
+            else res.json(updated)
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.update(err))
             else next(err)
@@ -117,12 +112,9 @@ export class CatalogController extends Controller<
 
     public delete(req: Request, res: Response, next: NextFunction): void {
         try {
-            const { table, msgs, item, username } = this.getData(req)
+            const { table, item, username } = this.getData(req)
             const items = this.svc.setTable(table).remove(item.ids, username)
-            res.send({
-                message: msgs.del,
-                data: items,
-            })
+            res.json(items)
         } catch (err: any) {
             if (err instanceof SqliteError) next(DBError.delete(err))
             else next(err)
@@ -131,12 +123,10 @@ export class CatalogController extends Controller<
 
     protected getData(req: Request) {
         const { id, table } = req.params
-        const data = this.messages[table]
         const username = req.user?.name || "Desconocido"
         const body = req.body
 
         return {
-            msgs: data,
             item: body,
             username,
             id: +id,

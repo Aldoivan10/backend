@@ -41,15 +41,8 @@ export class SaleControlller extends Controller<
     ): void {
         try {
             const user = req.user!
-            const { init: initDate, end: endDate } = req.body
             const items = this.svc.removeBetween(req.body, user.name)
-            const range = endDate
-                ? `desde ${initDate} a ${endDate}`
-                : `del día ${initDate}`
-            res.send({
-                message: `Se eliminaron las ventas ${range}`,
-                data: items,
-            })
+            res.json(items)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.delete(err))
             else next(err)

@@ -8,7 +8,7 @@ import { singToken } from "../utils/token.util"
 
 @injectable()
 export class AuthController {
-    constructor(@inject(Types.AuthService) private readonly svc: AuthService) {}
+    constructor(@inject(Types.AuthService) private readonly svc: AuthService) { }
 
     public users(_: Request, res: Response) {
         res.json(this.svc.availableUsers())
@@ -26,9 +26,7 @@ export class AuthController {
 
             res.cookie(`${user.name}_at`, accessToken, TK_OPT)
                 .cookie(`${user.name}_rt`, refreshToken, TK_OPT)
-                .json({
-                    message: "Usuario autenticado",
-                })
+                .send("Usuario autenticado")
         } catch (err) {
             next(err)
         }
@@ -48,7 +46,7 @@ export class AuthController {
 
             res.cookie(`${user.name}_at`, accessToken, TK_OPT)
                 .cookie(`${user.name}_rt`, refreshToken, TK_OPT)
-                .json({ message: "Sesión iniciada como administrador" })
+                .status(204)
         } catch (err) {
             next(err)
         }
@@ -59,7 +57,7 @@ export class AuthController {
             const { username } = req.body
             res.clearCookie(`${username}_at`)
                 .clearCookie(`${username}_rt`)
-                .json({ message: "Sesión cerrada" })
+                .status(204)
         } catch (err) {
             next(err)
         }

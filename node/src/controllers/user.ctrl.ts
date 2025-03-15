@@ -31,11 +31,7 @@ export class UserController extends Controller<
             const id = req.user!.id
             const { shortcuts } = req.body
             const updated = this.svc.shortcuts(id, shortcuts)
-            res.json({
-                msg: updated
-                    ? "Aatajos actualizados"
-                    : "No hubo modificaicones",
-            })
+            res.json(updated)
         } catch (err) {
             if (err instanceof SqliteError) next(DBError.query(err))
             else next(err)
