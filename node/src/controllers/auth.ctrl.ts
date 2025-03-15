@@ -26,7 +26,7 @@ export class AuthController {
 
             res.cookie(`${user.name}_at`, accessToken, TK_OPT)
                 .cookie(`${user.name}_rt`, refreshToken, TK_OPT)
-                .send("Usuario autenticado")
+                .status(204).end()
         } catch (err) {
             next(err)
         }
@@ -46,7 +46,7 @@ export class AuthController {
 
             res.cookie(`${user.name}_at`, accessToken, TK_OPT)
                 .cookie(`${user.name}_rt`, refreshToken, TK_OPT)
-                .status(204)
+                .status(204).end()
         } catch (err) {
             next(err)
         }
@@ -57,7 +57,7 @@ export class AuthController {
             const { username } = req.body
             res.clearCookie(`${username}_at`)
                 .clearCookie(`${username}_rt`)
-                .status(204)
+                .status(204).end()
         } catch (err) {
             next(err)
         }
