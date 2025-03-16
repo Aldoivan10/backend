@@ -22,7 +22,7 @@ app.disable("x-powered-by")
 // Middleware para logs de peticiones
 app.use(logMW)
 // Middleware para permitir todas las solicitudes
-app.use(cors())
+app.use(cors({ origin: true, credentials: true }))
 // Middleware para parsear el body de la petición
 app.use(json())
 // Middleware para las cookies

@@ -9,7 +9,7 @@ export const {
     TK_ALG = "HS256",
     TK_OPT = {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
         secure: process.env.NODE_ENV === "production",
     },
 } = process.env as Env
