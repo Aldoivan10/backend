@@ -22,12 +22,12 @@ export class AuthService {
     }
 
     public authenticate(username: string) {
-        const user = plainToClass(
+        const user: UserDTO | undefined = plainToClass(
             UserDTO,
             this.repo.auth(username),
             this.classOptions
         )
-        return user.payload
+        return user?.payload
     }
 
     public login(payload: TokenPayload, password?: Maybe<string>) {
