@@ -26,6 +26,7 @@ export abstract class Service<I extends Obj, O extends Obj>
     constructor(protected readonly dto: ClassConstructor<O>) { }
 
     public total(filter: FilterDomain): number {
+        filter.setLimit().setOffset().build()
         const obj = this.repo.total(filter.getData(), filter.getFilter())
         return obj.total
     }
