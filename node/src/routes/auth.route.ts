@@ -30,4 +30,10 @@ router.post(
     controller.logout.bind(controller)
 )
 
+router.post(
+    "/clear",
+    validationMW(LoginSchema),
+    controller.clear.bind(controller)
+)
+
 export default router

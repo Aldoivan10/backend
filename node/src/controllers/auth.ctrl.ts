@@ -54,10 +54,23 @@ export class AuthController {
 
     public logout(req: Request, res: Response, next: NextFunction) {
         try {
+            const user = req.user
+            if (!user) throw AuthError.token()
+            if (!user.admin) throw AuthError.rol()
+            user.logged = false
+            res.status(204).end()
+        } catch (err) {
+            next(err)
+        }
+    }
+
+    public clear(req: Request, res: Response, next: NextFunction) {
+        try {
             const { username } = req.body
+            const user = req.user
+            if (user) user.logged = false
             res.clearCookie(`${username}_at`)
-                .clearCookie(`${username}_rt`)
-                .status(204).end()
+                .clearCookie(`${username}_rt`).status(204).end()
         } catch (err) {
             next(err)
         }
