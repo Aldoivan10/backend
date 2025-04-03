@@ -58,7 +58,7 @@ export class UserDTO {
         return {
             name: this.name,
             logged: this.logged,
-            admin: this.role.name === "Administrador",
+            admin: this.role.id === 1,
         }
     }
 }
