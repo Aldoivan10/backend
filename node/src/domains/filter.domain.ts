@@ -30,12 +30,11 @@ export class FilterDomain {
 
     public setFilters(filters?: FilterData) {
         if (filters) {
-            this.where =
-                "WHERE " +
-                Object.keys(filters)
-                    .map(this.getClause.bind(this))
-                    .filter(Boolean)
-                    .join(" AND ")
+            const data = Object.keys(filters)
+                .map(this.getClause.bind(this))
+                .filter(Boolean)
+                .join(" AND ")
+            if (data) this.where = `WHERE ${data}`
             this.data = filters
         }
     }
@@ -74,7 +73,9 @@ export class FilterDomain {
     }
 
     private getClause(key: string) {
-        const [column, operatorKey] = key.split("_")
+        const parts = key.split("_")
+        const column = parts.slice(0, -1).join("_")
+        const operatorKey = parts[parts.length - 1]
         if (!this.allowedColumns.includes(column)) return ""
         return `${column} ${this.getOperator(operatorKey)} @${key}`
     }
