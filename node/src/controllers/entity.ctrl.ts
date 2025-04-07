@@ -23,6 +23,7 @@ export class EntityController extends Controller<
         super([
             "nombre",
             "tipo",
+            "id_tipo",
             "rfc",
             "dirección",
             "domicilio",
