@@ -46,6 +46,10 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
         return super.delete(ids, username, `Los productos: ${arrConj(names)}`)
     }
 
+    public getByCode(code: string, groups?: string[]) {
+        return this.mapper(this.repo.getByCode(code), groups)
+    }
+
     protected sanitize(body: Body.Product) {
         body.refundable = Number(body.refundable)
         body.units = body.units.map((unit, index) =>
@@ -67,8 +71,7 @@ export class ProductService extends Service<Body.Product, ProductDTO> {
             changes.push(`cantidad mínima de ${old.min} a ${body.min}`)
         if (Boolean(body.refundable) !== old.refundable)
             changes.push(
-                `reembolsable de ${old.refundable ? "sí" : "no"} a ${
-                    body.refundable ? "sí" : "no"
+                `reembolsable de ${old.refundable ? "sí" : "no"} a ${body.refundable ? "sí" : "no"
                 }`
             )
         if (body.id_supplier !== old.supplier.id) {

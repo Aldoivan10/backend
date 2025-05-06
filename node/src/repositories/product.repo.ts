@@ -1,4 +1,4 @@
-import { Transaction } from "better-sqlite3"
+import { Statement, Transaction } from "better-sqlite3"
 import { inject, injectable } from "inversify"
 import { Types } from "../containers/types"
 import { APIDataBase } from "../models/db"
@@ -9,6 +9,7 @@ export default class ProductRepository extends Repository<Body.Product> {
     protected insertStm: Transaction<Repo.Insert<Body.Product>>
     protected updateStm: Transaction<Repo.Update<Body.Product>>
     protected logUpdateStm: Transaction<Repo.UpdAndLog<Body.Product>>
+    protected findByCodeStm: Statement<String, Maybe<Body.Product>>
 
     constructor(@inject(Types.DataBase) protected readonly db: APIDataBase) {
         super(
@@ -48,6 +49,7 @@ export default class ProductRepository extends Repository<Body.Product> {
         const delUnitsStm = this.db.prepare<number>(
             "DELETE FROM Producto_Unidad WHERE id_producto=?"
         )
+        this.findByCodeStm = this.db.prepare("SELECT * FROM Producto_Vista WHERE EXISTS ( SELECT 1 FROM json_each(Producto_Vista.codigos) AS j WHERE j.value->>'codigo' = ?)")
 
         this.insertStm = this.db.transaction((item, user) => {
             this.logStm.run(user)
@@ -87,5 +89,9 @@ export default class ProductRepository extends Repository<Body.Product> {
         changes: string
     ) {
         return this.logUpdateStm(id, item, user, changes)
+    }
+
+    public getByCode(code: string) {
+        return this.findByCodeStm.get(code)
     }
 }

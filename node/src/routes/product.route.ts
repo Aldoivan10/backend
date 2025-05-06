@@ -14,6 +14,7 @@ router.get("/", controller.findAll.bind(controller))
 router.get("/single", controller.find.bind(controller))
 router.get("/total", controller.total.bind(controller))
 router.get("/:id(\\d+)", controller.findByID.bind(controller))
+router.get("/code/:code", controller.findByCode.bind(controller))
 router.post(
     "/",
     tokenMW,
