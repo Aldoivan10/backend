@@ -21,6 +21,7 @@ export class EntityController extends Controller<
         @inject(Types.EntityService) protected readonly svc: EntityService
     ) {
         super([
+            "id",
             "nombre",
             "tipo",
             "id_tipo",
