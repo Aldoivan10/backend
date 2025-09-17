@@ -36,7 +36,7 @@ export const NameSchema = (max: number) => {
             name: pipe(
                 string("El nombre debe ser una cadena"),
                 trim(),
-                nonEmpty("El nombre no debe estar vacío"),
+                nonEmpty("El nombre es obligatorio"),
                 maxLength(max, `El nombre no debe exceder ${max} carácteres`)
             ),
         }),

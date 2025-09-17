@@ -11,30 +11,56 @@ import {
     number,
     object,
     pipe,
+    record,
     required,
     string,
     transform,
-    trim,
+    trim
 } from "valibot"
 import { formatDecimals } from "../utils/number.util"
 import { NameSchema } from "./general.val"
 
 export const ProductSchema = intersect([
     NameSchema(256),
+    object({
+        codes: pipe(
+            record(
+                pipe(
+                    string(),
+                    transform(id => +id),
+                    number("El ID del código debe ser un número"),
+                    minValue(1, "El ID del código debe ser mayor a 0")
+                ),
+                pipe(
+                    string("El código debe ser una cadena"),
+                    trim(),
+                    nonEmpty("El código no puede estar vacío")
+                ), "Al menos un código es requerido"),
+            check((obj) => {
+                const ids = Object.values(obj)
+                return !ids.length
+            }, "Al menos un código es requerido"),
+            check((obj) => {
+                const ids = Object.values(obj)
+                const set = new Set(ids)
+                return ids.length === set.size
+            }, "No se pueden repetir los códigos")
+        ),
+    }),
     required(
         object({
             id_department: pipe(
-                number(`El ID del departamento debe ser numérico`),
-                minValue(1, `El ID debe ser mayor a 0`)
+                number("Departamento desconocido"),
+                minValue(1, "Departamento desconocido")
             ),
         }),
-        `El departamento es obligatorio`
+        "El departamento es obligatorio"
     ),
     required(
         object({
             id_supplier: pipe(
-                number(`El ID del proveedor debe ser numérico`),
-                minValue(1, `El ID debe ser mayor a 0`)
+                number("Proveedor desconocido"),
+                minValue(1, "Proveedor desconocido")
             ),
         }),
         `El proveedor es obligatorio`
@@ -72,32 +98,6 @@ export const ProductSchema = intersect([
         }),
         ["buy"],
         "El precio de comprar es requerido"
-    ),
-    required(
-        object({
-            codes: pipe(
-                array(
-                    object({
-                        id: pipe(
-                            number("El ID del código debe ser un número"),
-                            minValue(1, "El ID del código debe ser mayor a 0")
-                        ),
-                        code: pipe(
-                            string("El código debe ser una cadena"),
-                            trim(),
-                            nonEmpty("El código no puede estar vacío")
-                        ),
-                    })
-                ),
-                minLength(1, "Debe haber al menos un código"),
-                check((arr) => {
-                    const ids = arr.map((item) => item.id)
-                    const set = new Set(ids)
-                    return ids.length === set.size
-                }, "No se pueden repetir los códigos")
-            ),
-        }),
-        "Los códigos son requeridos"
     ),
     required(
         object({
