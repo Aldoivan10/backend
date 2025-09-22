@@ -21,15 +21,15 @@ export const KitSchema = intersect([
                 array(
                     object({
                         id: pipe(
-                            number("El ID del producto debe ser un número"),
+                            number("Campo requerido"),
                             minValue(1, "El ID del producto debe ser mayor a 0")
                         ),
                         unit: pipe(
-                            number("El ID de la unidad debe ser un número"),
+                            number("Campo requerido"),
                             minValue(1, "El ID de la unidad debe ser mayor a 0")
                         ),
                         amount: pipe(
-                            number("La cantidad debe ser un número"),
+                            number("Campo requerido"),
                             check(
                                 (value) => value > 0,
                                 "La cantidad debe ser mayor a 0"

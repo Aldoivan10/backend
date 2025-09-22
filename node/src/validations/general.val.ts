@@ -21,7 +21,7 @@ export const IdsSchema = object({
     ids: pipe(
         array(
             pipe(
-                number("Los ids deben ser números"),
+                number("Campo requerido"),
                 minValue(1, "Los ids deben ser enteros positivos")
             ),
             "Los ids deben estar en un arreglo"
@@ -34,7 +34,7 @@ export const NameSchema = (max: number) => {
     return required(
         object({
             name: pipe(
-                string("El nombre debe ser una cadena"),
+                string("Campo requerido"),
                 trim(),
                 nonEmpty("El nombre es obligatorio"),
                 maxLength(max, `El nombre no debe exceder ${max} carácteres`)
@@ -49,7 +49,7 @@ export const DateRangeSchema = pipe(
         object({
             init: pipe(
                 string(
-                    "La fecha de inicio debe ser una cadena con el formato yyyy-mm-dd"
+                    "Fecha inválida"
                 ),
                 isoDateTime(
                     "La fecha no esta en el formato solicitado (yyyy-mm-dd)"
@@ -60,7 +60,7 @@ export const DateRangeSchema = pipe(
             end: nullish(
                 pipe(
                     string(
-                        "La fecha final debe ser una cadena con el formato yyyy-mm-dd"
+                        "Fecha inválida"
                     ),
                     isoDateTime(
                         "La fecha no esta en el formato solicitado (yyyy-mm-dd)"

@@ -1,4 +1,4 @@
-import { Database, Transaction } from "better-sqlite3"
+import type { Database, Transaction } from "better-sqlite3"
 import { inject, injectable } from "inversify"
 import { Types } from "../containers/types"
 import { Repository } from "./repository"

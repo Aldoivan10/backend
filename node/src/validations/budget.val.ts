@@ -19,15 +19,15 @@ export const BudgetSchema = intersect([
                 array(
                     object({
                         id_product: pipe(
-                            number("El ID del producto debe ser un número"),
+                            number("Campo requerido"),
                             minValue(1, "El valor mínimo es 1")
                         ),
                         id_unit: pipe(
-                            number("El ID de la unidad debe ser un número"),
+                            number("Campo requerido"),
                             minValue(1, "El valor mínimo es 1")
                         ),
                         amount: pipe(
-                            number("La cantidad debe ser un número"),
+                            number("Campo requerido"),
                             check(
                                 (input) => input > 0,
                                 "La cantidad debe ser mayor de 0"

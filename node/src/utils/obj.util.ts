@@ -1,4 +1,10 @@
-import { Request, Response } from "express"
+import { Request, Response } from "express";
+
+type Filters = {
+    filter?: string;
+    limit?: number;
+    offset?: number;
+};
 
 // Convertir los campos de un objeto a otro objeto (DTO)
 export const mapTo = <T>(obj: Maybe<Obj>, mapper?: Record<string, string>) => {
@@ -41,7 +47,7 @@ export const toJSON = <T>(item: Maybe<Obj>) => {
                 if (Array.isArray(val)) val.map(toJSON<any>)
                 if (typeof val === "object") val = toJSON<Object>(val)
                 item[key] = val
-            } catch (e) {}
+            } catch (e) { }
         }
         return item as T
     }

@@ -15,12 +15,12 @@ export const ShortcutSchema = object({
         array(
             object({
                 shortcut: pipe(
-                    string("El atajo debe ser una cadena"),
+                    string("Campo requerido"),
                     trim(),
                     nonEmpty("El atajo es obligatorio")
                 ),
                 id: pipe(
-                    number("El ID debe ser un número"),
+                    number("Campo requerido"),
                     minValue(1, "El ID es incorrecto")
                 ),
             }),

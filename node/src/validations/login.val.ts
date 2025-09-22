@@ -11,7 +11,7 @@ import {
 export const LoginSchema = required(
     object({
         username: pipe(
-            string("El nombre debe ser una cadena"),
+            string("Campo requerido"),
             trim(),
             nonEmpty("El nombre no debe estar vacío")
         ),
@@ -24,7 +24,7 @@ export const AdminSchema = intersect([
     required(
         object({
             password: pipe(
-                string("La contraseña es obligatoria"),
+                string("Campo requerido"),
                 trim(),
                 nonEmpty("La contraseña no debe estar vacía")
             ),

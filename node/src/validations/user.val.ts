@@ -23,7 +23,7 @@ export const UserSchema = pipe(
             object({
                 password: nullish(
                     pipe(
-                        string("La contraseña debe ser una cadena"),
+                        string("Campo requerido"),
                         trim(),
                         nonEmpty("La contraseña no debe estar vacía"),
                         minLength(
@@ -38,7 +38,7 @@ export const UserSchema = pipe(
                     null
                 ),
                 id_user_type: pipe(
-                    number("El ID de tipo de usuario debe ser un número"),
+                    number("Campo requerido"),
                     minValue(
                         1,
                         "El ID de tipo de usuario debe ser un número positivo"

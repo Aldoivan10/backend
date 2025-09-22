@@ -13,15 +13,15 @@ export const ParserSchema = pipe(
     required(
         object({
             id_unit: pipe(
-                number("El ID de la unidad debe ser un número"),
+                number("Campo requerido"),
                 minValue(1, "El ID de la unidad debe ser mayor a 0")
             ),
             id_sub_unit: pipe(
-                number("El ID de la unidad debe ser un número"),
+                number("Campo requerido"),
                 minValue(1, "El ID de la unidad debe ser mayor a 0")
             ),
             multiplier: pipe(
-                number("El multiplicador debe ser un número"),
+                number("Campo requerido"),
                 transform(formatDecimals)
             ),
         }),
